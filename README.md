@@ -1,6 +1,6 @@
-# Muse
+# Fude
 
-Muse turns music into paintings. Every note has its own color, and each color covers as much of the canvas as its note is played. Keep it open while your music plays, and it paints a new picture for every song while a little cat paints along.
+Fude turns music into paintings. Every note has its own color, and each color covers as much of the canvas as its note is played. Keep it open while your music plays, and it paints a new picture for every song while a little cat paints along.
 
 It runs as a website, an iPhone and Android app, and a Chrome or Edge side panel.
 
@@ -8,8 +8,8 @@ It runs as a website, an iPhone and Android app, and a Chrome or Edge side panel
 
 | Folder or file | What it is |
 |---|---|
-| `muse.src.html` | The whole app, in one file. Edit this. |
-| `build.sh` | Rebuilds everything below from `muse.src.html`. |
+| `fude.src.html` | The whole app, in one file. Edit this. |
+| `build.sh` | Rebuilds everything below from `fude.src.html`. |
 | `site/` | The website. Publish this folder (Netlify, GitHub Pages, Cloudflare Pages). It works offline and installs to the home screen. |
 | `app/` | The iPhone and Android app (Capacitor). See `app/README.md`. |
 | `ext/` | The browser extension. Load it unpacked from `chrome://extensions`. |
@@ -19,7 +19,7 @@ It runs as a website, an iPhone and Android app, and a Chrome or Edge side panel
 
 ## Making a change
 
-1. Edit `muse.src.html`.
+1. Edit `fude.src.html`.
 2. Run `./build.sh` (needs Python 3; for the native projects, also Node.js and `npm install` in `app/`).
 3. Commit. If the site is connected to Netlify or GitHub Pages, it updates by itself.
 

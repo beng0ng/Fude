@@ -1,4 +1,4 @@
-package app.muse.paint;
+package app.fude.paint;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -18,7 +18,7 @@ public class MainActivity extends BridgeActivity {
         openShared(intent);
     }
 
-    // a song shared from a music app's Share menu: Muse reads it from ?text=… and ?title=…
+    // a song shared from a music app's Share menu: Fude reads it from ?text=… and ?title=…
     private void openShared(Intent intent) {
         if (intent == null || !Intent.ACTION_SEND.equals(intent.getAction()) || bridge == null) return;
         String text = intent.getStringExtra(Intent.EXTRA_TEXT);

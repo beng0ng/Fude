@@ -1,5 +1,5 @@
-# build outputs that are made from muse.src.html
-muse.html
+# build outputs that are made from fude.src.html
+fude.html
 site/test.html
 node_modules/
 .DS_Store

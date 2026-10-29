@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "app.muse.paint"
+    namespace = "app.fude.paint"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.muse.paint"
+        applicationId "app.fude.paint"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

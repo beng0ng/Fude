@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Muse: give each musical note a color, choose or play a song, and watch it painted in exactly the proportions its notes are played.">
+<meta name="description" content="Fude: give each musical note a color, choose or play a song, and watch it painted in exactly the proportions its notes are played.">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#F3F0E9">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Muse">
+<meta name="apple-mobile-web-app-title" content="Fude">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta property="og:title" content="Muse">
+<meta property="og:title" content="Fude">
 <meta property="og:description" content="Give each note a color, bring a song, and see it painted in exactly the proportions its notes are played.">
 <meta property="og:image" content="preview.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Muse</title>
+<title>Fude</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
@@ -770,7 +770,7 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
 <div class="wrap">
   <a class="skip" href="#tune">Skip to the colors</a>
   <header class="top" id="top">
-    <div class="mark"><i aria-hidden="true"></i>Muse</div>
+    <div class="mark"><i aria-hidden="true"></i>Fude</div>
     <nav aria-label="Movements">
       <a href="#now" class="navnow" hidden>Now</a><a href="#tune"><b>I</b>Tune<i class="tick" aria-hidden="true"></i></a><a href="#listen"><b>II</b>Listen<i class="tick" aria-hidden="true"></i></a><a href="#paint"><b>III</b>Paint<i class="tick" aria-hidden="true"></i></a><a href="#behold"><b>IV</b>Behold<i class="tick" aria-hidden="true"></i></a><button class="navzen" id="navZen" type="button"><b aria-hidden="true">◯</b>Zen</button>
     </nav>
@@ -780,9 +780,9 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
   <section class="hero">
     <div>
       <p class="eyebrow">Sound, seen</p>
-      <h1>Muse</h1>
-      <p class="lede">Give each of the twelve notes the color you hear in it. Choose a melody, and Muse paints it in exactly the proportions it is played.</p>
-      <ol class="outline" aria-label="How Muse works">
+      <h1>Fude</h1>
+      <p class="lede">Give each of the twelve notes the color you hear in it. Choose a melody, and Fude paints it in exactly the proportions it is played.</p>
+      <ol class="outline" aria-label="How Fude works">
         <li><a href="#tune"><b>I</b><span><strong>Tune your colors</strong> give each note a shade</span></a></li>
         <li><a href="#listen"><b>II</b><span><strong>Bring the music</strong> listen live, upload, compose, or pick a song</span></a></li>
         <li><a href="#paint"><b>III</b><span><strong>Choose the picture</strong> a painting you know, or a new theme</span></a></li>
@@ -854,14 +854,14 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
       <div>
         <span class="eyebrow step">Movement 2 of 4</span>
         <h2>Bring the music</h2>
-        <p>Let Muse listen to a song as it plays, or give it your own music to perform. Either way, the picture forms from the notes as they sound.</p>
+        <p>Let Fude listen to a song as it plays, or give it your own music to perform. Either way, the picture forms from the notes as they sound.</p>
       </div>
     </div>
     <div class="doors">
       <div class="finder door">
         <div class="doorhead"><span class="eyebrow"><b class="letter">A</b>Listen live</span><span class="ready" id="micState">Microphone not asked yet</span></div>
-        <h3>Play a song anywhere, Muse paints what it hears</h3>
-        <p>Spotify, YouTube, a record player, your own instrument. Muse listens, names the chords, and builds the painting while the song plays.</p>
+        <h3>Play a song anywhere, Fude paints what it hears</h3>
+        <p>Spotify, YouTube, a record player, your own instrument. Fude listens, names the chords, and builds the painting while the song plays.</p>
         <div class="row"><button class="btn" id="micBtn" type="button">Start listening</button><button class="btn ghost small" id="tabBtn" type="button">Listen to a browser tab instead</button></div>
         <div class="sideoffer"><button class="btn ghost small" id="sideOpen" type="button"><i aria-hidden="true"></i>Paint on the side</button><span class="muted">A small window that stays beside Spotify or any music, keeps listening, and paints a new picture for every song.</span></div>
         <div class="mlink" id="mlink">
@@ -879,8 +879,8 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
       </div>
       <div class="finder door">
         <div class="doorhead"><span class="eyebrow"><b class="letter">B</b>Your own music</span><span class="ready" id="mineState"></span></div>
-        <h3>Compose it, or hand Muse the sheet music</h3>
-        <p>Muse plays it with the instruments you choose, one part at a time or all together, and paints as it goes.</p>
+        <h3>Compose it, or hand Fude the sheet music</h3>
+        <p>Fude plays it with the instruments you choose, one part at a time or all together, and paints as it goes.</p>
         <label class="drop" id="sheetDrop" for="sheetFile"><b>Upload sheet music</b> or drop it here<br><span class="mono" style="font-size:11px">MIDI (.mid) · MusicXML (.musicxml, .xml, .mxl) · ABC (.abc)</span></label>
         <input type="file" id="sheetFile" accept=".mid,.midi,.musicxml,.xml,.mxl,.abc,.txt,audio/midi,application/vnd.recordare.musicxml+xml,application/vnd.recordare.musicxml" class="vh">
         <div class="row arrrow">
@@ -909,7 +909,7 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
     <div class="summary-line" id="arrNote" hidden></div>
     <canvas id="ribbon" aria-label="The selected song drawn as brush strokes in your note colors, each as long as the note is held." role="img"></canvas>
     <div class="libhead"><span class="eyebrow"><b class="letter">C</b>The library</span><h3>Or choose from the library</h3></div>
-    <p class="muted" style="font-size:14px;margin-bottom:var(--s4)">Search by name, composer or mood, or tap a mood. Press the record on any song to hear it right away. Anything not here, Muse can look up online.</p>
+    <p class="muted" style="font-size:14px;margin-bottom:var(--s4)">Search by name, composer or mood, or tap a mood. Press the record on any song to hear it right away. Anything not here, Fude can look up online.</p>
     <form class="bigsearch" id="songSearch" role="search"><label class="vh" for="songQ">Search songs</label><span class="glass" aria-hidden="true"></span><input id="songQ" type="search" placeholder="Search songs, composers or moods" autocomplete="off"><button class="btn" type="submit">Search</button></form>
     <div class="chips" id="chips" role="group" aria-label="Filter by mood or style"></div>
     <div class="songs" id="songs"></div>
@@ -942,7 +942,7 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
         </div>
         <div class="finder">
           <h3>Match a painting to the song</h3>
-          <p>Muse picks the painting in your collection whose light and mood best fit the melody and your colors.</p>
+          <p>Fude picks the painting in your collection whose light and mood best fit the melody and your colors.</p>
           <div><button class="btn ghost small" id="matchBtn" type="button">Match for me</button></div>
           <div class="matchline" id="matchLine"></div>
         </div>
@@ -1019,7 +1019,7 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
         <p class="legendnote" id="legendNote">Each bar wears your color for that note. Its height is the note's share of the melody's sounding time, which is also its share of the canvas.</p>
         <div id="chordBox" hidden>
           <p class="eyebrow">Harmony</p>
-          <h3 style="font-size:20px;margin-top:4px">Chords Muse heard</h3>
+          <h3 style="font-size:20px;margin-top:4px">Chords Fude heard</h3>
           <div class="chordrow" id="chordRow"></div>
           <p class="muted" style="font-size:13px;margin-top:8px" id="chordSum"></p>
         </div>
@@ -1033,12 +1033,12 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
 
   <footer>
     <a class="totop" href="#top">Back to the top ↑</a>
-    <span>Muse · paintings: The Starry Night (1889), The Great Wave (c. 1831), The Scream (1893), The Shipwreck (1805), Udnie (1913), all public domain.</span>
+    <span>Fude · paintings: The Starry Night (1889), The Great Wave (c. 1831), The Scream (1893), The Shipwreck (1805), Udnie (1913), all public domain.</span>
     <span>Melodies are public domain. Piano, strings, flute and cello use the FluidR3 General MIDI soundfont by Frank Wen (CC BY 3.0), via MIDI.js soundfonts; the other instruments are made in your browser.</span>
   </footer>
 </div>
 <div id="smode" hidden>
-  <header class="sm-top"><a class="sm-mark" id="smHome" href="./?full=1"><i aria-hidden="true"></i>Muse</a><span class="sm-state" id="smState"><i aria-hidden="true"></i><span id="smStateT">Not listening</span></span>
+  <header class="sm-top"><a class="sm-mark" id="smHome" href="./?full=1"><i aria-hidden="true"></i>Fude</a><span class="sm-state" id="smState"><i aria-hidden="true"></i><span id="smStateT">Not listening</span></span>
     <button class="themebtn" type="button" aria-label="Switch to dark"></button><button class="iconbtn" id="smMore" type="button" aria-label="More" aria-haspopup="menu" aria-expanded="false" aria-controls="smMenu"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="13" cy="8" r="1.4"/></svg></button></header>
   <div class="sm-menu" id="smMenu" role="menu" aria-label="More" hidden>
     <button type="button" role="menuitem" id="smNext" disabled>New painting</button>
@@ -1048,27 +1048,27 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
     <a role="menuitem" id="smSpotify" href="https://open.spotify.com" target="_blank" rel="noopener">Open Spotify</a>
     <button type="button" role="menuitem" id="spUnlink" hidden>Unlink Spotify</button>
     <button type="button" role="menuitem" id="smZen">Zen mode</button>
-    <a role="menuitem" id="smFull" href="./?full=1">All of Muse</a>
+    <a role="menuitem" id="smFull" href="./?full=1">All of Fude</a>
     <button type="button" role="menuitem" id="smAbout">About and privacy</button>
   </div>
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
     <div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
-  <div class="sm-canvas" id="smCanvas"><p class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Muse paints a new picture for every song.</p></div>
+  <div class="sm-canvas" id="smCanvas"><p class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</p></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>
   <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button></div>
   <div class="sm-strip" id="smStrip" aria-label="Paintings made here, newest first"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <div class="isheet" id="installSheet" role="dialog" aria-modal="false" aria-labelledby="isHead" hidden>
-  <h3 id="isHead">Put Muse on your home screen</h3>
-  <ol><li>Tap the Share button <span aria-hidden="true">⎙</span> in Safari’s toolbar.</li><li>Choose <b>Add to Home Screen</b>.</li><li>Open Muse from its icon. It runs full screen, works offline, and keeps your colors and paintings.</li></ol>
+  <h3 id="isHead">Put Fude on your home screen</h3>
+  <ol><li>Tap the Share button <span aria-hidden="true">⎙</span> in Safari’s toolbar.</li><li>Choose <b>Add to Home Screen</b>.</li><li>Open Fude from its icon. It runs full screen, works offline, and keeps your colors and paintings.</li></ol>
   <button class="btn small" id="isClose" type="button">Got it</button>
 </div>
 <div class="isheet" id="aboutSheet" role="dialog" aria-modal="false" aria-labelledby="abHead" hidden>
-  <h3 id="abHead">Muse</h3>
+  <h3 id="abHead">Fude</h3>
   <p class="about-ver" id="abVer"></p>
-  <p>Muse only listens while you ask it to, and it works out the notes on this device. Nothing it hears is recorded or sent anywhere.</p>
-  <p>Your colors, paintings and settings stay on this device too. If you link Spotify, Muse reads which song is playing, and you can unlink it at any time from the ⋯ menu.</p>
+  <p>Fude only listens while you ask it to, and it works out the notes on this device. Nothing it hears is recorded or sent anywhere.</p>
+  <p>Your colors, paintings and settings stay on this device too. If you link Spotify, Fude reads which song is playing, and you can unlink it at any time from the ⋯ menu.</p>
   <p id="abMore"><a href="privacy.html">Read the full privacy policy</a></p>
   <button class="btn small" id="abClose" type="button">Close</button>
 </div>
@@ -1188,7 +1188,7 @@ const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MOBILE=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 // the listening companion: asked for with ?side, back from linking Spotify, or the phone app opened from its icon
-// inside the browser extension: 'panel' is the side panel, 'full' the whole of Muse in a tab
+// inside the browser extension: 'panel' is the side panel, 'full' the whole of Fude in a tab
 const MUSE_EXT=window.MUSE_EXT||'';
 let SIDEMODE=(()=>{try{const q=new URLSearchParams(location.search);return MUSE_EXT==='panel'||q.has('side')||/^muse-/.test(q.get('state')||'')||(!!window.Capacitor&&![...q.keys()].length&&location.hash.length<2)}catch(e){return false}})();
 const PAINT_MAX=MOBILE?1200:1600; // the longest side of a painting, in pixels
@@ -1207,7 +1207,7 @@ const PRESETS = {
   scriabin:{name:'Scriabin',year:'1911',c:['#E8231F','#8B4FB8','#F5D90A','#6E7FA6','#A9D8F0','#9C1C2E','#3A5FD0','#F08A1C','#A35FB4','#3FA34D','#7C8A99','#4C8FE0']},
   newton:{name:'Newton',year:'1704',c:['#D7263D','#E2552F','#F08A24','#F3B630','#F2D541','#6BB35A','#3E9A87','#3A78C2','#3E5BA8','#4B3F9E','#6A3FA0','#8E4CB0']},
   rimsky:{name:'Rimsky-Korsakov',year:'c. 1900',c:['#F2EFE6','#8E7FA0','#E8C14A','#4F5A6E','#2F5FA8','#5E9A55','#6E7FB8','#B08A3E','#A891B4','#E6A3A8','#6B6066','#39507A']},
-  ink:{name:'Ink and stone',year:'Muse',c:['#1F2421','#38413C','#505B55','#6A766F','#86928B','#A0ABA4','#B9C3BC','#CFD7D1','#8FA89A','#5F7D70','#B8A88A','#D9CDB4']}
+  ink:{name:'Ink and stone',year:'Fude',c:['#1F2421','#38413C','#505B55','#6A766F','#86928B','#A0ABA4','#B9C3BC','#CFD7D1','#8FA89A','#5F7D70','#B8A88A','#D9CDB4']}
 };
 let colors; // array of {h,s,l}
 function fromHexes(arr){return arr.map(x=>{const r=hex2rgb(x),o=rgb2hsl(...r);return{h:o.h,s:o.s,l:o.l}})}
@@ -1483,7 +1483,7 @@ function parseMIDI(buf){
   const tag=()=>{const s=String.fromCharCode(u8[p],u8[p+1],u8[p+2],u8[p+3]);p+=4;return s};
   if(tag()!=='MThd')throw new Error('Not a MIDI file');
   const hl=d.getUint32(p);p+=4;const ntr=d.getUint16(p+2),div=d.getUint16(p+4);p+=hl;
-  if(div&0x8000)throw new Error('This MIDI file uses SMPTE timing, which Muse cannot read');
+  if(div&0x8000)throw new Error('This MIDI file uses SMPTE timing, which Fude cannot read');
   const tempos=[],tracks=[];
   for(let t=0;t<ntr&&p+8<=u8.length;t++){
     if(tag()!=='MTrk')break;const len=d.getUint32(p);p+=4;const end=Math.min(p+len,u8.length);let tick=0,status=0,name='';const notes=[],open={},prog={};
@@ -1618,7 +1618,7 @@ async function importSheet(file){
   else if(ext==='mxl')res=parseMusicXML(await unzipScore(await file.arrayBuffer()));
   else if(ext==='musicxml'||ext==='xml')res=parseMusicXML(await file.text());
   else if(ext==='abc')res=parseABC(await file.text());
-  else{const txt=await file.text();if(/^\s*<\?xml|<score-partwise/.test(txt))res=parseMusicXML(txt);else if(/^[A-Za-z]:/m.test(txt)&&/^K:/m.test(txt))res=parseABC(txt);else{const pm=parseMelody(txt);if(pm.bad.length||!pm.notes.length)throw new Error('Muse could not read this file as notes');res={bpm:96,parts:[{name:'Melody',inst:'piano',notes:pm.notes}]}}}
+  else{const txt=await file.text();if(/^\s*<\?xml|<score-partwise/.test(txt))res=parseMusicXML(txt);else if(/^[A-Za-z]:/m.test(txt)&&/^K:/m.test(txt))res=parseABC(txt);else{const pm=parseMelody(txt);if(pm.bad.length||!pm.notes.length)throw new Error('Fude could not read this file as notes');res={bpm:96,parts:[{name:'Melody',inst:'piano',notes:pm.notes}]}}}
   if(!res.parts.length)throw new Error('No notes were found in this file');
   // keep the painting responsive: at most eight parts, and about four minutes of music
   res.parts=res.parts.sort((a,b)=>b.notes.length-a.notes.length).slice(0,8);
@@ -1725,7 +1725,7 @@ const allSongs=()=>[...extras.slice().reverse(),...SONGS];
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function addExtra(s){if(!s.rec&&s.beats==null)finalizeSong(s);extras=extras.filter(x=>x.id!==s.id);extras.push(s);renderSongs()}
 function songMeta(s){
-  if(s.rec)return s.chroma?'heard by Muse · '+fmtTime(s.heard||0):'recording · not heard yet';
+  if(s.rec)return s.chroma?'heard by Fude · '+fmtTime(s.heard||0):'recording · not heard yet';
   const np=s.parts?s.parts.length:1;
   return (s.sketch?'sketch · ':'')+`${s.notes.length} notes · ${+(s.beats||0).toFixed(1)} beats${np>1?` · ${np} parts`:''}`;
 }
@@ -1805,7 +1805,7 @@ function drawRibbon(beat=-1){
   const faint=css('--faint'),ink=css('--fg');
   if(song.rec){
     const tl=song.timeline||[];
-    if(!tl.length){ctx.fillStyle=faint;ctx.font='13px "Hanken Grotesk",sans-serif';ctx.fillText(song.stream?'Muse draws the notes here as it hears them.':'Play the recording and its notes will appear here as Muse hears them.',4,h/2);return}
+    if(!tl.length){ctx.fillStyle=faint;ctx.font='13px "Hanken Grotesk",sans-serif';ctx.fillText(song.stream?'Fude draws the notes here as it hears them.':'Play the recording and its notes will appear here as Fude hears them.',4,h/2);return}
     const cols=Math.max(tl.length,song.duration?Math.ceil(song.duration*4):tl.length),cw=w/cols;
     tl.forEach((fr,i)=>{let y=h;const sh=norm(fr);for(let pc=0;pc<12;pc++){const hh=sh[pc]*(h-8);if(hh<.3)continue;ctx.fillStyle=hexOf(pc);ctx.fillRect(i*cw,y-hh,Math.max(1,cw-.6),hh);y-=hh}});
     return}
@@ -2010,7 +2010,7 @@ function readParts(){
     const name=row.querySelector('.pname').value.trim()||'Part',inst=row.querySelector('.pinst').value;
     if(row._notes){out.push({name,inst,notes:row._notes,locked:true});continue}
     const text=row.querySelector('.pnotes').value,{notes,bad}=parseMelody(text);
-    if(bad.length){err.hidden=false;err.textContent=`In “${name}”, Muse could not read `+bad.slice(0,4).map(b=>'“'+b+'”').join(', ')+'. Use a letter A to G, then an optional ♯ or b, octave and :beats.';row.querySelector('.pnotes').focus();return null}
+    if(bad.length){err.hidden=false;err.textContent=`In “${name}”, Fude could not read `+bad.slice(0,4).map(b=>'“'+b+'”').join(', ')+'. Use a letter A to G, then an optional ♯ or b, octave and :beats.';row.querySelector('.pnotes').focus();return null}
     if(notes.some(n=>!n.rest))out.push({name,inst,notes,text});
   }
   if(!out.length){err.hidden=false;err.textContent='Add at least one note first, by tapping the keys, typing, or uploading sheet music.';return null}
@@ -2039,7 +2039,7 @@ async function loadSheet(file){
     partsEl.innerHTML='';res.parts.forEach(p=>addPartRow(p));activePart=partsEl.querySelector('.part');markActive();
     $('#bpmIn').value=res.bpm;$('#mineTitle').value=res.title;
     const s=useMine(true);if(s)toast(`${res.title}: ${res.parts.length} part${res.parts.length===1?'':'s'}, now playing${res.cut?' (trimmed to the first four minutes)':''}`);
-  }catch(e){$('#mineState').textContent='';$('#melodyErr').hidden=false;$('#melodyErr').textContent=(e&&e.message)||'Muse could not read that file.'}
+  }catch(e){$('#mineState').textContent='';$('#melodyErr').hidden=false;$('#melodyErr').textContent=(e&&e.message)||'Fude could not read that file.'}
 }
 $('#sheetFile').addEventListener('change',e=>{loadSheet(e.target.files[0]);e.target.value=''});
 dropZone($('#sheetDrop'),f=>loadSheet(f));
@@ -2223,7 +2223,7 @@ function arrangedSong(s){
   if(!s||s.rec||arrStyle==='none'||!s.notes.length)return s;
   if(arrStyle==='score'&&SCORES[s.id])return scoreSong(s);
   if(s.parts&&s.parts.length>1)return s; // a score with its own parts is played as written; the arrangement only chose its instruments
-  const style=arrStyle==='score'?'solo':arrStyle; // a song with no published score in Muse is arranged for piano
+  const style=arrStyle==='score'?'solo':arrStyle; // a song with no published score in Fude is arranged for piano
   const key=[s.id,style,s.bpm,s.beats,s.notes.length,s.parts&&s.parts[0].inst||''].join('|');
   if(arrCache.has(key))return arrCache.get(key);
   const an=analyseSong(s),mel=s.parts?s.parts[0]:{name:'Melody',notes:s.notes},M=an.meter,intro=2*M;
@@ -2247,7 +2247,7 @@ function arrNote(){const el=$('#arrNote');if(!song||song.rec||!song.notes||!song
   if(A.scored){const an=A.analysis,sc=A.score;el.textContent=`Published score: ${sc.setting} · ${keyName(an.key)} · ${meterName(an)} · ${Math.ceil((A.beats-(sc.up||0))/barBeats(an)-1e-6)+(sc.up?1:0)} bars at ${A.bpm} bpm · ${A.parts.map(p=>p.name).join(', ')} · ${sc.license}`;return}
   if(!A.arranged){el.textContent=song.parts&&song.parts.length>1?`${song.parts.length} parts, played as written · ${song.bpm} bpm`:`Melody only · ${song.bpm} bpm`;return}
   const an=A.analysis,cs=an.chords.map(c=>chordName(c,an.key)),shown=cs.slice(0,10).join(' · ');
-  el.textContent=`${arrStyle==='score'&&SONGS.includes(song)?'No published score in Muse for this one, so Muse arranges it · ':''}${keyName(an.key)} · ${meterName(an)}${an.pickup?' with a pickup':''} · ${Math.ceil((song.beats-an.pickup)/barBeats(an)-1e-6)} bars at ${song.bpm} bpm${an.ends.length?` · ${an.ends.length+1} phrases`:''} · ${A.parts.slice(1).map(p=>p.name+(p.name==='Left hand'&&LH_STYLES[an.lh]?' ('+LH_STYLES[an.lh]+')':'')).join(', ')} · chords ${shown}${cs.length>10?' …':''}`;
+  el.textContent=`${arrStyle==='score'&&SONGS.includes(song)?'No published score in Fude for this one, so Fude arranges it · ':''}${keyName(an.key)} · ${meterName(an)}${an.pickup?' with a pickup':''} · ${Math.ceil((song.beats-an.pickup)/barBeats(an)-1e-6)} bars at ${song.bpm} bpm${an.ends.length?` · ${an.ends.length+1} phrases`:''} · ${A.parts.slice(1).map(p=>p.name+(p.name==='Left hand'&&LH_STYLES[an.lh]?' ('+LH_STYLES[an.lh]+')':'')).join(', ')} · chords ${shown}${cs.length>10?' …':''}`;
 }
 function setArrStyle(a,restart=true){arrStyle=a;try{localStorage.setItem('muse.arr2',a)}catch(e){}$('#playArr').value=a;$('#arrSel').value=a;
   if(STYLE_MEL[a]&&song&&!(song.parts&&song.parts.some(p=>p.inst))){globalInst=STYLE_MEL[a];$('#instSel').value=globalInst;try{localStorage.setItem('muse.inst',globalInst)}catch(e){}}
@@ -2284,7 +2284,7 @@ async function lookupOnline(q){
   if(!sample){box.innerHTML='<div class="res"><span class="why">Looking up a song’s notes needs Claude, which this view cannot reach. Listen with the links above, then bring the audio file into “Paint a recording” below.</span></div>';return}
   box.innerHTML='<div class="busyline">Claude is looking it up…</div>';$('#onlineBox').scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'nearest'});
   try{
-    const j=await sample.json(`You help Muse, an app that paints music. The viewer searched for a song: "${q}".
+    const j=await sample.json(`You help Fude, an app that paints music. The viewer searched for a song: "${q}".
 Identify the single most likely real song or piece. Reply with only JSON:
 {"found": true or false,
  "title": string, "artist": string (composer or performer), "year": string,
@@ -2303,7 +2303,7 @@ Never write out the melody of a song that is still under copyright.`,{modelTier:
     box.innerHTML=`<div class="res"><div class="row" style="justify-content:space-between"><b>${esc(j.title)}</b><span class="badge">${melody?'melody':'sketch'}</span></div>
       <span class="why">${esc(j.artist||'')}${j.year?' · '+esc(j.year):''} · ${esc(j.key||'')} · ${Math.round(bpm)} bpm${j.mood?' · '+esc(j.mood):''}</span>
       <div class="prof" aria-label="Estimated share of each note">${sh.map((v,i)=>`<i title="${NOTE_NAMES[i]} ${(v*100).toFixed(0)}%" style="height:${Math.max(3,v/mx*100)}%;background:${hexOf(i)}"></i>`).join('')}</div>
-      <span class="why">${melody?'A public-domain piece: Muse will play its opening melody.':'Still under copyright, so Muse plays a short sketch in its key and paints from Claude’s estimate of its notes. For the real thing, use a recording.'}</span>
+      <span class="why">${melody?'A public-domain piece: Fude will play its opening melody.':'Still under copyright, so Fude plays a short sketch in its key and paints from Claude’s estimate of its notes. For the real thing, use a recording.'}</span>
       <div class="row"><button class="btn small" type="button" id="useFound">Use this song</button></div></div>`;
     $('#useFound').onclick=()=>{
       const id='web-'+String(j.title).toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30);
@@ -2330,7 +2330,7 @@ function dropZone(el,cb){
 
 const TAB_OK=!!(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia&&!MOBILE);
 if(!TAB_OK){$('#tabBtn').hidden=true;$('#liveNote').textContent='Hold your device near the music while it plays.'}
-const blockedMsg=e=>e&&e.name==='NotAllowedError'?'Muse was not allowed to listen. Allow the microphone in your browser’s site settings and try again. Inside the Claude viewer, live listening is blocked, so open the standalone Muse site.':'Muse could not start listening here. Inside the Claude viewer this is blocked, so open the standalone Muse site.';
+const blockedMsg=e=>e&&e.name==='NotAllowedError'?'Fude was not allowed to listen. Allow the microphone in your browser’s site settings and try again. Inside the Claude viewer, live listening is blocked, so open the standalone Fude site.':'Fude could not start listening here. Inside the Claude viewer this is blocked, so open the standalone Fude site.';
 const MIC_OPTS={audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}};
 function micState(text,cls){const el=$('#micState');el.textContent=text;el.className='ready'+(cls?' '+cls:'')}
 // ask for the microphone as soon as the standalone site opens, so the first listen is one tap
@@ -2353,8 +2353,8 @@ $('#micBtn').onclick=async()=>{
   catch(e){$('#liveNote').textContent=blockedMsg(e);micState(e&&e.name==='NotAllowedError'?'Microphone not allowed':'Microphone unavailable')}
 };
 /* ---------- songs from music apps: a shared or pasted link from Spotify, Apple Music, YouTube, SoundCloud, Deezer or Tidal.
-   No music service lets another app read its audio, so Muse plays the song in the service's own player (or app) and listens to it,
-   and when the link is a piece Muse already has, it can play its own score instead ---------- */
+   No music service lets another app read its audio, so Fude plays the song in the service's own player (or app) and listens to it,
+   and when the link is a piece Fude already has, it can play its own score instead ---------- */
 const SERVICES={spotify:['Spotify','#1DB954'],apple:['Apple Music','#FA2D48'],youtube:['YouTube','#FF0033'],soundcloud:['SoundCloud','#FF5500'],deezer:['Deezer','#A238FF'],tidal:['Tidal','#7f7f7f']};
 const IN_VIEWER=(()=>{try{return!!window.claude||window.self!==window.top}catch(e){return true}})();
 // what a link points at, and how the service's own player can be embedded
@@ -2380,7 +2380,7 @@ async function lookupTitle(m){
   try{const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),4000);const r=await fetch(api+encodeURIComponent(m.url),{signal:ctl.signal});clearTimeout(t);if(!r.ok)return null;const j=await r.json();
     let title=String(j.title||'').trim(),by=String(j.author_name||'').trim();if(m.svc==='soundcloud'&&/ by /.test(title)&&!by){const i=title.lastIndexOf(' by ');by=title.slice(i+4);title=title.slice(0,i)}
     return title?{title:title.slice(0,90),by:by.slice(0,60)}:null}catch(e){return null}}
-// a piece already in Muse's library: every word of its title appears in the shared song's name
+// a piece already in Fude's library: every word of its title appears in the shared song's name
 const normWords=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().split(' ').filter(Boolean);
 function libraryMatch(title,by){
   const tw=normWords(title+' '+(by||''));if(!tw.length)return null;let best=null,bs=0;
@@ -2401,21 +2401,21 @@ function drawMusicCard(m){
   card.innerHTML=`<div class="mhead"><span class="msvc" style="--svc:${svc[1]}">${esc(m.svc?svc[0]:'Link')}</span><input class="mtitle" id="mTitle" value="${esc(m.title||'')}" placeholder="Song name (optional)" aria-label="Song name" maxlength="90"><button class="mx" id="mClose" type="button" aria-label="Clear this song">×</button></div>
     ${embed?`<div class="membed${m.h?'':' wide'}"><iframe src="${esc(m.embed)}" title="${esc(svc[0])} player" ${m.h?`height="${m.h}"`:''} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`:''}
     <p class="mknown" id="mKnownNote" hidden></p>
-    <p class="mhow muted">${embed?`Press play in the ${esc(svc[0])} player${MOBILE?' with your sound up':''}, then`:`Play it in ${esc(m.svc?svc[0]:'another app')}${MOBILE?' on this phone or a speaker nearby':''}, then`} press Listen and paint. Muse hears it through the ${TAB_OK&&embed?'microphone, or this tab’s sound,':'microphone'} and paints as it plays.${m.svc==='spotify'&&embed?' Without a Spotify login in this browser the player plays a 30-second preview.':''}</p>
-    <div class="row"><button class="btn" id="mKnown" type="button" hidden>Play Muse’s score and paint</button><button class="btn" id="mListen" type="button">Listen and paint</button>${TAB_OK&&embed?`<button class="btn ghost small" id="mTab" type="button">Listen to this tab</button>`:''}<a class="btn ghost small" id="mOpen" href="${esc(m.url)}" target="_blank" rel="noopener">Open in ${esc(m.svc?svc[0]:'a new tab')} ↗</a></div>`;
+    <p class="mhow muted">${embed?`Press play in the ${esc(svc[0])} player${MOBILE?' with your sound up':''}, then`:`Play it in ${esc(m.svc?svc[0]:'another app')}${MOBILE?' on this phone or a speaker nearby':''}, then`} press Listen and paint. Fude hears it through the ${TAB_OK&&embed?'microphone, or this tab’s sound,':'microphone'} and paints as it plays.${m.svc==='spotify'&&embed?' Without a Spotify login in this browser the player plays a 30-second preview.':''}</p>
+    <div class="row"><button class="btn" id="mKnown" type="button" hidden>Play Fude’s score and paint</button><button class="btn" id="mListen" type="button">Listen and paint</button>${TAB_OK&&embed?`<button class="btn ghost small" id="mTab" type="button">Listen to this tab</button>`:''}<a class="btn ghost small" id="mOpen" href="${esc(m.url)}" target="_blank" rel="noopener">Open in ${esc(m.svc?svc[0]:'a new tab')} ↗</a></div>`;
   card.hidden=false;musicKnown(m);
   $('#mTitle').addEventListener('input',e=>{m.title=e.target.value.trim();musicKnown(m)});
   $('#mClose').onclick=()=>{musicMeta=null;card.hidden=true;card.innerHTML='';$('#linkIn').value=''};
   $('#mKnown').onclick=()=>{if(m.known){selectSong(m.known);playAndPaint()}};
   $('#mListen').onclick=async()=>{stopSong();if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('This browser cannot share a microphone.');return}
-    try{const st=await navigator.mediaDevices.getUserMedia(MIC_OPTS);beginLive(st,'mic',{title:m.title,by:m.by,svc:m.svc,url:m.url})}catch(e){$('#liveNote').textContent=blockedMsg(e);toast(e&&e.name==='NotAllowedError'?'Allow the microphone to listen':'Muse could not start listening here')}};
+    try{const st=await navigator.mediaDevices.getUserMedia(MIC_OPTS);beginLive(st,'mic',{title:m.title,by:m.by,svc:m.svc,url:m.url})}catch(e){$('#liveNote').textContent=blockedMsg(e);toast(e&&e.name==='NotAllowedError'?'Allow the microphone to listen':'Fude could not start listening here')}};
   if($('#mTab'))$('#mTab').onclick=async()=>{stopSong();let st;
     try{st=await navigator.mediaDevices.getDisplayMedia({video:true,audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,suppressLocalAudioPlayback:false},preferCurrentTab:true,selfBrowserSurface:'include'})}catch(e){return}
     const aud=st.getAudioTracks();st.getVideoTracks().forEach(t=>t.stop());if(!aud.length){toast('No sound came through. Share this tab with its audio.');return}beginLive(new MediaStream(aud),'tab',{title:m.title,by:m.by,svc:m.svc,url:m.url})};
 }
-// when the song is one Muse has, offer its own score first
+// when the song is one Fude has, offer its own score first
 function musicKnown(m){const k=libraryMatch(m.title,m.by),note=$('#mKnownNote'),kb=$('#mKnown'),lb=$('#mListen');if(!note)return;m.known=k;
-  note.hidden=kb.hidden=!k;lb.classList.toggle('ghost',!!k);if(k)note.innerHTML=`Muse has this piece: <b>${esc(k.title)}</b>, ${esc(k.by)}. It can play its own score and paint it, no listening needed.`}
+  note.hidden=kb.hidden=!k;lb.classList.toggle('ghost',!!k);if(k)note.innerHTML=`Fude has this piece: <b>${esc(k.title)}</b>, ${esc(k.by)}. It can play its own score and paint it, no listening needed.`}
 $('#linkBtn').onclick=()=>{const u=$('#linkIn').value.trim();if(u)bringLink(u)};
 $('#linkIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#linkBtn').click()}});
 $('#linkIn').addEventListener('paste',()=>setTimeout(()=>{const u=$('#linkIn').value.trim();if(/^(https?:\/\/|spotify:)/i.test(u))bringLink(u)},0));
@@ -2690,7 +2690,7 @@ $('#artSearch').addEventListener('submit',async e=>{
   box.innerHTML='<div class="busyline">Claude is searching its knowledge of art…</div>';
   const dd=songDist(song),top=dd.share.map((v,i)=>[v,i]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,4).map(([v,i])=>`${NAMES_FOR_AI[i]} ${hexOf(i)}`).join(', ');
   try{
-    const j=await sample.json(`You help Muse, an app that recolors paintings to match a melody. The viewer searched for paintings: "${q}". Their current melody is "${song.title}" and its main colors are ${top||'not known yet'}.
+    const j=await sample.json(`You help Fude, an app that recolors paintings to match a melody. The viewer searched for paintings: "${q}". Their current melody is "${song.title}" and its main colors are ${top||'not known yet'}.
 Suggest up to 5 real, existing paintings that fit the search, preferring public-domain works. Reply with only JSON:
 {"paintings":[{"title":string,"artist":string,"year":string,"public_domain":boolean,"why":one short sentence on why it fits}]}`,{modelTier:'quick'});
     const list=(j&&Array.isArray(j.paintings)?j.paintings:[]).slice(0,5);
@@ -2707,14 +2707,14 @@ Suggest up to 5 real, existing paintings that fit the search, preferring public-
 async function paintingLight(id){return (await getLum(id)).mean}
 $('#matchBtn').onclick=async()=>{
   const line=$('#matchLine'),dd=songDist(song);
-  if(!dd.share.some(v=>v>0)){line.textContent='Play the recording first so Muse knows its notes.';return}
+  if(!dd.share.some(v=>v>0)){line.textContent='Play the recording first so Fude knows its notes.';return}
   line.textContent='Looking…';
   const songLight=dd.share.reduce((a,v,i)=>{const [r,g,b]=rgbOf(i);return a+v*(.299*r+.587*g+.114*b)/255},0);
   const lights={};for(const pt of PAINTINGS)lights[pt.id]=await paintingLight(pt.id);
   let best=PAINTINGS.slice().sort((a,b)=>Math.abs(lights[a.id]-songLight)-Math.abs(lights[b.id]-songLight))[0],reason=`Its overall light (${Math.round(lights[best.id]*100)}%) is closest to your colors for this melody (${Math.round(songLight*100)}%).`;
   if(sample){
     try{const top=dd.share.map((v,i)=>[v,i]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,5).map(([v,i])=>`${NAMES_FOR_AI[i]} ${(v*100).toFixed(0)}% as ${hexOf(i)}`).join('; ');
-      const j=await sample.json(`Muse recolors a painting so its palette follows a melody. Choose the painting whose mood and composition best suit the melody.
+      const j=await sample.json(`Fude recolors a painting so its palette follows a melody. Choose the painting whose mood and composition best suit the melody.
 Melody: "${song.title}" by ${song.by}${song.key?', '+song.key:''}. Its notes and the viewer's colors: ${top}. Brightness of those colors: ${Math.round(songLight*100)}%.
 Paintings (id: title, artist, year, brightness):
 ${PAINTINGS.map(p=>`${p.id}: ${p.title}, ${p.artist}, ${p.year}, ${Math.round(lights[p.id]*100)}%`).join('\n')}
@@ -2727,11 +2727,11 @@ Reply with only JSON: {"id": one of the ids, "reason": one calm sentence for the
 async function compose(themeId,dist){
   const th=THEMES.find(t=>t.id===themeId);
   const lines=dist.share.map((s,i)=>({n:NOTE_NAMES[i],s,hex:hexOf(i)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>`${x.n}: ${(x.s*100).toFixed(1)}%, color ${x.hex}`).join('\n');
-  const prompt=`You are the composer inside Muse, a quiet, zen art tool that paints melodies. A viewer mapped each musical note to a color and chose a melody. The renderer will paint an abstract piece in the theme "${th.name}" (${th.note}). Each color covers exactly its note's share of the canvas; you only shape the composition and name it.
+  const prompt=`You are the composer inside Fude, a quiet, zen art tool that paints melodies. A viewer mapped each musical note to a color and chose a melody. The renderer will paint an abstract piece in the theme "${th.name}" (${th.note}). Each color covers exactly its note's share of the canvas; you only shape the composition and name it.
 
 Melody: "${song.title}" by ${song.by}.
 Share of sounding time per note, with the viewer's color:
-${lines||'Not known yet: it is a recording Muse will hear while painting. Compose from the title alone and keep the statement general.'}
+${lines||'Not known yet: it is a recording Fude will hear while painting. Compose from the title alone and keep the statement general.'}
 
 Reply with only a JSON object:
 {"title": an evocative title of at most 5 words (no quotes, no colon),
@@ -2856,7 +2856,7 @@ async function paint(scroll=true,still=false){
     if(sample&&$('#aiToggle').checked&&!shared&&!zen.on){
       $('#artTitle').textContent='Claude is composing…';
       try{const c=await compose(th.id,song.rec?{share:new Array(12).fill(0)}:fullDist);title=c.title;stmt=c.statement;params=c.params;seed=c.seed;by=`${th.name} · from ${song.title} · composed with Claude`}
-      catch(e){if(e&&e.code==='not_granted'){$('#aiBar').hidden=true;sample=null}toast('Claude could not compose this one, so Muse composed it')}
+      catch(e){if(e&&e.code==='not_granted'){$('#aiBar').hidden=true;sample=null}toast('Claude could not compose this one, so Fude composed it')}
     }}
   if(job!==liveJob)return;
   const keyOf=()=>{try{const ns=song.rec?(song.chroma||[]).map((v,pc)=>({pc,dur:v})).filter(n=>n.dur>0):song.notes;return ns&&ns.length?findKey(ns):null}catch(e){return null}};
@@ -2870,7 +2870,7 @@ async function paint(scroll=true,still=false){
   const focus=known?[.5,.5]:[params.focusX||.5,params.focusY||.5],blooms=[];let flow=null;
   $('#holdBtn').hidden=!known;$('#artTitle').textContent=title;$('#artBy').textContent=by;$('#staleNote').hidden=true;
   const finish=async dist=>{
-    if(!dist.share.some(v=>v>0)){$('#artStmt').textContent='Muse heard no clear notes, so there is nothing to paint yet.';return}
+    if(!dist.share.some(v=>v>0)){$('#artStmt').textContent='Fude heard no clear notes, so there is nothing to paint yet.';return}
     const r=await render({...base,share:dist.share});if(flow)await flow.end(r,blooms);drawToArt(r,1,focus,blooms);const img=blooms.length?art.getContext('2d').getImageData(0,0,r.W,r.H):r.img;last={...r,img,kind:mode,id:base.id,seed,params,dist};renderChords(song);
     $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd();
   };
@@ -2878,7 +2878,7 @@ async function paint(scroll=true,still=false){
     if(!live){art.classList.add('busy');await finish(fullDist);return}
     if(song.stream)$('#liveStop').textContent='Stop listening';else $('#liveStop').textContent='Stop';
     // live: play, and repaint from what has been heard so far
-    $('#liveBar').hidden=false;$('#artStmt').textContent=song.stream?'Muse is listening. Play your song, and the painting grows with every note it hears.':song.rec?'Muse is listening and painting what it hears.':'Muse is playing the melody and painting each note as it sounds.';
+    $('#liveBar').hidden=false;$('#artStmt').textContent=song.stream?'Fude is listening. Play your song, and the painting grows with every note it hears.':song.rec?'Fude is listening and painting what it hears.':'Fude is playing the melody and painting each note as it sounds.';
     const ctl=startSource(song,null);if(!ctl)return;ctl.live=true;liveSwap=swap;playing=ctl;$('#playSong').textContent='Stop';markSongs();
     let busy=false,lastRoot=-1,lastMark=null;const dynSaid={};const A=song.rec?null:arrangedSong(song);painterStart(focus);{const bpm=A?A.bpm:0,w=A&&A.score&&A.score.tempo_word,feel=!bpm?'':bpm<=80?'nice and slow, so long careful strokes':bpm<112?'a steady tempo, a steady paw':'quick tempo, quick little dabs!';chatStart([known?PAINT_LINES[pt.id]:THEME_LINES[th.id],feel&&(w?`“${w}”: ${feel}`:feel[0].toUpperCase()+feel.slice(1))])}flow=artFlow(focus,()=>ctl.progress(),()=>job===liveJob);
     await new Promise(resolve=>{
@@ -3007,7 +3007,7 @@ function scoreSong(s){
   const an=analyseSong({parts:[{notes:line}],notes:line,beats,key:sc.key||s.key,meter:sc.time||s.meter,up:sc.up||0});
   const M=an.meter,ends=findPhrases(line,M,beats);
   an.intro=0;an.perf=an.chords;an.ends=ends.map(e=>({beat:e.beat,dur:e.dur,end:e.end}));
-  // a score written in shorter or longer note values than Muse's checked tune keeps the same pace
+  // a score written in shorter or longer note values than Fude's checked tune keeps the same pace
   // tempo changes printed in the score scale the pace from there on
   const tc=(sc.tempos||[]).filter(t=>t[1]>0),tf=tc.length>1?b=>{let v=tc[0][1];for(const t of tc){if(t[0]<=b)v=t[1];else break}return tc[0][1]/v}:null;
   const bpm=Math.round(s.bpm*(sc.rate||1)),lastBar=Math.max(0,beats-barBeats(an)),timeMap=makeTimeMap(60/bpm,beats,an.ends.filter(e=>e.beat<lastBar-M),lastBar,beats,tf);
@@ -3109,7 +3109,7 @@ function renderStage(){
   if((stage.hidden&&!sideOn)||!song)return;stageSong=song;const A=arrangedSong(song),box=$('#stAbc');$('#sideTitle').textContent=song.title;
   $('#stTitle').textContent=song.title;$('#stBy').textContent=song.by+(song.year?', '+song.year:'');
   $('#stArr').value=arrStyle;
-  $('#stSrc').textContent=song.rec?'A recording has no score to show.':A.scored?`Published score: ${A.score.setting}. ${A.score.license}.`:arrStyle==='none'?'Melody only, as Muse checked it against the published tune.':!SONGS.includes(song)?'Your music, as Muse arranges it.':SCORES[song.id]?'Muse’s own arrangement. Choose “As written” to play the published score.':'No published score for this song is in Muse, so this is Muse’s own arrangement of the checked melody.';
+  $('#stSrc').textContent=song.rec?'A recording has no score to show.':A.scored?`Published score: ${A.score.setting}. ${A.score.license}.`:arrStyle==='none'?'Melody only, as Fude checked it against the published tune.':!SONGS.includes(song)?'Your music, as Fude arranges it.':SCORES[song.id]?'Fude’s own arrangement. Choose “As written” to play the published score.':'No published score for this song is in Fude, so this is Fude’s own arrangement of the checked melody.';
   stageTimes=[];stageEvents=[];stageOn=[];stageIdx=-1;stageLine=-1;
   if(song.rec||!window.ABCJS){box.innerHTML=song.rec?'':'<p class="muted">The sheet music could not be drawn here.</p>';return}
   let abc;try{abc=songToABC(A)}catch(e){box.innerHTML='<p class="muted">This song could not be written out as sheet music.</p>';return}
@@ -3234,7 +3234,7 @@ const showOrig=async on=>{if(!last||last.kind!=='known')return;const ctx=art.get
 const hb=$('#holdBtn');
 hb.addEventListener('pointerdown',e=>{e.preventDefault();showOrig(true)});['pointerup','pointerleave','pointercancel'].forEach(ev=>hb.addEventListener(ev,()=>showOrig(false)));
 hb.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();showOrig(true)}});hb.addEventListener('keyup',()=>showOrig(false));
-function posterName(ext){return'muse-'+($('#artTitle').textContent||'painting').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+ext}
+function posterName(ext){return'fude-'+($('#artTitle').textContent||'painting').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)+ext}
 async function saveBlob(blob,name){
   if(!downloads){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Saved');return}
   try{await downloads.save({filename:name,data:blob});toast('Saved')}catch(e){if(e&&e.code!=='declined')toast('This view cannot save files');if(e&&(e.code==='unavailable'||e.code==='not_granted')){$('#saveBtn').hidden=true;$('#saveA3').hidden=true}}
@@ -3249,7 +3249,7 @@ function shareState(){
   if(!last||!song||song.rec||!last.dist)return null;
   const o={v:'1',c:colors.map((_,i)=>hexOf(i).slice(1)).join(''),s:song.id,a:arrStyle,i:globalInst,t:String(song.bpm),k:last.kind==='known'?'p':'t',w:String(last.id),d:String(last.seed||1)};
   if(last.params){const p=last.params;o.p=[p.scale==null?1:p.scale,p.warp==null?.5:p.warp,p.focusX==null?.5:p.focusX,p.focusY==null?.5:p.focusY].map(v=>Math.round(v*100)).join(',')}
-  if(last.kind==='known'&&!PAINT_SRC[last.id])return{err:'A painting you brought in cannot travel in a link, only the ones Muse comes with.'};
+  if(last.kind==='known'&&!PAINT_SRC[last.id])return{err:'A painting you brought in cannot travel in a link, only the ones Fude comes with.'};
   if(song.id==='mine'){const parts=song.parts||[];if(!parts.length||parts.some(p=>p.locked||p.text==null))return{err:'An uploaded score cannot travel in a link yet; typed music can.'};o.m=JSON.stringify({t:song.title,b:song.bpm,p:parts.map(p=>[p.name,p.inst,p.text])})}
   else if(!SONGS.find(x=>x.id===song.id))return{err:'Only library songs and your own typed music can travel in a link.'};
   return{code:new URLSearchParams(o).toString()};
@@ -3260,11 +3260,11 @@ $('#shareBtn').onclick=async()=>{
   const st=shareState();if(!st){toast('Paint something first.');return}if(st.err){toast(st.err);return}
   const link=atTop()?location.href.split('#')[0]+'#'+st.code:null,text=link||('muse:'+st.code),box=$('#shareRow'),inp=$('#sharedIn');
   box.hidden=false;inp.value=text;inp.select();const ok=await copyText(text);
-  $('#shareHint').textContent=link?'Anyone who opens this link sees this painting, with your colors and arrangement.':'Paste this code into the box on any copy of Muse to see this painting there.';
+  $('#shareHint').textContent=link?'Anyone who opens this link sees this painting, with your colors and arrangement.':'Paste this code into the box on any copy of Fude to see this painting there.';
   toast(ok?(link?'Link copied':'Code copied'):'Copy the text below to share it');
 };
-$('#openShared').onclick=()=>{const box=$('#shareRow'),inp=$('#sharedIn');box.hidden=false;inp.value='';inp.placeholder='Paste a Muse link or code, then press Enter';$('#shareHint').textContent='';inp.focus()};
-$('#sharedIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(!openShared(e.target.value))toast('That is not a Muse link or code.')}});
+$('#openShared').onclick=()=>{const box=$('#shareRow'),inp=$('#sharedIn');box.hidden=false;inp.value='';inp.placeholder='Paste a Fude link or code, then press Enter';$('#shareHint').textContent='';inp.focus()};
+$('#sharedIn').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(!openShared(e.target.value))toast('That is not a Fude link or code.')}});
 // restore a painting from a link or code: colors, song, arrangement, canvas and seed
 function openShared(text){
   text=(text||'').trim();if(!text)return false;const h=text.indexOf('#');if(h>=0)text=text.slice(h+1);if(text.startsWith('muse:'))text=text.slice(5);
@@ -3309,12 +3309,12 @@ function renderGallery(){
     strip.appendChild(b)});
 }
 renderGallery();
-/* ---------- the shared gallery: a painting posted here is kept with Muse itself and shown to everyone who opens this link ---------- */
+/* ---------- the shared gallery: a painting posted here is kept with Fude itself and shown to everyone who opens this link ---------- */
 let sdb=null,suser=null,sMe=null,sOwner=false,sCanWrite=null,sPosts=[],sReadOnly=false;
 function sharedNote(){
   const n=$('#sharedNote');
   if(sReadOnly||sCanWrite===false){$('#postRow').hidden=true;n.textContent=sPosts.length?'Paintings others have posted. With this link you can look, but not post.':'Nothing has been posted yet. With this link you can look, but not post.';return}
-  $('#postRow').hidden=false;n.textContent=sPosts.length?'Posted paintings appear here for everyone who opens Muse. Click one to see it with its colors and arrangement.':'Nothing has been posted yet. Paint something, add a caption if you like, and post it for everyone who opens Muse.';
+  $('#postRow').hidden=false;n.textContent=sPosts.length?'Posted paintings appear here for everyone who opens Fude. Click one to see it with its colors and arrangement.':'Nothing has been posted yet. Paint something, add a caption if you like, and post it for everyone who opens Fude.';
 }
 function whenText(t){const d=Date.now()-t;if(!(t>0))return'';if(d<6e4)return'just now';if(d<36e5)return Math.round(d/6e4)+' min ago';if(d<864e5)return Math.round(d/36e5)+' h ago';if(d<6048e5)return Math.round(d/864e5)+' d ago';return new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
 let sRenderN=0;
@@ -3360,7 +3360,7 @@ function posterA3(){
   const serif='"Shippori Mincho","Hiragino Mincho ProN",Georgia,serif',sans='"Hanken Grotesk",system-ui,sans-serif';
   const wrap=(t,max)=>{const out=[];for(const para of String(t||'').split('\n')){let line='';for(const w of para.split(/\s+/)){const tr=line?line+' '+w:w;if(x.measureText(tr).width>max&&line){out.push(line);line=w}else line=tr}if(line)out.push(line)}return out};
   // measure the text first, so the whole composition can sit centred on the sheet
-  const maxW=W-m*2;x.font=`500 92px ${serif}`;const title=$('#artTitle').textContent||'Muse',tl=wrap(title,maxW-400).slice(0,2);
+  const maxW=W-m*2;x.font=`500 92px ${serif}`;const title=$('#artTitle').textContent||'Fude',tl=wrap(title,maxW-400).slice(0,2);
   x.font=`44px ${sans}`;const by=$('#artBy').textContent||'',bl=by?wrap(by,maxW-400)[0]:'';
   x.font=`38px ${sans}`;const stmt=$('#artStmt').textContent||'',sl=wrap(stmt,maxW).slice(0,4);
   const textH=tl.length*104+(bl?70:0)+40+sl.length*52,chartH=560,gapA=150,gapB=130;
@@ -3407,7 +3407,7 @@ function posterCanvas(){
   const x=c.getContext('2d'),dist=last.dist;x.fillStyle='#F6F7F3';x.fillRect(0,0,W,H+band);x.drawImage(art,0,0);
   x.fillStyle='#1D221F';x.font=`500 ${fs}px "Shippori Mincho","Hiragino Mincho ProN",Georgia,serif`;x.textBaseline='alphabetic';
   const fit=(t,max)=>{while(t.length>3&&x.measureText(t).width>max)t=t.slice(0,-2);return t.length<($('#artTitle').textContent||'').length&&t!==$('#artTitle').textContent?t+'…':t};
-  const title=$('#artTitle').textContent||'Muse',by=$('#artBy').textContent||'';let tt=title;while(tt.length>4&&x.measureText(tt).width>W-pad*2-fs*3)tt=tt.slice(0,-2)+'…';
+  const title=$('#artTitle').textContent||'Fude',by=$('#artBy').textContent||'';let tt=title;while(tt.length>4&&x.measureText(tt).width>W-pad*2-fs*3)tt=tt.slice(0,-2)+'…';
   x.fillText(tt,pad,H+pad+fs);x.font=`${Math.round(fs*.58)}px "Hanken Grotesk",system-ui,sans-serif`;x.fillStyle='#5F6A63';let bb=by;while(bb.length>4&&x.measureText(bb).width>W-pad*2-fs*3)bb=bb.slice(0,-2)+'…';x.fillText(bb,pad,H+pad+fs*1.9);
   x.textAlign='right';x.fillStyle='#8C968F';x.font=`${Math.round(fs*.55)}px "Shippori Mincho",Georgia,serif`;x.fillText('M U S E',W-pad,H+pad+fs);x.textAlign='left';
   const y0=H+pad+fs*2.6,y1=H+band-pad-fs*.8,ch=y1-y0,bw=(W-pad*2)/12,mx=Math.max(...dist.share)||1;
@@ -3423,8 +3423,8 @@ function drawChart(dist,canvasShare){
   const svg=$('#chart'),W=440,H=260,m={l:34,r:6,t:22,b:30},pw=W-m.l-m.r,ph=H-m.t-m.b;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   svg.setAttribute('aria-label','Share of time each note sounds: '+dist.share.map((v,i)=>v>0?`${NOTE_NAMES[i]} ${Math.round(v*100)}%`:null).filter(Boolean).join(', '));
-  $('#legendNote').textContent=dist.measured?`Each bar wears your color for that note. Its height is the note's share of ${song.stream?'the sound Muse heard':song.rec?'the sound Muse heard in the recording':'Claude’s estimate for the song'}, which is also its share of the canvas.`:"Each bar wears your color for that note. Its height is the note's share of the melody's sounding time, which is also its share of the canvas.";
-  $('#distHead').textContent=dist.measured?(song.rec?'Share of each note Muse heard':'Estimated share of each note'):'Share of time each note sounds';
+  $('#legendNote').textContent=dist.measured?`Each bar wears your color for that note. Its height is the note's share of ${song.stream?'the sound Fude heard':song.rec?'the sound Fude heard in the recording':'Claude’s estimate for the song'}, which is also its share of the canvas.`:"Each bar wears your color for that note. Its height is the note's share of the melody's sounding time, which is also its share of the canvas.";
+  $('#distHead').textContent=dist.measured?(song.rec?'Share of each note Fude heard':'Estimated share of each note'):'Share of time each note sounds';
   const mx=Math.max(...dist.share),step=mx>.4?.1:mx>.2?.05:.025,top=Math.max(step,Math.ceil(mx/step)*step);
   const y=v=>m.t+ph-(v/top)*ph,bw=pw/12,barW=Math.min(22,bw*.62);
   let s='';
@@ -3640,7 +3640,7 @@ $('#introSound').onclick=()=>{const ac=audio(),n=IN_NOTES.length;introT0=perform
    BACKGROUND SCORE
    Behind the whole page: faint staff lines breathe, and musical notes in the twelve colors
    drift slowly upward. Notes near the pointer swirl around it and follow where it goes,
-   and every note Muse plays or hears rises from where its pitch sits on the page.
+   and every note Fude plays or hears rises from where its pitch sits on the page.
    ========================================================= */
 const bgCv=$('#bg'),bgCtx=bgCv.getContext('2d'),bgNoise=makeNoise(77),bgRand=mulberry32(31);
 const BG={w:0,h:0,notes:[],last:performance.now(),frame:0,active:0,mx:-1e4,my:-1e4,mvx:0,mvy:0,mT:0,sig:''};
@@ -3737,21 +3737,21 @@ function markSteps(st){if(!st){st={};try{st=JSON.parse(localStorage.getItem('mus
   const m={'#tune':'tune','#listen':'listen','#paint':'paint','#behold':'behold'};document.querySelectorAll('.top nav a').forEach(a=>{const k=m[a.getAttribute('href')];const d=!!st[k];a.classList.toggle('done',d);a.title=d?'Done':''})}
 markSteps();
 takeShared();
-/* ---------- the app: installing Muse to the home screen, and the installed app's own touches ---------- */
+/* ---------- the app: installing Fude to the home screen, and the installed app's own touches ---------- */
 {const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true||!!window.Capacitor,ios=/iPhone|iPad|iPod/.test(navigator.userAgent)&&!/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent),ib=$('#installBtn');let ask=null;
   if(standalone)document.body.classList.add('app');
   if(!standalone&&!IN_VIEWER&&location.protocol==='https:'){
     addEventListener('beforeinstallprompt',e=>{e.preventDefault();ask=e;ib.hidden=false});
     if(ios)ib.hidden=false;
     ib.onclick=async()=>{if(ask){ask.prompt();try{const r=await ask.userChoice;if(r.outcome==='accepted')ib.hidden=true}catch(e){}ask=null}else $('#installSheet').hidden=false};
-    addEventListener('appinstalled',()=>{ib.hidden=true;toast('Muse is on your home screen')})}
+    addEventListener('appinstalled',()=>{ib.hidden=true;toast('Fude is on your home screen')})}
   $('#isClose').onclick=()=>{$('#installSheet').hidden=true}}
 $('#navZen').onclick=zenStart;
 /* ---------- the phone app: one screen at a time behind a tab bar (Now, Colors, Music, Style, Gallery), instead of one long page ---------- */
 const APP_TABS=document.body.classList.contains('app')&&matchMedia('(max-width:760px)').matches;
 function goTab(){}
 if(APP_TABS){document.body.classList.add('tabs');
-  const nav=document.querySelector('.top nav'),secs=['tune','listen','paint','behold'];nav.classList.add('tabbar');nav.setAttribute('aria-label','Muse');document.body.appendChild(nav);
+  const nav=document.querySelector('.top nav'),secs=['tune','listen','paint','behold'];nav.classList.add('tabbar');nav.setAttribute('aria-label','Fude');document.body.appendChild(nav);
   const IC={now:'<path d="M4 20c2.5 0 4-1.5 4-3.6 0-1.3-1-2.4-2.3-2.4C4.2 14 3 15.3 3 17c0 1.4-.4 2.3-1 3"/><path d="M8.6 14.2 19.4 3.4a1.6 1.6 0 0 1 2.3 2.3L10.9 16.5"/>',
     tune:'<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="16" cy="10" r="1.3"/><path d="M12 21a3 3 0 0 1 0-6h1.5a2 2 0 0 0 2-2"/>',
     listen:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
@@ -3764,7 +3764,7 @@ if(APP_TABS){document.body.classList.add('tabs');
     cur=k;tabs.forEach(a=>{const on=a.getAttribute('href')==='#'+k;a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})};
   goTab=show;
   nav.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();show(a.getAttribute('href').slice(1))});
-  // a link or a scroll to a section elsewhere in Muse opens its tab first
+  // a link or a scroll to a section elsewhere in Fude opens its tab first
   document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a||nav.contains(a))return;const k=a.getAttribute('href').slice(1);if(secs.includes(k)){e.preventDefault();show(k)}});
   const sv=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(o){const m=this.closest&&this.closest('.mv');if(m&&secs.includes(m.id)&&!m.classList.contains('cur'))show(m.id);return sv.call(this,o)};
   document.addEventListener('muse:leftnow',()=>{if(cur==='now'||!cur)show('behold')});
@@ -3780,11 +3780,11 @@ if(APP_TABS){document.body.classList.add('tabs');
   const flip=()=>{const want=isDark()?'light':'dark',dev=DARK_Q.matches?'dark':'light';if(want===dev)delete root.dataset.theme;else root.dataset.theme=want;
     try{localStorage.setItem('muse.theme',want===dev?'auto':want)}catch(e){}draw();window.dispatchEvent(new Event('muse:theme'))};
   document.querySelectorAll('.themebtn').forEach(b=>b.addEventListener('click',flip));DARK_Q.addEventListener&&DARK_Q.addEventListener('change',draw);draw()}
-/* ---------- the companion: Muse open beside Spotify, or any music. It keeps listening and paints every song as a new picture.
+/* ---------- the companion: Fude open beside Spotify, or any music. It keeps listening and paints every song as a new picture.
    Linked to Spotify it knows each track's name, cover and length, starts a new picture the moment the track changes,
    and with headphones in, when there is nothing to hear, it paints from the colours of the track's cover ---------- */
 const sm={stream:null,state:'off',n:0,segT:0,quiet:0,loud:0,floor:.002,segLevel:0,pics:[],pi:-1,timer:0,an:null,buf:null,made:0,src:'mic',heardAt:0,track:null,coverW:null,dest:null,voiceT:0};
-// in the browser extension Muse hears the music tab itself: its sound through the extension's tab capture, and the song's name and cover from the tab's Media Session
+// in the browser extension Fude hears the music tab itself: its sound through the extension's tab capture, and the song's name and cover from the tab's Media Session
 const EXT_TAB=!!(MUSE_EXT&&window.chrome&&chrome.tabCapture&&chrome.tabs),tb={id:null,timer:0,site:'',through:null};
 try{const k=localStorage.getItem('muse.smsrc');if(k==='cover'||(k==='tab'&&EXT_TAB)||k==='mic')sm.src=k;else if(EXT_TAB)sm.src='tab'}catch(e){if(EXT_TAB)sm.src='tab'}
 const following=()=>!!(sp.tok||tb.id),srcName=()=>tb.id?(tb.site||'the tab'):'Spotify';
@@ -3805,15 +3805,15 @@ const SPOTIFY_CLIENT_ID='';
 const sp={id:'',tok:null,now:null,at:0,timer:0,pausedAt:0};
 try{sp.id=SPOTIFY_CLIENT_ID||localStorage.getItem('muse.spotify.id')||'';sp.tok=JSON.parse(localStorage.getItem('muse.spotify')||'null')}catch(e){}
 // in the iPhone and Android app, Spotify's sign-in opens in the system browser and comes back through the app's own address
-const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.muse.paint://spotify';
+const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.fude.paint://spotify';
 const capPlugin=n=>{const C=window.Capacitor;if(!C)return null;try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};
 const MUSE_VERSION='1.0.0';
-// in the phone app, the status bar's clock and battery stay readable against Muse's light or dark
+// in the phone app, the status bar's clock and battery stay readable against Fude's light or dark
 function sysBars(){const S=NATIVE&&capPlugin('SystemBars');if(!S||!S.setStyle)return;const r=document.documentElement,
   dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
   try{Promise.resolve(S.setStyle({style:dark?'DARK':'LIGHT'})).catch(()=>{})}catch(e){}}
 addEventListener('muse:theme',sysBars);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',sysBars)}catch(e){}sysBars();
-// About: the version, and what Muse does with what it hears
+// About: the version, and what Fude does with what it hears
 $('#abVer').textContent='Version '+MUSE_VERSION;if(IN_VIEWER)$('#abMore').hidden=true;
 $('#smAbout').onclick=()=>{$('#aboutSheet').hidden=false;$('#abClose').focus()};$('#abClose').onclick=()=>{$('#aboutSheet').hidden=true};
 const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.identity&&chrome.identity.launchWebAuthFlow);
@@ -3854,7 +3854,7 @@ async function spAuthed(){if(!sp.tok)return null;if(Date.now()<sp.tok.exp)return
   try{return(await spTokenReq({grant_type:'refresh_token',refresh_token:sp.tok.rt})).at}catch(e){spUnlink(true);return null}}
 async function spApi(path,method='GET'){const at=await spAuthed();if(!at)return null;const r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+at}});if(r.status===401&&sp.tok)sp.tok.exp=0;return r}
 function spUnlink(expired){sp.tok=null;sp.now=null;spSave();clearTimeout(sp.timer);if(sm.src==='cover'){smSource('mic')}spDraw();if(expired)toast('Spotify needs linking again')}
-// what is playing, every few seconds while Muse is open
+// what is playing, every few seconds while Fude is open
 async function spPoll(){clearTimeout(sp.timer);if(!sp.tok||!SIDEMODE)return;if(tb.id){sp.timer=setTimeout(spPoll,4000);return}
   try{const r=await spApi('/me/player/currently-playing?additional_types=episode');
     if(r&&r.status===200){const j=await r.json(),it=j.item;
@@ -3870,15 +3870,15 @@ function spSeen(t){sp.now=t;sp.at=performance.now();spDraw();if(!sm.stream)retur
   else if(sm.state==='wait'&&following())smSet('wait',t?srcName()+' is paused':'Waiting for '+srcName()+' to play')}
 function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id;$('#srcCover').hidden=!sp.tok||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;$('#smSp').hidden=!on||(!!tb.id&&!t);$('#smSp').classList.toggle('noctl',!sp.tok||!!tb.id);
   if(!on)return;const a=$('#spArt');
-  if(!t){a.hidden=true;a.removeAttribute('src');$('#spTitle').textContent='Nothing playing on Spotify';$('#spBy').textContent='Play something there, and Muse picks it up here';$('#spProg').style.transform='scaleX(0)';$('#spPlay').classList.remove('on');$('#spPlay').setAttribute('aria-label','Play');return}
+  if(!t){a.hidden=true;a.removeAttribute('src');$('#spTitle').textContent='Nothing playing on Spotify';$('#spBy').textContent='Play something there, and Fude picks it up here';$('#spProg').style.transform='scaleX(0)';$('#spPlay').classList.remove('on');$('#spPlay').setAttribute('aria-label','Play');return}
   a.hidden=!t.art;if(t.art&&a.getAttribute('src')!==t.art)a.src=t.art;$('#spTitle').textContent=t.title;$('#spBy').textContent=t.by;$('#spPlay').classList.toggle('on',t.playing);$('#spPlay').setAttribute('aria-label',t.playing?'Pause':'Play');spProg()}
 function spProg(){const t=sp.now,bar=document.querySelector('.sp-bar');if(bar)bar.style.visibility=t&&t.dur?'':'hidden';if(!t||!t.dur)return;const pos=t.pos+(t.playing?performance.now()-sp.at:0);$('#spProg').style.transform=`scaleX(${clamp(pos/t.dur,0,1).toFixed(3)})`}
 setInterval(()=>{if(SIDEMODE&&sp.now&&!document.hidden)spProg()},500);
 // play, pause and skip work with Spotify Premium; Spotify answers 403 otherwise
 async function spCmd(path,method){let r=null;try{r=await spApi(path,method)}catch(e){}
-  if(r&&r.status===403)toast('Play and skip from Muse need Spotify Premium');else if(r&&r.status===404)toast('Open Spotify on one of your devices first');
+  if(r&&r.status===403)toast('Play and skip from Fude need Spotify Premium');else if(r&&r.status===404)toast('Open Spotify on one of your devices first');
   setTimeout(spPoll,500)}
-// headphones in: the microphone hears nothing, so Muse reads the track's cover. Each colour on it goes to the nearest note colour,
+// headphones in: the microphone hears nothing, so Fude reads the track's cover. Each colour on it goes to the nearest note colour,
 // and those notes are sounded silently into the same listener a microphone would feed, so the picture grows in the usual way
 async function coverNotes(url){const w=new Array(12).fill(0);
   try{const im=new Image();im.crossOrigin='anonymous';im.src=url;await im.decode();const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,32,32);
@@ -3892,7 +3892,7 @@ function smVoice(){if(sm.src!=='cover'||sm.state!=='paint'||!sm.dest||!sm.coverW
   for(let k=0;k<n;k++){let r=Math.random(),pc=0;for(;pc<11;pc++){r-=sm.coverW[pc];if(r<=0)break}
     const o=ac.createOscillator(),g=ac.createGain(),oct=k?4+(Math.random()<.3?1:0):3;o.frequency.value=440*Math.pow(2,(12*(oct+1)+pc-69)/12);
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.2,t+.04);g.gain.exponentialRampToValueAtTime(.001,t+1.5);o.connect(g);g.connect(sm.dest);o.start(t);o.stop(t+1.6)}}
-// the screen stays on while Muse paints, so it can sit by the speaker like a picture frame
+// the screen stays on while Fude paints, so it can sit by the speaker like a picture frame
 let smLock=null;
 async function smWake(on){try{if(on&&!smLock&&navigator.wakeLock&&!document.hidden){smLock=await navigator.wakeLock.request('screen');smLock.addEventListener('release',()=>{smLock=null})}else if(!on&&smLock){const l=smLock;smLock=null;await l.release()}}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden||!SIDEMODE)return;if(sm.stream)smWake(true);if(sp.tok)spPoll()});
@@ -3903,11 +3903,11 @@ async function smStart(){
   if(sm.stream)return;const ac=audio();try{await ac.resume()}catch(e){}
   if(sm.src==='cover'&&!sp.tok)smSource('mic',true);
   if(sm.src==='tab'&&!EXT_TAB)smSource('mic',true);
-  if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){smSet('off','Can’t hear that tab');$('#smSub').textContent=e&&e.name==='NoTab'?'Open your music in a tab, then press Start here.':'Click the Muse button in the toolbar while the music tab is open, then press Start.';return}
-    // capturing a tab silences it, so its sound is played on through Muse
+  if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){smSet('off','Can’t hear that tab');$('#smSub').textContent=e&&e.name==='NoTab'?'Open your music in a tab, then press Start here.':'Click the Fude button in the toolbar while the music tab is open, then press Start.';return}
+    // capturing a tab silences it, so its sound is played on through Fude
     tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination);setTimeout(tabPoll,300)}
   else if(sm.src==='cover'){sm.dest=ac.createMediaStreamDestination();sm.stream=sm.dest.stream;clearInterval(sm.voiceT);sm.voiceT=setInterval(smVoice,900)}
-  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Muse in your browser’s site settings, then start again.':sp.tok?'Muse could not open a microphone here. With Spotify linked, Headphones paints from each cover instead.':'Muse could not open a microphone here.';return}
+  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok?'Fude could not open a microphone here. With Spotify linked, Headphones paints from each cover instead.':'Fude could not open a microphone here.';return}
   const src=ac.createMediaStreamSource(sm.stream);sm.an=ac.createAnalyser();sm.an.fftSize=2048;sm.buf=new Float32Array(sm.an.fftSize);src.connect(sm.an);sm.src_=src;
   sm.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',()=>smStop()));
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);
@@ -3927,7 +3927,7 @@ function smTick(){
     sm.quiet=r<quietAt?sm.quiet+.1:0;const len=now-sm.segT;
     $('#smStateT').textContent=sp.now&&sm.track&&!sp.now.playing?'Paused':`Painting song ${sm.n} · ${fmtTime(len)}`;const at=$('#artTitle').textContent;if(at&&$('#smTitle').textContent!==at)$('#smTitle').textContent=at;
     // following Spotify with nothing reaching the microphone: most likely headphones
-    if(follow&&sm.src==='mic'&&sp.now.playing&&!sm.hinted&&performance.now()-sm.heardAt>12000){sm.hinted=true;$('#smSub').textContent='Muse can’t hear the music. Wearing headphones?';$('#smHp').hidden=false}
+    if(follow&&sm.src==='mic'&&sp.now.playing&&!sm.hinted&&performance.now()-sm.heardAt>12000){sm.hinted=true;$('#smSub').textContent='Fude can’t hear the music. Wearing headphones?';$('#smHp').hidden=false}
     if(!follow&&(sm.quiet>=(len>40?2.2:6)||len>420))smEnd()}}
 function smBegin(){
   if(sm.state==='paint'||!sm.stream)return;const tr=spFollow()?sp.now:null;if(sm.src==='cover'&&!tr)return;
@@ -3950,7 +3950,7 @@ function smDone(){
     const full=art.toDataURL('image/jpeg',.92),name=$('#artTitle').textContent,b=document.createElement('button');b.type='button';b.title='Save '+name;b.setAttribute('aria-label','Save '+name);
     b.innerHTML=`<img alt="" src="${c.toDataURL('image/jpeg',.8)}">`;b.onclick=()=>{const a=document.createElement('a');a.href=full;a.download=name.replace(/[^\w\s,-]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)+'.jpg';document.body.appendChild(a);a.click();a.remove()};
     $('#smStrip').prepend(b);sm.made++}catch(e){}}
-// how Muse hears the music: the microphone (a speaker, or the phone's own), or each track's cover when the sound is in headphones
+// how Fude hears the music: the microphone (a speaker, or the phone's own), or each track's cover when the sound is in headphones
 function smSource(k,quiet){sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
   if(!quiet&&sm.stream){smStop();smStart()}}
 let smHere=null;
@@ -3958,8 +3958,8 @@ function smInit(){
   if(sm.ready){document.body.classList.add('sidemode');$('#smode').hidden=false;$('#smCanvas').appendChild(art);spDraw();if(sp.tok)spPoll();if(sm.wasOn){sm.wasOn=false;smStart()}return}
   if(!smHere&&document.body.classList.contains('tabs'))smHere={parent:art.parentNode,next:art.nextSibling,y:0};
   sm.ready=true;document.body.classList.add('sidemode');const box=$('#smode');box.hidden=false;$('#smCanvas').appendChild(art);box.classList.toggle('blank',!last);sm.pics=smPics();
-  document.title='Muse · listening';
-  // opened in a window of its own: the full Muse opens in a new tab rather than replacing the painter
+  document.title='Fude · listening';
+  // opened in a window of its own: the full Fude opens in a new tab rather than replacing the painter
   if(window.opener||(window.self!==window.top&&!IN_VIEWER)){$('#smHome').target='_blank';$('#smFull').target='_blank'}
   const leave=e=>{if(smHere){e.preventDefault();smLeave()}};$('#smHome').onclick=leave;$('#smFull').onclick=leave;
   $('#smGo').onclick=()=>{if(sm.stream)smStop();else smStart()};
@@ -3976,20 +3976,20 @@ function smInit(){
   $('#spPrev').onclick=()=>spCmd('/me/player/previous','POST');$('#spNext').onclick=()=>spCmd('/me/player/next','POST');
   $('#spPlay').onclick=()=>{const p=!!(sp.now&&sp.now.playing);if(sp.now){sp.now.pos+=p?performance.now()-sp.at:0;sp.at=performance.now();sp.now.playing=!p;spDraw()}spCmd(p?'/me/player/pause':'/me/player/play','PUT')};
   const os=$('#smSpotify');if(MOBILE||window.Capacitor){os.href='spotify:';os.removeAttribute('target')}
-  if(MUSE_EXT){$('#smFull').href=$('#smHome').href='full.html';$('#smFull').target=$('#smHome').target='_blank';if(EXT_TAB)$('#smEmpty').innerHTML='Play music in a tab: Spotify, YouTube, anything.<br>Press Start, and Muse paints every song.'}
+  if(MUSE_EXT){$('#smFull').href=$('#smHome').href='full.html';$('#smFull').target=$('#smHome').target='_blank';if(EXT_TAB)$('#smEmpty').innerHTML='Play music in a tab: Spotify, YouTube, anything.<br>Press Start, and Fude paints every song.'}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
   $('#smEmpty').hidden=!!last;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}
-// the companion inside this page (a phone, or Muse shown inside another page): Back returns to the full Muse
+// the companion inside this page (a phone, or Fude shown inside another page): Back returns to the full Fude
 function smEnter(){if(SIDEMODE)return;stopSong();if(zen.on)zenEnd();smHere={parent:art.parentNode,next:art.nextSibling,y:scrollY};SIDEMODE=true;try{history.pushState({muse:'side'},'')}catch(e){}smInit();window.scrollTo(0,0)}
-function smLeave(){if(!smHere)return;sm.wasOn=!!sm.stream;smStop();const h=smHere;smHere=null;SIDEMODE=false;document.body.classList.remove('sidemode');$('#smode').hidden=true;h.parent.insertBefore(art,h.next);document.title='Muse';window.scrollTo(0,h.y);clearTimeout(sp.timer);if(!last)paint(false,true);document.dispatchEvent(new Event('muse:leftnow'))}
+function smLeave(){if(!smHere)return;sm.wasOn=!!sm.stream;smStop();const h=smHere;smHere=null;SIDEMODE=false;document.body.classList.remove('sidemode');$('#smode').hidden=true;h.parent.insertBefore(art,h.next);document.title='Fude';window.scrollTo(0,h.y);clearTimeout(sp.timer);if(!last)paint(false,true);document.dispatchEvent(new Event('muse:leftnow'))}
 addEventListener('popstate',()=>{if(smHere)smLeave()});
 // the button that opens it: a floating window on top of other apps where the browser has one, a small window otherwise, the whole screen on a phone
 async function openSidePainter(){
   if(IN_VIEWER||MOBILE||window.Capacitor){smEnter();return}
   const url=new URL('?side=1',location.href).href;
-  if(window.documentPictureInPicture){try{const w=await documentPictureInPicture.requestWindow({width:380,height:660});const d=w.document;d.title='Muse';d.body.style.cssText='margin:0;background:'+getComputedStyle(document.body).backgroundColor;
-    const f=d.createElement('iframe');f.src=url;f.allow='microphone; autoplay; screen-wake-lock';f.title='Muse, painting beside your music';f.style.cssText='border:0;display:block;width:100vw;height:100vh';d.body.appendChild(f);return}catch(e){}}
+  if(window.documentPictureInPicture){try{const w=await documentPictureInPicture.requestWindow({width:380,height:660});const d=w.document;d.title='Fude';d.body.style.cssText='margin:0;background:'+getComputedStyle(document.body).backgroundColor;
+    const f=d.createElement('iframe');f.src=url;f.allow='microphone; autoplay; screen-wake-lock';f.title='Fude, painting beside your music';f.style.cssText='border:0;display:block;width:100vw;height:100vh';d.body.appendChild(f);return}catch(e){}}
   const w=window.open(url,'museSide','popup,width=380,height=700');if(!w)smEnter()}
 $('#sideOpen').onclick=openSidePainter;$('#spBtn').onclick=openSidePainter;
 /* ---------- a finished painting gets a burst of paint in the song's own colours ---------- */

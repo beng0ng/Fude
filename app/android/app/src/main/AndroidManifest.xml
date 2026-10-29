@@ -19,19 +19,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- songs shared from a music app's Share menu open in Muse -->
+            <!-- songs shared from a music app's Share menu open in Fude -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <!-- the way back from Spotify's sign-in page: app.muse.paint://spotify?code=… -->
+            <!-- the way back from Spotify's sign-in page: app.fude.paint://spotify?code=… -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="app.muse.paint" android:host="spotify" />
+                <data android:scheme="app.fude.paint" android:host="spotify" />
             </intent-filter>
         </activity>
 
@@ -47,7 +47,7 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Muse listens to music through the microphone to paint it -->
+    <!-- Fude listens to music through the microphone to paint it -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 </manifest>

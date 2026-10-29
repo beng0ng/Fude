@@ -7,11 +7,11 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Muse listens to the music you play so it can paint it.</string>
+	<string>Fude listens to the music you play so it can paint it.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Muse</string>
+        <string>Fude</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -74,10 +74,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>app.muse.paint</string>
+			<string>app.fude.paint</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>app.muse.paint</string>
+				<string>app.fude.paint</string>
 			</array>
 		</dict>
 	</array>

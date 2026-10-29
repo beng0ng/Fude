@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuild the website, the phone app's web files and the browser extension from muse.src.html
+# Rebuild the website, the phone app's web files and the browser extension from fude.src.html
 set -e
 cd "$(dirname "$0")"
 python3 build.py
