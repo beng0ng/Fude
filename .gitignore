@@ -1,0 +1,5 @@
+# build outputs that are made from muse.src.html
+muse.html
+site/test.html
+node_modules/
+.DS_Store
