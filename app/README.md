@@ -27,6 +27,12 @@ The app opens straight into the companion: a full-screen painter you keep open w
 **Link Spotify** signs in through Spotify's page in the system browser and comes back to the app through its own address, `app.fude.paint://spotify` (registered for Android in `AndroidManifest.xml` and for iPhone in `Info.plist`, and handled by the `@capacitor/app` and `@capacitor/browser` plugins).
 To turn it on, follow the site README's "Turning on Link Spotify" steps, and add **both** redirect URIs to the Spotify app: the site's address and `app.fude.paint://spotify`. Then put the Client ID in `www/index.html` (or in the site's `index.html` before copying it over) and run `npx cap sync`.
 
+## Headphones
+With headphones in, the microphone can't hear the music, and phones don't let one app listen to another app's sound. Fude follows the music app instead, and paints each song from the colors of its cover (**Headphones on** in the ⋯ menu).
+- **Android:** no sign-in needed, and it works with Spotify, YouTube Music, Apple Music, Deezer, Tidal, SoundCloud or anything else with playback controls. The first time, Fude asks for **notification access**, the Android permission that lets an app see what other apps are playing, and opens the settings page to turn it on. Fude then knows each song's name, artist, cover, length and whether it's playing, and its play, pause and skip buttons control the music app. It does not read notifications. The code is `NowPlayingPlugin.java` and `NowPlayingListener.java` in `android/app/src/main/java/app/fude/paint/`, registered in `MainActivity.java` and `AndroidManifest.xml`.
+- **iPhone:** iOS doesn't let an app see what Spotify is playing, so here Headphones on needs **Link Spotify**, which Spotify limits to 5 accounts you pick (see the site README).
+- If you install a test build from a downloaded file instead of from Android Studio or Google Play, Android 13 and later may grey out Fude's switch in notification access. Open Fude's App info, tap ⋮, choose **Allow restricted settings**, and try again.
+
 ## How the app is laid out
 On a phone the app works like an app rather than a web page: a tab bar along the bottom with **Now** (the listening companion it opens to), **Colours**, **Music**, **Style** and **Gallery**, one screen at a time. Links and buttons that used to scroll down the page open the right tab instead, and the phone's back button returns from Now to where you were. Zen mode is in the ⋯ menu on Now.
 

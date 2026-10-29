@@ -29,8 +29,8 @@ Spotify only lets a registered app read what you are playing, so the button stay
 1. Sign in at developer.spotify.com, open the Dashboard and **Create app**. Tick **Web API**.
 2. Add the exact address where Fude is hosted as a **Redirect URI**, for example `https://yourname.github.io/fude/` (ending the same way the address does, usually with `/`).
 3. Copy the app's **Client ID** into `const SPOTIFY_CLIENT_ID=''` in `index.html`, and upload it again. No secret is needed; Fude signs in with Spotify's PKCE flow.
-4. While the Spotify app is in development mode, only the Spotify accounts you add under **User Management** can link. Ask Spotify for an extension to open it to everyone.
-Linking works on the hosted site and its home-screen app. It does not work inside Claude's preview. The iPhone/Android app links too, once `app.fude.paint://spotify` is added as a second redirect URI (see its README).
+4. Spotify's rules since 2026: an app in development mode needs its owner to have **Spotify Premium**, and only up to **5** Spotify accounts that you add under **User Management** can link. Spotify only opens apps to everyone for registered businesses, so for most people Link Spotify is for you and a few friends.
+Linking works on the hosted site and its home-screen app. It does not work inside Claude's preview. The iPhone/Android app links too, once `app.fude.paint://spotify` is added as a second redirect URI (see its README). The Android app doesn't need linking to follow Spotify with headphones in; see "Headphones" in the app's README.
 
 ## Songs from Spotify and other music apps
 - Paste or share a song link from **Spotify, Apple Music, YouTube, SoundCloud, Deezer or Tidal** into "From your music app" in Bring the music (the Paste button reads it from the clipboard). On Android, once Fude is installed, it also appears in the music app's own Share menu.

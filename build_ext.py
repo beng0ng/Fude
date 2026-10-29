@@ -2,7 +2,9 @@
 # Extension pages allow no inline scripts and no blob workers, so each script and worker becomes a file of its own.
 import re,os,json,shutil
 from PIL import Image
-OUT='ext';shutil.rmtree(OUT,ignore_errors=True);os.makedirs(OUT)
+OUT='ext';keep=open(OUT+'/README.md').read() if os.path.exists(OUT+'/README.md') else None  # the README is written by hand
+shutil.rmtree(OUT,ignore_errors=True);os.makedirs(OUT)
+if keep:open(OUT+'/README.md','w').write(keep)
 page=open('site/index.html').read()
 page=re.sub(r"<script>if\('serviceWorker'.*?</script>\n?",'',page,flags=re.S)
 page=page.replace('<link rel="manifest" href="manifest.webmanifest">\n','')

@@ -2610,7 +2610,10 @@ const sm={stream:null,state:'off',n:0,segT:0,quiet:0,loud:0,floor:.002,segLevel:
 // in the browser extension Fude hears the music tab itself: its sound through the extension's tab capture, and the song's name and cover from the tab's Media Session
 const EXT_TAB=!!(MUSE_EXT&&window.chrome&&chrome.tabCapture&&chrome.tabs),tb={id:null,timer:0,site:'',through:null};
 try{const k=localStorage.getItem('muse.smsrc');if(k==='cover'||(k==='tab'&&EXT_TAB)||k==='mic')sm.src=k;else if(EXT_TAB)sm.src='tab'}catch(e){if(EXT_TAB)sm.src='tab'}
-const following=()=>!!(sp.tok||tb.id),srcName=()=>tb.id?(tb.site||'the tab'):'Spotify';
+// in the Android app, with notification access, Fude sees what any music app is playing: the song, its cover, where it is, and play and skip.
+// No Spotify sign-in is needed, so it works for everyone, and with headphones in it is how Fude keeps up with the music
+const NP=(()=>{const C=window.Capacitor,capPlugin=n=>{try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};try{return C&&C.getPlatform&&C.getPlatform()==='android'&&(!C.isNativePlatform||C.isNativePlatform())?capPlugin('NowPlaying'):null}catch(e){return null}})(),np={on:false,app:'',asked:false,h:null};
+const following=()=>!!(sp.tok||tb.id||np.on),srcName=()=>tb.id?(tb.site||'the tab'):np.on?(np.app||'your music app'):'Spotify';
 async function tabStream(){
   const [t]=await chrome.tabs.query({active:true,lastFocusedWindow:true});
   if(!t||!/^https?:/.test(t.url||'https:'))throw Object.assign(new Error('no tab'),{name:'NoTab'});
@@ -2641,7 +2644,7 @@ $('#abVer').textContent='Version '+MUSE_VERSION;if(IN_VIEWER)$('#abMore').hidden
 $('#smAbout').onclick=()=>{$('#aboutSheet').hidden=false;$('#abClose').focus()};$('#abClose').onclick=()=>{$('#aboutSheet').hidden=true};
 const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.identity&&chrome.identity.launchWebAuthFlow);
 const spRedirect=()=>NATIVE?SP_APP_REDIRECT:EXT_ID?chrome.identity.getRedirectURL('spotify'):location.origin+location.pathname,spCan=()=>!!sp.id&&!IN_VIEWER&&(NATIVE||EXT_ID||/^https?:$/.test(location.protocol));
-const spFollow=()=>!!((sp.tok||(typeof tb!=='undefined'&&tb.id))&&sp.now);
+const spFollow=()=>!!((sp.tok||tb.id||np.on)&&sp.now);
 // SHA-256 for the sign-in code, where the browser's own is missing (a page that is not a secure context)
 async function sha256(bytes){if(window.crypto&&crypto.subtle)try{return await crypto.subtle.digest('SHA-256',bytes)}catch(e){}
   const K=[],H=[],isP=n=>{for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true};for(let n=2,c=0;c<64;n++)if(isP(n)){if(c<8)H[c]=(Math.pow(n,1/2)%1)*2**32|0;K[c++]=(Math.pow(n,1/3)%1)*2**32|0}
@@ -2676,9 +2679,9 @@ if(NATIVE){const A=capPlugin('App');if(A&&A.addListener)try{A.addListener('appUr
 async function spAuthed(){if(!sp.tok)return null;if(Date.now()<sp.tok.exp)return sp.tok.at;if(!sp.tok.rt){spUnlink(true);return null}
   try{return(await spTokenReq({grant_type:'refresh_token',refresh_token:sp.tok.rt})).at}catch(e){spUnlink(true);return null}}
 async function spApi(path,method='GET'){const at=await spAuthed();if(!at)return null;const r=await fetch('https://api.spotify.com/v1'+path,{method,headers:{Authorization:'Bearer '+at}});if(r.status===401&&sp.tok)sp.tok.exp=0;return r}
-function spUnlink(expired){sp.tok=null;sp.now=null;spSave();clearTimeout(sp.timer);if(sm.src==='cover'){smSource('mic')}spDraw();if(expired)toast('Spotify needs linking again')}
+function spUnlink(expired){sp.tok=null;sp.now=null;spSave();clearTimeout(sp.timer);if(sm.src==='cover'&&!np.on){smSource('mic')}spDraw();if(np.on)NP.current().then(npSeen).catch(()=>{});if(expired)toast('Spotify needs linking again')}
 // what is playing, every few seconds while Fude is open
-async function spPoll(){clearTimeout(sp.timer);if(!sp.tok||!SIDEMODE)return;if(tb.id){sp.timer=setTimeout(spPoll,4000);return}
+async function spPoll(){clearTimeout(sp.timer);if(!sp.tok||!SIDEMODE)return;if(tb.id||np.on){sp.timer=setTimeout(spPoll,4000);return}
   try{const r=await spApi('/me/player/currently-playing?additional_types=episode');
     if(r&&r.status===200){const j=await r.json(),it=j.item;
       if(it){const ims=(it.album||it.show||it).images||[];spSeen({id:it.id||it.uri,title:it.name,by:it.artists?it.artists.map(a=>a.name).join(', '):it.show?it.show.name:'',art:(ims[1]||ims[0]||{}).url||'',small:(ims[ims.length-1]||{}).url||'',dur:it.duration_ms||0,pos:j.progress_ms||0,playing:!!j.is_playing})}else spSeen(null)}
@@ -2691,16 +2694,29 @@ function spSeen(t){sp.now=t;sp.at=performance.now();spDraw();if(!sm.stream)retur
     if(sm.state==='wait')smSet('wait','Following '+srcName())}
   else if(sm.state==='paint'){if(!sp.pausedAt)sp.pausedAt=performance.now();else if(performance.now()-sp.pausedAt>15000)smEnd()}
   else if(sm.state==='wait'&&following())smSet('wait',t?srcName()+' is paused':'Waiting for '+srcName()+' to play')}
-function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id;$('#srcCover').hidden=!sp.tok||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;$('#smSp').hidden=!on||(!!tb.id&&!t);$('#smSp').classList.toggle('noctl',!sp.tok||!!tb.id);
+function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id||np.on;$('#srcCover').hidden=(!sp.tok&&!NP)||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;$('#smSp').hidden=!on||(!!tb.id&&!t);$('#smSp').classList.toggle('noctl',(!sp.tok&&!np.on)||!!tb.id);
   if(!on)return;const a=$('#spArt');
-  if(!t){a.hidden=true;a.removeAttribute('src');$('#spTitle').textContent='Nothing playing on Spotify';$('#spBy').textContent='Play something there, and Fude picks it up here';$('#spProg').style.transform='scaleX(0)';$('#spPlay').classList.remove('on');$('#spPlay').setAttribute('aria-label','Play');return}
+  if(!t){a.hidden=true;a.removeAttribute('src');$('#spTitle').textContent='Nothing playing'+(np.on?'':' on Spotify');$('#spBy').textContent='Play something there, and Fude picks it up here';$('#spProg').style.transform='scaleX(0)';$('#spPlay').classList.remove('on');$('#spPlay').setAttribute('aria-label','Play');return}
   a.hidden=!t.art;if(t.art&&a.getAttribute('src')!==t.art)a.src=t.art;$('#spTitle').textContent=t.title;$('#spBy').textContent=t.by;$('#spPlay').classList.toggle('on',t.playing);$('#spPlay').setAttribute('aria-label',t.playing?'Pause':'Play');spProg()}
 function spProg(){const t=sp.now,bar=document.querySelector('.sp-bar');if(bar)bar.style.visibility=t&&t.dur?'':'hidden';if(!t||!t.dur)return;const pos=t.pos+(t.playing?performance.now()-sp.at:0);$('#spProg').style.transform=`scaleX(${clamp(pos/t.dur,0,1).toFixed(3)})`}
 setInterval(()=>{if(SIDEMODE&&sp.now&&!document.hidden)spProg()},500);
 // play, pause and skip work with Spotify Premium; Spotify answers 403 otherwise
-async function spCmd(path,method){let r=null;try{r=await spApi(path,method)}catch(e){}
+async function spCmd(path,method){let r=null;
+  if(np.on){try{await NP.control({action:path.split('/').pop()})}catch(e){toast('Open your music app first')}return}
+  try{r=await spApi(path,method)}catch(e){}
   if(r&&r.status===403)toast('Play and skip from Fude need Spotify Premium');else if(r&&r.status===404)toast('Open Spotify on one of your devices first');
   setTimeout(spPoll,500)}
+// following another app on Android: access is asked once, with the reason, and the system settings page does the rest
+async function npStart(quiet){if(!NP)return false;
+  try{const s=await NP.status();if(!s||!s.allowed){if(!quiet)npAsk();return false}
+    if(!np.h)np.h=await NP.addListener('change',npSeen);const cur=await NP.start();np.on=true;const was=np.empty!=null;npAsked();
+    if(was){$('#smTitle').textContent=last?$('#artTitle').textContent:'Play some music';$('#smSub').textContent='Fude follows your music app now. Each song becomes a new painting.'}npSeen(cur);clearTimeout(sp.timer);return true}catch(e){if(!quiet)npAsk();return false}}
+function npSeen(m){if(!np.on)return;if(m&&m.app)np.app=m.app;
+  spSeen(m&&m.title?{id:m.id||m.title+'|'+(m.artist||''),title:m.title,by:m.artist||m.app||'',art:m.art||'',small:m.art||'',dur:m.duration||0,pos:m.position||0,playing:!!m.playing}:null)}
+function npAsk(){smSet('off','Needs access');const e=$('#smEmpty');if(np.empty==null)np.empty=e.innerHTML;
+  e.innerHTML='Headphones keep the music from the microphone.<br>Fude can follow your music app instead, and paint each song from its cover. Nothing leaves your phone.';e.hidden=false;
+  $('#smTitle').textContent='Let Fude see what’s playing';$('#smSub').textContent='Tap Allow access, turn on Fude, then come back';$('#smAccess').hidden=false;$('#smGo').hidden=true}
+function npAsked(){$('#smAccess').hidden=true;$('#smGo').hidden=false;if(np.empty!=null){$('#smEmpty').innerHTML=np.empty;np.empty=null;$('#smEmpty').hidden=!!last}}
 // headphones in: the microphone hears nothing, so Fude reads the track's cover. Each colour on it goes to the nearest note colour,
 // and those notes are sounded silently into the same listener a microphone would feed, so the picture grows in the usual way
 async function coverNotes(url){const w=new Array(12).fill(0);
@@ -2718,24 +2734,26 @@ function smVoice(){if(sm.src!=='cover'||sm.state!=='paint'||!sm.dest||!sm.coverW
 // the screen stays on while Fude paints, so it can sit by the speaker like a picture frame
 let smLock=null;
 async function smWake(on){try{if(on&&!smLock&&navigator.wakeLock&&!document.hidden){smLock=await navigator.wakeLock.request('screen');smLock.addEventListener('release',()=>{smLock=null})}else if(!on&&smLock){const l=smLock;smLock=null;await l.release()}}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(document.hidden||!SIDEMODE)return;if(sm.stream)smWake(true);if(sp.tok)spPoll()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!SIDEMODE)return;if(sm.stream)smWake(true);if(sp.tok)spPoll();
+  // back from the settings page: with access on, Fude carries on where it asked
+  if(np.asked){np.asked=false;npStart(true).then(ok=>{if(ok&&!sm.stream)smStart()})}else if(np.on)NP.current().then(npSeen).catch(()=>{})});
 function smPics(){return zenShuffle([...PAINTINGS.map(p=>'known:'+p.id),...THEMES.map(t=>'new:'+t.id)])}
 function smSet(state,text){sm.state=state;const el=$('#smState');el.className='sm-state'+(state==='paint'?' live':state==='wait'?' wait':'');$('#smStateT').textContent=text;
   $('#smGo').textContent=state==='off'?'Start':'Stop';$('#smGo').classList.toggle('ghost',state!=='off');$('#smNext').disabled=state==='off'}
 async function smStart(){
   if(sm.stream)return;const ac=audio();try{await ac.resume()}catch(e){}
-  if(sm.src==='cover'&&!sp.tok)smSource('mic',true);
+  if(sm.src==='cover'&&!sp.tok&&!np.on){if(!NP)smSource('mic',true);else if(!(await npStart()))return}
   if(sm.src==='tab'&&!EXT_TAB)smSource('mic',true);
   if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){smSet('off','Can’t hear that tab');$('#smSub').textContent=e&&e.name==='NoTab'?'Open your music in a tab, then press Start here.':'Click the Fude button in the toolbar while the music tab is open, then press Start.';return}
     // capturing a tab silences it, so its sound is played on through Fude
     tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination);setTimeout(tabPoll,300)}
   else if(sm.src==='cover'){sm.dest=ac.createMediaStreamDestination();sm.stream=sm.dest.stream;clearInterval(sm.voiceT);sm.voiceT=setInterval(smVoice,900)}
-  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok?'Fude could not open a microphone here. With Spotify linked, Headphones paints from each cover instead.':'Fude could not open a microphone here.';return}
+  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok||NP?'Fude could not open a microphone here. Headphones on, in the ⋯ menu, follows your music without it.':'Fude could not open a microphone here.';return}
   const src=ac.createMediaStreamSource(sm.stream);sm.an=ac.createAnalyser();sm.an.fftSize=2048;sm.buf=new Float32Array(sm.an.fftSize);src.connect(sm.an);sm.src_=src;
   sm.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',()=>smStop()));
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);
-  smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||!!sp.tok;if(!last&&!sp.tok)$('#smTitle').textContent='Play some music';
-  clearInterval(sm.timer);sm.timer=setInterval(smTick,100);if(sp.tok&&!tb.id)spPoll()}
+  smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||following();if(!last&&!following())$('#smTitle').textContent='Play some music';
+  clearInterval(sm.timer);sm.timer=setInterval(smTick,100);if(sp.tok&&!tb.id&&!np.on)spPoll();if(np.on)NP.current().then(npSeen).catch(()=>{})}
 function smStop(){clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
 // the sound level, ten times a second. Without Spotify, music starts a painting and a pause after a song ends it; with Spotify, its track changes do
 function smTick(){
@@ -2743,7 +2761,9 @@ function smTick(){
   if(audio().state!=='running'){$('#smStateT').textContent='Tap Start to begin';return}
   const loudAt=Math.max(sm.floor*3.5,.004),quietAt=Math.max(sm.floor*2.2,sm.segLevel*.1,.0022),follow=spFollow();if(r>loudAt)sm.heardAt=performance.now();
   if(sm.state==='wait'){
-    if(r<loudAt)sm.floor+=(Math.min(r,.05)-sm.floor)*.02;if(follow)return;
+    if(r<loudAt)sm.floor+=(Math.min(r,.05)-sm.floor)*.02;
+    if(NP&&!np.on&&sm.src==='mic'&&!sm.hinted&&performance.now()-sm.heardAt>20000){sm.hinted=true;$('#smSub').textContent='Nothing to hear yet. Music in headphones? Fude can follow your music app instead.';$('#smHp').hidden=false}
+    if(follow)return;
     sm.loud=r>loudAt?sm.loud+.1:Math.max(0,sm.loud-.05);if(sm.loud>=.8){if(sm.finishing)sm.pendingBegin=true;else smBegin()}}
   else if(sm.state==='paint'){
     if(r<sm.floor)sm.floor+=(r-sm.floor)*.05;if(r>quietAt)sm.segLevel+=(r-sm.segLevel)*(sm.segLevel?.01:1);
@@ -2751,7 +2771,9 @@ function smTick(){
     $('#smStateT').textContent=sp.now&&sm.track&&!sp.now.playing?'Paused':`Painting song ${sm.n} · ${fmtTime(len)}`;const at=$('#artTitle').textContent;if(at&&$('#smTitle').textContent!==at)$('#smTitle').textContent=at;
     // following Spotify with nothing reaching the microphone: most likely headphones
     if(follow&&sm.src==='mic'&&sp.now.playing&&!sm.hinted&&performance.now()-sm.heardAt>12000){sm.hinted=true;$('#smSub').textContent='Fude can’t hear the music. Wearing headphones?';$('#smHp').hidden=false}
-    if(!follow&&(sm.quiet>=(len>40?2.2:6)||len>420))smEnd()}}
+    if(!follow&&(sm.quiet>=(len>40?2.2:6)||len>420))smEnd();
+    // a pause of fifteen seconds finishes the picture, also when the music app sends nothing more while paused
+    if(follow&&!sp.now.playing&&sp.pausedAt&&performance.now()-sp.pausedAt>15000)smEnd()}}
 function smBegin(){
   if(sm.state==='paint'||!sm.stream)return;const tr=spFollow()?sp.now:null;if(sm.src==='cover'&&!tr)return;
   sm.pendingBegin=false;sm.n++;sm.segT=performance.now()/1000;sm.quiet=0;sm.segLevel=0;sm.heardAt=performance.now();sm.track=tr;sm.pi=(sm.pi+1)%sm.pics.length;const [m,id]=sm.pics[sm.pi].split(':');
@@ -2774,8 +2796,8 @@ function smDone(){
     b.innerHTML=`<img alt="" src="${c.toDataURL('image/jpeg',.8)}">`;b.onclick=()=>{const a=document.createElement('a');a.href=full;a.download=name.replace(/[^\w\s,-]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)+'.jpg';document.body.appendChild(a);a.click();a.remove()};
     $('#smStrip').prepend(b);sm.made++}catch(e){}}
 // how Fude hears the music: the microphone (a speaker, or the phone's own), or each track's cover when the sound is in headphones
-function smSource(k,quiet){sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
-  if(!quiet&&sm.stream){smStop();smStart()}}
+function smSource(k,quiet){npAsked();sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
+  if(!quiet&&sm.stream){smStop();smStart()}else if(!quiet&&k==='cover'&&NP&&!np.on)npStart()}
 let smHere=null;
 function smInit(){
   if(sm.ready){document.body.classList.add('sidemode');$('#smode').hidden=false;$('#smCanvas').appendChild(art);spDraw();if(sp.tok)spPoll();if(sm.wasOn){sm.wasOn=false;smStart()}return}
@@ -2790,6 +2812,7 @@ function smInit(){
   $('#smSave').onclick=()=>{const b=$('#smStrip button');if(b)b.click()};
   $('#smLink').onclick=()=>spLink();$('#smZen').onclick=()=>{if(smHere)smLeave();else{SIDEMODE=false;smStop();document.body.classList.remove('sidemode');$('#smode').hidden=true}zenStart()};$('#spUnlink').onclick=()=>spUnlink();
   $('#srcCover').onclick=()=>smSource(sm.src==='cover'?'mic':'cover');$('#srcTab').onclick=()=>smSource(sm.src==='tab'?'mic':'tab');$('#smHp').onclick=()=>smSource('cover');smSource(sm.src,true);
+  $('#smAccess').onclick=()=>{np.asked=true;NP.openSettings().catch(()=>{np.asked=false;toast('Open Settings, then Notification access, and turn on Fude')})};
   // the ⋯ menu: everything that is not Start lives here, and it closes on a choice, a tap outside or Escape
   const menu=$('#smMenu'),more=$('#smMore'),shut=()=>{menu.hidden=true;more.setAttribute('aria-expanded','false')};
   more.onclick=e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;more.setAttribute('aria-expanded',String(open));if(open)(menu.querySelector('[role^=menuitem]:not([hidden]):not([disabled])')||menu).focus()};
@@ -2802,6 +2825,8 @@ function smInit(){
   if(MUSE_EXT){$('#smFull').href=$('#smHome').href='full.html';$('#smFull').target=$('#smHome').target='_blank';if(EXT_TAB)$('#smEmpty').innerHTML='Play music in a tab: Spotify, YouTube, anything.<br>Press Start, and Fude paints every song.'}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
   $('#smEmpty').hidden=!!last;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
+  if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}
 // the companion inside this page (a phone, or Fude shown inside another page): Back returns to the full Fude
 function smEnter(){if(SIDEMODE)return;stopSong();if(zen.on)zenEnd();smHere={parent:art.parentNode,next:art.nextSibling,y:scrollY};SIDEMODE=true;try{history.pushState({muse:'side'},'')}catch(e){}smInit();window.scrollTo(0,0)}

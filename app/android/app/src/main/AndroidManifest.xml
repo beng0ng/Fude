@@ -35,6 +35,17 @@
             </intent-filter>
         </activity>
 
+        <!-- with notification access, Fude can see which song another app is playing (with headphones in, the microphone can't hear it) -->
+        <service
+            android:name=".NowPlayingListener"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

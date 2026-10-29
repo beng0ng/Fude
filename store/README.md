@@ -51,7 +51,7 @@ music,painting,art,visualizer,color,synesthesia,notes,zen,relax,piano,song,canva
 ## Privacy answers
 
 - **App Store, App Privacy:** choose **Data Not Collected**. Fude has no server, no analytics and no tracking. The microphone is processed on the device and never leaves it.
-- **Google Play, Data safety:** "Does your app collect or share any of the required user data types?" **No.** Sound the app processes on the device only, without sending it off the device, does not count as collected.
+- **Google Play, Data safety:** "Does your app collect or share any of the required user data types?" **No.** Sound the app processes on the device only, without sending it off the device, does not count as collected. The same goes for the song names and covers the Android app reads from the music app with headphones in: they never leave the phone.
 - **Export compliance (App Store):** already answered in the app (`ITSAppUsesNonExemptEncryption` is set to NO), because Fude only uses standard HTTPS.
 
 ## Notes for the App Review team
@@ -76,7 +76,7 @@ Paste this into App Store Connect under App Review Information → Notes:
    4. Choose Build → Generate Signed App Bundle and create an upload key. **Keep the key file and its password safe.** Every future update must be signed with the same key.
    5. In Play Console, create the app, fill in the listing and the Data safety form from this page, and upload the `.aab` file.
    6. Google requires new personal developer accounts to run a closed test with at least 12 testers for 14 days before they can publish to everyone. Start that test early.
-4. **Spotify linking (optional, can wait for an update).** The app works with Spotify without linking: Fude hears the music through the microphone. The **Link Spotify** button stays hidden until you add a Spotify Client ID (see "Listening with Spotify" in the `fude-app` README). Spotify only allows 25 hand-picked users until it approves the app for wider use, so release without it first.
+4. **Spotify linking (optional, can stay off).** The app works with Spotify without linking: through the microphone with a speaker, and on Android with headphones too, by following the music app. The **Link Spotify** button stays hidden until you add a Spotify Client ID (see "Listening with Spotify" in the `fude-app` README). Spotify now allows only 5 hand-picked accounts per app and only opens apps to everyone for registered businesses, so release without it.
 
 ## For each update
 
