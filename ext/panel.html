@@ -912,11 +912,14 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 
 .peek{position:absolute;pointer-events:none;z-index:2;border-radius:3px}
 #smode:not(.veil) .peek{display:none}
-.sm-words{margin:0;text-align:center;display:flex;flex-direction:column;gap:2px;max-width:100%;padding:0 8px}
+.sm-words{position:relative;width:100%;height:118px;overflow:hidden;flex:none;
+  -webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent)}
 .sm-words[hidden]{display:none}
-.sm-words span{font-family:var(--display);font-size:17px;line-height:1.3;color:var(--fg);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:balance}
-.sm-words span.pop{animation:tonePop .5s var(--ease)}
-.sm-words small{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-words ol{list-style:none;margin:0;padding:0 10px;text-align:center;transition:transform .55s var(--ease);will-change:transform}
+.sm-words li{font-family:var(--display);font-size:15px;line-height:1.3;padding:3px 0;color:var(--muted);opacity:.7;transition:color .4s,opacity .4s,transform .4s var(--ease);text-wrap:balance}
+.sm-words li.past{opacity:.4}
+.sm-words li.now{color:var(--fg);opacity:1;font-size:17.5px;font-weight:500;transform:scale(1.02)}
+@media (max-height:700px){.sm-words{height:84px}}
 .sm-words:not([hidden])~.sm-lyric{height:22px}
 
 .gthumb{width:132px}.gthumb img{width:132px;height:96px}
@@ -932,6 +935,15 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 .gl-item small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gl-item .gl-song{color:var(--fg)}
 #galSheet .btn{margin-top:10px}
+
+.pc-wheel{flex-direction:row;align-items:center;gap:12px}
+.pc-wheel .wh{width:40px;height:40px;border-radius:50%;flex:none;background:radial-gradient(closest-side,#fff,transparent),conic-gradient(#E8231F,#F08A1C,#F5D90A,#3FA34D,#4C8FE0,#8B4FB8,#E8231F)}
+.pc-wheel small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.pc-wheel[hidden]{display:none}
+#pcTune .tune{display:flex;flex-direction:column;gap:14px;padding:12px;border-radius:16px;background:var(--glass);box-shadow:0 0 0 1px var(--hair)}
+#pcTune .instrument{width:min(300px,100%)}
+#pcTune .tunepanel{width:100%}
+#pcTune #pcTuneUse{margin:10px auto 0;display:flex}
 </style>
 </head>
 <body>
@@ -1234,7 +1246,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
     <div class="sm-pick" id="smPick" hidden><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
-  <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><p class="sm-words" id="smWords" hidden><span id="smWord"></span><small id="smWordNext"></small></p><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
+  <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><div class="sm-words" id="smWords" hidden><ol id="smWordList"></ol></div><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>
   <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button><button class="btn" id="smAccess" type="button" hidden>Allow access</button><button class="btn ghost small" id="smChange" type="button" hidden>Change picture</button></div>
   <div class="sm-strip" id="smStrip" aria-label="Paintings made here, newest first"></div>

@@ -38,17 +38,18 @@ function genField(kind,id,seed,size,params,lumArr,W,H){
   const p=Object.assign({scale:1,warp:.5,focusX:.5,focusY:.5},params||{});let field;
   if(kind==='painting'){
     field=new Float32Array(W*H);const r=mulberry32(seed);
-    // a light blur keeps regions whole instead of speckled; detail returns in the shading
-    const tmp=new Float32Array(W*H),R2=Math.max(2,Math.round(2*Math.sqrt(Math.max(W,H)/640)));
-    for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R2;x<W;x++){if(x+R2<W){acc+=lumArr[y*W+x+R2];c++}if(x-R2-1>=0){acc-=lumArr[y*W+x-R2-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
-    for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R2;y<H;y++){if(y+R2<H){acc+=tmp[(y+R2)*W+x];c++}if(y-R2-1>=0){acc-=tmp[(y-R2-1)*W+x];c--}if(y>=0)field[y*W+x]=acc/c}}
-    // edge-aware smoothing: light flows between neighbours of similar brightness but not across a contour, so the bands follow the painting's shapes
-    const K2=.0036,lam=.22;
-    for(let it=0;it<7;it++){tmp.set(field);
-      for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,v=tmp[i];let acc=0;
-        const dn=tmp[i-W]-v,ds=tmp[i+W]-v,de=tmp[i+1]-v,dw=tmp[i-1]-v;
-        acc+=dn/(1+dn*dn/K2)+ds/(1+ds*ds/K2)+de/(1+de*de/K2)+dw/(1+dw*dw/K2);field[i]=v+lam*acc}}
+    // the regions follow the painting's own light, only a hair softened, so its shapes and edges stay crisp;
+    // a wider blur is kept beside it, and the difference is the fine detail (brushwork, outlines, texture) laid back over the colors
+    const tmp=new Float32Array(W*H),lo=new Float32Array(W*H),box=(src,dst,R2)=>{
+    for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R2;x<W;x++){if(x+R2<W){acc+=src[y*W+x+R2];c++}if(x-R2-1>=0){acc-=src[y*W+x-R2-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
+    for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R2;y<H;y++){if(y+R2<H){acc+=tmp[(y+R2)*W+x];c++}if(y-R2-1>=0){acc-=tmp[(y-R2-1)*W+x];c--}if(y>=0)dst[y*W+x]=acc/c}}};
+    box(lumArr,field,1);box(lumArr,lo,Math.max(2,Math.round(3*Math.max(W,H)/1600)));
+    // a few rounds of edge-aware smoothing calm the scan's grain inside each shape without moving any edge
+    for(let it=0;it<4;it++){tmp.set(field);
+      for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,v=tmp[i],dn=tmp[i-W]-v,ds=tmp[i+W]-v,de=tmp[i+1]-v,dw=tmp[i-1]-v;
+        field[i]=v+.22*(dn/(1+dn*dn/.0012)+ds/(1+ds*ds/.0012)+de/(1+de*de/.0012)+dw/(1+dw*dw/.0012))}}
     for(let i=0;i<W*H;i++)field[i]+=(r()-.5)*.002;
+    return{W,H,field,lumArr,lo};
   }else{
     W=H=size||640;field=new Float32Array(W*H);lumArr=null;const n=makeNoise(seed),r=mulberry32(seed+3),s=p.scale,wp=p.warp;
     let stones=[];
@@ -78,10 +79,10 @@ function shadePixels(m,F){
   for(let i=0;i<W*H;i++){
     const j=band[i],c=rgbs[j];let s=0;
     if(lumArr){s=(lumArr[i]-meanL[j])*1.15;
-      // brush strokes: faint ridges that run along the contours of the painting, in the direction of its shapes
-      const x=i%W,y=(i/W)|0;let gx=.707,gy=.707;
-      if(x>0&&x<W-1&&y>0&&y<H-1){const ex=field[i+1]-field[i-1],ey=field[i+W]-field[i-W],mg=Math.sqrt(ex*ex+ey*ey);if(mg>1e-4){const wgt=clampF(mg*30,0,1);gx=(ex/mg)*wgt+.707*(1-wgt);gy=(ey/mg)*wgt+.707*(1-wgt)}}
-      const ph=(x*gx+y*gy)*1.05/sk+bn(x*.028/sk,y*.028/sk)*5.5;s+=.04*Math.sin(ph)*(.65+.35*Math.sin(ph*.41+1.3))}
+      s=s*.6+(field[i]-F.lo[i])*1.5;s=s<-.7?-.7:s>.7?.7:s;
+      // next to a neighbouring note's region the two colors meet in a short gradient, so edges stay where the painting has them without stair-steps
+      const tt=t[i],nb=bands.length;let o=-1,w=0;if(tt<.35&&j>0){o=j-1;w=(.35-tt)/.7}else if(tt>.65&&j<nb-1){o=j+1;w=(tt-.65)/.7}
+      if(o>=0){const c2=rgbs[o],k=i*4;d[k]=shadeTo(c[0]+(c2[0]-c[0])*w,s,light[0]);d[k+1]=shadeTo(c[1]+(c2[1]-c[1])*w,s,light[1]);d[k+2]=shadeTo(c[2]+(c2[2]-c[2])*w,s,light[2]);d[k+3]=255;continue}}
     else{
       const ti=t[i];
       if(id==='field')s=-.16*(1-Math.sin(Math.PI*ti))+.04;

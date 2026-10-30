@@ -1305,17 +1305,18 @@ function genField(kind,id,seed,size,params,lumArr,W,H){
   const p=Object.assign({scale:1,warp:.5,focusX:.5,focusY:.5},params||{});let field;
   if(kind==='painting'){
     field=new Float32Array(W*H);const r=mulberry32(seed);
-    // a light blur keeps regions whole instead of speckled; detail returns in the shading
-    const tmp=new Float32Array(W*H),R2=Math.max(2,Math.round(2*Math.sqrt(Math.max(W,H)/640)));
-    for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R2;x<W;x++){if(x+R2<W){acc+=lumArr[y*W+x+R2];c++}if(x-R2-1>=0){acc-=lumArr[y*W+x-R2-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
-    for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R2;y<H;y++){if(y+R2<H){acc+=tmp[(y+R2)*W+x];c++}if(y-R2-1>=0){acc-=tmp[(y-R2-1)*W+x];c--}if(y>=0)field[y*W+x]=acc/c}}
-    // edge-aware smoothing: light flows between neighbours of similar brightness but not across a contour, so the bands follow the painting's shapes
-    const K2=.0036,lam=.22;
-    for(let it=0;it<7;it++){tmp.set(field);
-      for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,v=tmp[i];let acc=0;
-        const dn=tmp[i-W]-v,ds=tmp[i+W]-v,de=tmp[i+1]-v,dw=tmp[i-1]-v;
-        acc+=dn/(1+dn*dn/K2)+ds/(1+ds*ds/K2)+de/(1+de*de/K2)+dw/(1+dw*dw/K2);field[i]=v+lam*acc}}
+    // the regions follow the painting's own light, only a hair softened, so its shapes and edges stay crisp;
+    // a wider blur is kept beside it, and the difference is the fine detail (brushwork, outlines, texture) laid back over the colors
+    const tmp=new Float32Array(W*H),lo=new Float32Array(W*H),box=(src,dst,R2)=>{
+    for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R2;x<W;x++){if(x+R2<W){acc+=src[y*W+x+R2];c++}if(x-R2-1>=0){acc-=src[y*W+x-R2-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
+    for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R2;y<H;y++){if(y+R2<H){acc+=tmp[(y+R2)*W+x];c++}if(y-R2-1>=0){acc-=tmp[(y-R2-1)*W+x];c--}if(y>=0)dst[y*W+x]=acc/c}}};
+    box(lumArr,field,1);box(lumArr,lo,Math.max(2,Math.round(3*Math.max(W,H)/1600)));
+    // a few rounds of edge-aware smoothing calm the scan's grain inside each shape without moving any edge
+    for(let it=0;it<4;it++){tmp.set(field);
+      for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x,v=tmp[i],dn=tmp[i-W]-v,ds=tmp[i+W]-v,de=tmp[i+1]-v,dw=tmp[i-1]-v;
+        field[i]=v+.22*(dn/(1+dn*dn/.0012)+ds/(1+ds*ds/.0012)+de/(1+de*de/.0012)+dw/(1+dw*dw/.0012))}}
     for(let i=0;i<W*H;i++)field[i]+=(r()-.5)*.002;
+    return{W,H,field,lumArr,lo};
   }else{
     W=H=size||640;field=new Float32Array(W*H);lumArr=null;const n=makeNoise(seed),r=mulberry32(seed+3),s=p.scale,wp=p.warp;
     let stones=[];
@@ -1345,10 +1346,10 @@ function shadePixels(m,F){
   for(let i=0;i<W*H;i++){
     const j=band[i],c=rgbs[j];let s=0;
     if(lumArr){s=(lumArr[i]-meanL[j])*1.15;
-      // brush strokes: faint ridges that run along the contours of the painting, in the direction of its shapes
-      const x=i%W,y=(i/W)|0;let gx=.707,gy=.707;
-      if(x>0&&x<W-1&&y>0&&y<H-1){const ex=field[i+1]-field[i-1],ey=field[i+W]-field[i-W],mg=Math.sqrt(ex*ex+ey*ey);if(mg>1e-4){const wgt=clampF(mg*30,0,1);gx=(ex/mg)*wgt+.707*(1-wgt);gy=(ey/mg)*wgt+.707*(1-wgt)}}
-      const ph=(x*gx+y*gy)*1.05/sk+bn(x*.028/sk,y*.028/sk)*5.5;s+=.04*Math.sin(ph)*(.65+.35*Math.sin(ph*.41+1.3))}
+      s=s*.6+(field[i]-F.lo[i])*1.5;s=s<-.7?-.7:s>.7?.7:s;
+      // next to a neighbouring note's region the two colors meet in a short gradient, so edges stay where the painting has them without stair-steps
+      const tt=t[i],nb=bands.length;let o=-1,w=0;if(tt<.35&&j>0){o=j-1;w=(.35-tt)/.7}else if(tt>.65&&j<nb-1){o=j+1;w=(tt-.65)/.7}
+      if(o>=0){const c2=rgbs[o],k=i*4;d[k]=shadeTo(c[0]+(c2[0]-c[0])*w,s,light[0]);d[k+1]=shadeTo(c[1]+(c2[1]-c[1])*w,s,light[1]);d[k+2]=shadeTo(c[2]+(c2[2]-c[2])*w,s,light[2]);d[k+3]=255;continue}}
     else{
       const ti=t[i];
       if(id==='field')s=-.16*(1-Math.sin(Math.PI*ti))+.04;
@@ -2153,7 +2154,7 @@ function saveGallery(){for(;;){try{localStorage.setItem('muse.gallery',JSON.stri
 function galleryAdd(info){
   // a painting of something heard can't be rebuilt from a link, so the gallery keeps a larger picture of it instead
   let st=shareState();if(!art.width||(st&&st.err))return;if(!st&&!(song&&song.rec&&info))return;let pic='';
-  if(!st){try{const k=Math.min(1,560/Math.max(art.width,art.height)),c=document.createElement('canvas');c.width=Math.round(art.width*k);c.height=Math.round(art.height*k);c.getContext('2d').drawImage(art,0,0,c.width,c.height);pic=c.toDataURL('image/jpeg',.8)}catch(e){return}st={code:''}}
+  if(!st){try{const k=Math.min(1,1000/Math.max(art.width,art.height)),c=document.createElement('canvas');c.width=Math.round(art.width*k);c.height=Math.round(art.height*k);const cx=c.getContext('2d');cx.imageSmoothingQuality='high';cx.drawImage(art,0,0,c.width,c.height);pic=c.toDataURL('image/jpeg',.85)}catch(e){return}st={code:''}}
   const W=192,H=Math.max(1,Math.round(W*art.height/art.width)),th=document.createElement('canvas');th.width=W;th.height=H;th.getContext('2d').drawImage(art,0,0,W,H);
   let thumb;try{thumb=th.toDataURL('image/jpeg',.72)}catch(e){return}
   gallery=gallery.filter(g=>!st.code||g.code!==st.code);gallery.unshift({code:st.code,title:$('#artTitle').textContent,thumb,t:Date.now(),...(pic?{pic}:{}),...(info||{})});gallery=gallery.slice(0,GALLERY_MAX);saveGallery();renderGallery();
@@ -2751,13 +2752,18 @@ async function lyricsFor(tr){const key=tr?tr.title+'|'+tr.by:'';if(key===LY.key)
   const q=new URLSearchParams({track_name:tr.title,artist_name:(tr.by||'').split(',')[0]});if(tr.dur)q.set('duration',Math.round(tr.dur/1000));
   const get=async u=>{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),6000);try{const r=await fetch(u,{signal:ac.signal});return r.ok?await r.json():null}catch(e){return null}finally{clearTimeout(t)}};
   let j=await get('https://lrclib.net/api/get?'+q);if(!j||!j.syncedLyrics){const l=await get('https://lrclib.net/api/search?'+new URLSearchParams({track_name:tr.title,artist_name:(tr.by||'').split(',')[0]}));j=Array.isArray(l)?l.find(x=>x&&x.syncedLyrics):null}
-  if(LY.key!==key||!j||!j.syncedLyrics)return;
-  LY.lines=String(j.syncedLyrics).split('\n').map(l=>{const m=l.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);return m?{t:+m[1]*60+ +m[2],w:m[3]}:null}).filter(Boolean)}
+  if(LY.key!==key||!j||!j.syncedLyrics)return;LY.cur=-2;
+  LY.lines=String(j.syncedLyrics).split('\n').map(l=>{const m=l.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);return m?{t:+m[1]*60+ +m[2],w:m[3]}:null}).filter(Boolean);
+  $('#smWordList').innerHTML=LY.lines.map(l=>`<li>${l.w?esc(l.w):'♪'}</li>`).join('');$('#smWordList').style.transform=''}
 function lyricsOn(){try{return localStorage.getItem('muse.lyrics')!=='off'}catch(e){return true}}
 // where the song is: what the music app last said plus the time since, or the time since this painting began
 function lyricsPos(){const n=sp.now;if(n&&sm.track&&n.id===sm.track.id&&n.pos)return(n.pos+(n.playing?performance.now()-sp.at:0))/1000;return performance.now()/1000-sm.segT}
-setInterval(()=>{if(!SIDEMODE||document.hidden||!LY.lines||sm.state!=='paint')return;const t=lyricsPos()+.25,L=LY.lines;let i=-1;for(let k=0;k<L.length;k++){if(L[k].t<=t)i=k;else break}
-  const box=$('#smWords'),w=i>=0?L[i].w:'',nx=L[i+1]?L[i+1].w:'';box.hidden=!(w||nx);const a=$('#smWord');if(a.textContent!==(w||'♪')){a.textContent=w||'♪';a.classList.remove('pop');void a.offsetWidth;a.classList.add('pop')}$('#smWordNext').textContent=nx},250);
+// the words scroll up as the song goes, the line being sung held in the middle, lit
+setInterval(()=>{const box=$('#smWords');if(!SIDEMODE||document.hidden)return;if(!LY.lines||sm.state!=='paint'){if(!box.hidden)box.hidden=true;return}
+  const t=lyricsPos()+.3,L=LY.lines;let i=-1;for(let k=0;k<L.length;k++){if(L[k].t<=t)i=k;else break}
+  if(box.hidden)box.hidden=false;if(i===LY.cur)return;LY.cur=i;const ol=$('#smWordList'),lis=ol.children;
+  [...lis].forEach((li,k)=>li.className=k===i?'now':k<i?'past':'');const li=lis[Math.max(0,i)];
+  if(li)ol.style.transform=`translateY(${(box.clientHeight/2-li.offsetTop-li.offsetHeight/2).toFixed(1)}px)`},200);
 /* ---------- home: the picture is chosen before the painting starts ---------- */
 function smPickName(v){if(v==='any')return'A surprise';const[m,id]=v.split(':');return m==='known'?(PAINTINGS.find(p=>p.id===id)||{}).title:(THEMES.find(t=>t.id===id)||{}).name}
 function smPickBuild(){const g=$('#pkGrid');if(g.children.length)return;const pre=(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})();
@@ -2766,7 +2772,7 @@ function smPickBuild(){const g=$('#pkGrid');if(g.children.length)return;const pr
   THEMES.forEach(t=>add('new:'+t.id,'<canvas width="112" height="112" aria-hidden="true"></canvas>',t.name));
   add('any','?','Surprise me','any');
   (async()=>{const share=new Array(12).fill(1/12);for(const t of THEMES){try{const r=await render({kind:'theme',id:t.id,share,seed:42,size:112}),cv=g.querySelector(`[data-v="new:${t.id}"] canvas`);cv.getContext('2d').putImageData(r.img,0,0)}catch(e){}await new Promise(requestAnimationFrame)}})()}
-function smHomeShow(on){const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#pkColors').hidden=true;$('#pkGrid').hidden=false;$('#smChange').hidden=on||!sm.choice;
+function smHomeShow(on){tuneBack();const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#pkColors').hidden=true;$('#pkGrid').hidden=false;$('#smChange').hidden=on||!sm.choice;
   if(on){smPickBuild();$('#pkGrid').querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===(sm.choice||(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})())));
     if(!sm.err){$('#smTitle').textContent='What should the cat paint?';$('#smSub').textContent=sm.state==='paint'?'Your pick starts with the next song':'Pick a picture. The music gives it its colors.'}}}
 // home, second step: the colors the notes wear, from a palette, the ones already set, or a vibe put into words
@@ -2777,18 +2783,24 @@ function smColorsStep(v){sm.pendingPick=v;$('#pkGrid').querySelectorAll('.pk').f
   const strip=c=>`<span class="sw">${c.map(x=>`<i style="background:${x}"></i>`).join('')}</span>`;
   const mine=[...Array(12)].map((_,i)=>hexOf(i));
   box.innerHTML=`<button type="button" class="pc-back" id="pcBack">← Pictures</button>
+    <div class="pc-own" id="pcOwn"><button type="button" class="pc pc-wheel" id="pcWheel"><span class="wh" aria-hidden="true"></span><span><b>Make my own</b><small>Give each note a color on the color wheel</small></span></button><div id="pcTune"></div></div>
     <div class="pc-vibe"><b>Colors from a vibe</b><span>${sample?'Claude makes a palette from your words':'Describe a mood and Fude mixes a palette for it'}</span>
       <form id="vibeForm"><input id="vibeIn" type="text" maxlength="80" placeholder="e.g. rainy café at night" aria-label="Describe a vibe" autocomplete="off"><button class="btn small" type="submit">Make</button></form>
       <div class="pc-chips">${VIBES.map(x=>`<button type="button" class="chip" data-vibe="${x}">${x}</button>`).join('')}</div><div id="vibeOut"></div></div>
     <div class="pc-list"><button type="button" class="pc" data-k="mine">${strip(mine)}<b>Keep my colors</b></button>
     ${Object.entries(PRESETS).map(([k,p])=>`<button type="button" class="pc" data-k="${k}">${strip(p.c)}<b>${esc(p.name)}</b></button>`).join('')}</div>`;
-  $('#pcBack').onclick=()=>{box.hidden=true;$('#pkGrid').hidden=false;smHomeShow(true)};
-  box.querySelectorAll('.pc').forEach(b=>b.onclick=()=>{if(b.dataset.k!=='mine')smUseColors(PRESETS[b.dataset.k].c,PRESETS[b.dataset.k].name);smChoose(v)});
+  // the color wheel itself comes over from the Colors page, with its note ring, light slider and exact color
+  $('#pcWheel').onclick=()=>{const t=$('.tune');if(!tuneHere)tuneHere={parent:t.parentNode,next:t.nextSibling};$('#pcTune').appendChild(t);$('#pcWheel').hidden=true;
+    const use=document.createElement('button');use.type='button';use.className='btn small';use.id='pcTuneUse';use.textContent='Use these colors';use.onclick=()=>{tuneBack();smChoose(v)};$('#pcTune').appendChild(use);wheelL=-1;drawWheel();updateTunePanel()};
+  $('#pcBack').onclick=()=>{tuneBack();box.hidden=true;$('#pkGrid').hidden=false;smHomeShow(true)};
+  box.querySelectorAll('.pc[data-k]').forEach(b=>b.onclick=()=>{if(b.dataset.k!=='mine')smUseColors(PRESETS[b.dataset.k].c,PRESETS[b.dataset.k].name);smChoose(v)});
   const go=async(txt,again)=>{txt=String(txt||'').trim();if(!txt)return;$('#vibeIn').value=txt;const out=$('#vibeOut');out.innerHTML='<p class="pc-wait">Mixing colors…</p>';
     const pal=await vibePalette(txt,again);if(sm.pendingPick!==v)return;
     out.innerHTML=`<div class="pc-made">${strip(pal.c)}<b>${esc(pal.name)}</b><div><button type="button" class="btn small" id="vibeUse">Use these</button><button type="button" class="btn ghost small" id="vibeAgain">Try again</button></div></div>`;
     $('#vibeUse').onclick=()=>{smUseColors(pal.c,pal.name);smChoose(v)};$('#vibeAgain').onclick=()=>go(txt,true)};
   $('#vibeForm').onsubmit=e=>{e.preventDefault();go($('#vibeIn').value)};box.querySelectorAll('[data-vibe]').forEach(b=>b.onclick=()=>go(b.dataset.vibe))}
+let tuneHere=null;
+function tuneBack(){if(!tuneHere)return;const t=$('.tune');tuneHere.parent.insertBefore(t,tuneHere.next);tuneHere=null;const u=$('#pcTuneUse');if(u)u.remove();try{wheelL=-1;drawWheel()}catch(e){}}
 function smUseColors(hexes,name){colors=fromHexes(hexes);try{wheelL=-1;colorsChanged()}catch(e){saveColors()}toast(name+' colors')}
 // a palette for a mood: Claude makes it where Fude runs inside Claude; elsewhere Fude mixes one from the words, the same words giving the same colors
 let vibeN=0;
@@ -2809,7 +2821,7 @@ function localVibe(txt,again){
   const S=clamp(58+sat*14,22,96),L=clamp(52+light*12,26,80);
   const c=[...Array(12)].map((_,i)=>{const r=hues[(i*5)%hues.length],hh=(r[0]+rnd()*(r[1]-r[0])+360)%360,l=clamp(L+((i*7)%12-5.5)*4.2+(rnd()-.5)*8,12,92),s=clamp(S+(rnd()-.5)*24,10,100);return rgb2hex(hsl2rgb(hh,s,l))});
   return{name:txt.replace(/\b\w/g,m=>m.toUpperCase()).slice(0,40),c}}
-function smChoose(v){$('#pkColors').hidden=true;$('#pkGrid').hidden=false;sm.choice=v;try{localStorage.setItem('muse.smpick',v)}catch(e){}smHomeShow(false);const name=smPickName(v);
+function smChoose(v){tuneBack();$('#pkColors').hidden=true;$('#pkGrid').hidden=false;sm.choice=v;try{localStorage.setItem('muse.smpick',v)}catch(e){}smHomeShow(false);const name=smPickName(v);
   if(sm.state==='paint'){toast(`The next song gets ${name}`);$('#smTitle').textContent=$('#artTitle').textContent;return}
   $('#smTitle').textContent=v==='any'?'A surprise picture':name;
   if(sm.stream){$('#smSub').textContent='Play some music and the cat starts painting';if(!last){$('#smEmpty').hidden=true}if(sm.loud>=.8)smBegin()}
@@ -2830,9 +2842,12 @@ async function tabStream(){
 // what the tab says is playing, every two seconds; a site without a Media Session leaves the songs to the sound level
 async function tabPoll(){clearTimeout(tb.timer);if(!tb.id)return;
   try{const [r]=await chrome.scripting.executeScript({target:{tabId:tb.id},world:'MAIN',func:()=>{const ms=navigator.mediaSession,m=ms&&ms.metadata;if(!m||!m.title)return null;const a=[...(m.artwork||[])],els=[...document.querySelectorAll('audio,video')];
-      return{title:m.title,by:m.artist||'',art:a.length?a[a.length-1].src:'',small:a.length?a[0].src:'',playing:ms.playbackState==='playing'||(ms.playbackState!=='paused'&&(!els.length||els.some(e=>!e.paused)))}}});
+      // where the song is, for the lyrics: the playing audio or video, or a music site's own time readout
+      const el=els.filter(e=>e.duration>0&&isFinite(e.duration)).sort((x,y)=>(x.paused-y.paused)||(y.duration-x.duration))[0],sec=t=>{const p=String(t||'').trim().split(':').map(Number);return p.length>1&&p.every(n=>n===n)?p.reduce((a,n)=>a*60+n,0):NaN};
+      let pos=el?el.currentTime:NaN,dur=el?el.duration:NaN;const q=s=>document.querySelector(s);const pp=q('[data-testid="playback-position"]'),pd=q('[data-testid="playback-duration"]');if(pp&&pd){pos=sec(pp.textContent);dur=sec(pd.textContent)}
+      return{title:m.title,by:m.artist||'',art:a.length?a[a.length-1].src:'',small:a.length?a[0].src:'',pos:pos===pos?pos*1000:0,dur:dur===dur?dur*1000:0,playing:ms.playbackState==='playing'||(ms.playbackState!=='paused'&&(!els.length||els.some(e=>!e.paused)))}}});
     try{const t=await chrome.tabs.get(tb.id);tb.title=t.title||tb.title;tb.icon=t.favIconUrl||tb.icon}catch(e){}
-    const m=r&&r.result;spSeen(m?{id:m.title+'|'+m.by,title:m.title,by:m.by||tb.site,art:m.art,small:m.small||m.art,dur:0,pos:0,playing:m.playing}:null)}catch(e){}
+    const m=r&&r.result;spSeen(m?{id:m.title+'|'+m.by,title:m.title,by:m.by||tb.site,art:m.art,small:m.small||m.art,dur:m.dur||0,pos:m.pos||0,playing:m.playing}:null)}catch(e){}
   if(tb.id)tb.timer=setTimeout(tabPoll,document.hidden?5000:2000)}
 // Spotify: the client ID of a Spotify app made at developer.spotify.com, with this page's address as its redirect URI. Left empty, linking stays off
 const SPOTIFY_CLIENT_ID='';

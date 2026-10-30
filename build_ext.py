@@ -72,7 +72,7 @@ navigator.permissions.query({name:'microphone'}).then(p=>{if(p.state==='granted'
 ic=Image.open('site/icon-512.png').convert('RGBA')
 for n in (16,32,48,128):ic.resize((n,n),Image.LANCZOS).save(f'{OUT}/icon-{n}.png')
 music=['https://open.spotify.com/*','https://music.youtube.com/*','https://www.youtube.com/*','https://music.apple.com/*','https://soundcloud.com/*','https://www.deezer.com/*','https://listen.tidal.com/*','https://*.bandcamp.com/*']
-man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.0.5",
+man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.0.6",
  "description":"Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
  "icons":{str(n):f'icon-{n}.png' for n in (16,32,48,128)},
  "action":{"default_title":"Paint this music with Fude","default_icon":{str(n):f'icon-{n}.png' for n in (16,32)}},
