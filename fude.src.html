@@ -927,6 +927,28 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 #pcTune .instrument{width:min(300px,100%)}
 #pcTune .tunepanel{width:100%}
 #pcTune #pcTuneUse{margin:10px auto 0;display:flex}
+
+/* the cat, paused: brush down, head tilted, looking at you */
+.painter.stare .pt-body{animation:pt-breathe 3.4s ease-in-out infinite}
+.painter.stare .pt-head{animation:pt-tilt 3.2s ease-in-out infinite}
+.painter.stare .pt-arm{animation:none;transform:rotate(18deg)!important;transition:transform .5s var(--ease)}
+.painter.stare .pt-tail{animation-duration:4.2s}
+@keyframes pt-tilt{0%,100%{transform:rotate(9deg)}50%{transform:rotate(5deg)}}
+.pt-emo{position:absolute;left:50%;top:-14px;translate:-50% 0;font-style:normal;font-family:var(--script);font-weight:700;font-size:24px;line-height:1;color:var(--fg);pointer-events:none;opacity:0;transition:opacity .4s}
+.painter.stare .pt-emo{opacity:1;animation:emoFloat 2.4s ease-in-out infinite}
+@keyframes emoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.painter.stare-ginger .pt-eyes{animation:none;transform:scale(1.18)}
+.painter.stare-midnight .pt-eyes{animation:pt-sleepy 3.6s ease-in-out infinite}
+@keyframes pt-sleepy{0%,30%,100%{transform:scaleY(1)}45%,70%{transform:scaleY(.18)}}
+.painter.stare-midnight .pt-emo{color:#C9A227}
+.painter.stare-snow .pt-eyes{animation:none;transform:scale(1.32)}
+.painter.stare-snow .pt-emo{color:#5AA9D6;animation:emoFloat 2.4s ease-in-out infinite,twinkle 1s ease-in-out infinite alternate}
+.painter.stare-sakura .pt-eyes{animation:none;transform:scale(1.15)}
+.painter.stare-sakura .pt-emo{color:#E0607E;font-family:var(--body);font-size:22px;animation:emoHeart 1.6s ease-in-out infinite}
+@keyframes emoHeart{0%{transform:translateY(4px) scale(.8);opacity:.2}40%{opacity:1}100%{transform:translateY(-14px) scale(1.15);opacity:0}}
+.painter.stare-golden .pt-eyes{display:none}.painter.stare-golden .pt-happy{display:inline}
+.painter.stare-golden .pt-emo{color:#D9A92A;animation:emoFloat 2.4s ease-in-out infinite,goldGlow 2s infinite}
+#smPause[hidden]{display:none}
 </style>
 <script>try{const t=localStorage.getItem('muse.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 
@@ -1228,7 +1250,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
   <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><div class="sm-words" id="smWords" hidden><ol id="smWordList"></ol></div><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>
-  <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button><button class="btn" id="smAccess" type="button" hidden>Allow access</button><button class="btn ghost small" id="smChange" type="button" hidden>Change picture</button></div>
+  <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button><button class="btn" id="smAccess" type="button" hidden>Allow access</button><button class="btn ghost small" id="smPause" type="button" hidden>Pause</button><button class="btn ghost small" id="smChange" type="button" hidden>Change picture</button></div>
   <div class="sm-strip" id="smStrip" aria-label="Paintings made here, newest first"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -2938,7 +2960,7 @@ Reply with only a JSON object:
 }
 
 /* ---------- behold ---------- */
-let last=null,liveJob=0,paintT0=0;
+let last=null,liveJob=0,paintT0=0,liveFlow=null;
 const art=$('#art');
 function markStale(){if(last&&$('#liveBar').hidden)$('#staleNote').hidden=false}
 function captionFor(dist,stmtOverride){
@@ -2997,7 +3019,7 @@ function sparkDraw(list,dt){
 function artFlow(focus,progress,alive){
   const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
   let W=0,H=0,paper,shown,prev,cur,mask,work,fadeT=0,end=null,running=true,faded=false,last=performance.now(),flipped=pup.fx<0;
-  let tip=null,body=null,ph=0,aim=0,turnAt=0,lastP=0,wipe=0,t0=last,sparks=[];
+  let tip=null,body=null,ph=0,aim=0,turnAt=0,lastP=0,wipe=0,t0=last,sparks=[],idle=false,wk=0,hold=null;
   let beat=60/84;try{if(song&&!song.rec)beat=60/clamp(arrangedSong(song).bpm||84,50,168)}catch(e){}if(beat<.42)beat*=2;helper.style.setProperty('--bob',(2*beat).toFixed(2)+'s');const sizeTo=(w,h)=>{if(w===W&&h===H)return;W=w;H=h;art.width=W;art.height=H;paper=makePaper(W,H);shown=mk(W,H);prev=mk(W,H);mask=mk(W,H);work=mk(W,H);cur=null};
   helper.classList.add('flowing');
   // the canvas is wiped to white the moment the music starts
@@ -3013,8 +3035,9 @@ function artFlow(focus,progress,alive){
     if(!faded&&redraw){const a=clamp((now-fadeT)/600,0,1),sg=shown.getContext('2d');sg.globalAlpha=1;sg.drawImage(prev,0,0);sg.globalAlpha=a*a*(3-2*a);sg.drawImage(cur,0,0);sg.globalAlpha=1;if(a>=1)faded=true}
     // where the cat is working: row by row from the bottom of the canvas to the top, sweeping across and back like a house painter;
     // a song longer than the climb gets a second coat, starting again from the bottom
-    const diag=Math.hypot(W,H),el=(now-t0)/1000,pr=clamp(progress(),0,1),rise=pr<1?pr:(el/150)%1;wipe=Math.max(wipe,pr<1?pr:1);
-    const dx=.5-.38*Math.cos(el*Math.PI/Math.max(2.4,beat*4)),dy=.88-.76*rise;
+    // the work clock only runs while the cat is painting, so a pause leaves it exactly where it stopped
+    if(!idle)wk+=dt;const diag=Math.hypot(W,H),el=wk,pr=SIDEMODE?clamp(wk/150,0,1):clamp(progress(),0,1),rise=pr<1?pr:(el/150)%1;wipe=Math.max(wipe,pr<1?pr:1);
+    let dx=.5-.38*Math.cos(el*Math.PI/Math.max(2.4,beat*4)),dy=.88-.76*rise;if(idle&&hold){dx=hold.x;dy=hold.y}else hold={x:dx,y:dy};
     painterHost();const L=art.offsetLeft,T=art.offsetTop,cw=art.offsetWidth,ch=art.offsetHeight,sx=L+dx*cw,sy=T+dy*ch;
     // the picture is out of sight (another tab of the app): the colours keep coming up, the cat waits
     if(!cw||!ch){if(end){const e=clamp((now-end.t)/end.ms,0,1);if(e>=1){running=false;helper.classList.remove('flowing');armRest();paint1(1);end.done();return}paint1(1);return}if(redraw)paint1(.85,wipe);return}
@@ -3026,7 +3049,7 @@ function artFlow(focus,progress,alive){
     const want=dx<.27?true:dx>.52?false:flipped;if(want!==flipped){if(!turnAt)turnAt=now;else if(now-turnAt>1200){flipped=want;turnAt=0}}else turnAt=0;
     helperPlace(body.x,body.y,flipped,now);
     // the arm sweeps from the shoulder and the wrist follows through, one stroke a beat, pressing hardest mid-stroke and lifting at each turn
-    ph+=dt/beat;const sw=-Math.cos(Math.PI*ph),press=Math.pow(Math.abs(Math.sin(Math.PI*ph)),.7)*(end?0:1),amp=REDUCED?0:1;
+    if(!idle)ph+=dt/beat;const sw=-Math.cos(Math.PI*ph),press=Math.pow(Math.abs(Math.sin(Math.PI*ph)),.7)*(end||idle?0:1),amp=REDUCED||idle?0:1;
     const lagA=clamp(Math.atan2(sy-body.y,(sx-body.x)*(pup.fxv<0?-1:1))*180/Math.PI*.35,-14,14);aim+=(lagA-aim)*Math.min(1,dt*3);
     const r1=aim+amp*22*sw,r2=amp*(16*Math.sin(Math.PI*ph+.7)-4);
     helperArm.style.transform=`rotate(${r1.toFixed(2)}deg)`;helperBrush.style.transform=`rotate(${r2.toFixed(2)}deg)`;
@@ -3054,6 +3077,8 @@ function artFlow(focus,progress,alive){
       if(cur){const pg=prev.getContext('2d');pg.globalCompositeOperation='copy';pg.drawImage(shown,0,0);pg.globalCompositeOperation='source-over'}else{prev.getContext('2d').drawImage(c,0,0)}
       cur=c;fadeT=performance.now();faded=false},
     target(){},
+    // no music: the brush stops, and the cat looks up from the canvas
+    idle(on){idle=!!on},
     // the last picture, brought fully to light
     end(r,blooms){return new Promise(res=>{if(!running||!W){res();return}this.image(r,blooms,1);end={t:performance.now(),ms:REDUCED?1:1400,done:res}})},
     stop(){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);peekDraw(true)}};
@@ -3098,7 +3123,7 @@ async function paint(scroll=true,still=false){
     // live: play, and repaint from what has been heard so far
     $('#liveBar').hidden=false;$('#artStmt').textContent=song.stream?'Fude is listening. Play your song, and the painting grows with every note it hears.':song.rec?'Fude is listening and painting what it hears.':'Fude is playing the melody and painting each note as it sounds.';
     const ctl=startSource(song,null);if(!ctl)return;ctl.live=true;liveSwap=swap;playing=ctl;paintT0=performance.now();$('#playSong').textContent='Stop';markSongs();
-    let busy=false,lastRoot=-1,lastMark=null;const dynSaid={};const A=song.rec?null:arrangedSong(song);painterStart(focus);{const bpm=A?A.bpm:0,w=A&&A.score&&A.score.tempo_word,feel=!bpm?'':bpm<=80?'nice and slow, so long careful strokes':bpm<112?'a steady tempo, a steady paw':'quick tempo, quick little dabs!';chatStart([known?PAINT_LINES[pt.id]:THEME_LINES[th.id],feel&&(w?`“${w}”: ${feel}`:feel[0].toUpperCase()+feel.slice(1))])}flow=artFlow(focus,()=>ctl.progress(),()=>job===liveJob);
+    let busy=false,lastRoot=-1,lastMark=null;const dynSaid={};const A=song.rec?null:arrangedSong(song);painterStart(focus);{const bpm=A?A.bpm:0,w=A&&A.score&&A.score.tempo_word,feel=!bpm?'':bpm<=80?'nice and slow, so long careful strokes':bpm<112?'a steady tempo, a steady paw':'quick tempo, quick little dabs!';chatStart([known?PAINT_LINES[pt.id]:THEME_LINES[th.id],feel&&(w?`“${w}”: ${feel}`:feel[0].toUpperCase()+feel.slice(1))])}flow=artFlow(focus,()=>ctl.progress(),()=>job===liveJob);liveFlow=flow;
     await new Promise(resolve=>{
       const tick=async()=>{
         if(job!==liveJob||ctl.stopped){resolve();return}
@@ -3130,6 +3155,11 @@ const helper=$('#painter');let painterT=0,painterHide=0;
 function painterHost(){if(helper.parentNode!==art.parentNode)art.parentNode.appendChild(helper)}
 // the cat's pose, eased every frame: where its brush tip is, which way it faces (turning through a squash, not a snap), and how far it leans into the stroke
 const helperSvg=helper.querySelector('svg'),helperLean=helper.querySelector('.pt-lean'),helperArm=helper.querySelector('.pt-arm'),helperBrush=helper.querySelector('.pt-brush');
+// the cat pauses: it puts the brush down and looks out at you, each pet in its own way
+const STARE={ginger:['?','Hm? Where did the music go?'],midnight:['…','A slow, sleepy blink'],snow:['✧','Big sparkly eyes'],sakura:['♡','Hearts'],golden:['★','A proud wink']};
+function catIdle(on){const pet=document.body.className.match(/\bpet-(\w+)/),k=pet&&STARE[pet[1]]?pet[1]:'ginger';
+  let e=helper.querySelector('.pt-emo');if(!e){e=document.createElement('i');e.className='pt-emo';e.setAttribute('aria-hidden','true');helper.appendChild(e)}
+  if(liveFlow)liveFlow.idle(on);Object.keys(STARE).forEach(p=>helper.classList.toggle('stare-'+p,on&&p===k));helper.classList.toggle('stare',on);e.textContent=on?STARE[k][0]:'';if(on)armRest()}
 function armRest(){helperArm.style.transform='';helperBrush.style.transform='';helper.style.removeProperty('--bob')}
 const pup={x:0,y:0,fx:1,lean:0,t:0,init:false,bw:0,hostW:0};let talkT=0;
 function helperPlace(px,py,flip,now){
@@ -4276,7 +4306,7 @@ function spSeen(t){sp.now=t;sp.at=performance.now();spDraw();if(!sm.stream)retur
     if(sm.state==='paint'&&sm.track&&sm.track.id!==t.id){smEnd();sm.pendingBegin=true}
     else if(sm.state==='wait'){if(sm.finishing)sm.pendingBegin=true;else smBegin()}
     if(sm.state==='wait')smSet('wait','Following '+srcName())}
-  else if(sm.state==='paint'){if(!sp.pausedAt)sp.pausedAt=performance.now();else if(performance.now()-sp.pausedAt>15000)smEnd()}
+  else if(sm.state==='paint'){if(!sp.pausedAt)sp.pausedAt=performance.now()}
   else if(sm.state==='wait'&&following())smSet('wait',t?srcName()+' is paused':'Waiting for '+srcName()+' to play')}
 function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id||np.on;$('#srcCover').hidden=(!sp.tok&&!NP)||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;const sys=sm.src==='sys'&&!!sm.stream;$('#smSp').hidden=!on&&!sys;$('#smSp').classList.toggle('noctl',(!sp.tok&&!np.on)||!!tb.id||sys);$('#smSp').classList.toggle('tabsrc',!!tb.id||sys);$('#smSp').classList.toggle('cover',!!(tb.id&&t&&t.art));
   const a=$('#spArt');
@@ -4326,7 +4356,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden||!SIDEMODE)
   // back from the settings page: with access on, Fude carries on where it asked
   if(np.asked){np.asked=false;npStart(true).then(ok=>{if(ok&&!sm.stream)smStart()})}else if(np.on)NP.current().then(npSeen).catch(()=>{})});
 function smPics(){return zenShuffle([...PAINTINGS.map(p=>'known:'+p.id),...THEMES.map(t=>'new:'+t.id)])}
-function smSet(state,text){sm.state=state;const el=$('#smState');el.className='sm-state'+(state==='paint'?' live':state==='wait'?' wait':'');$('#smStateT').textContent=text;
+function smSet(state,text){sm.state=state;if(state!=='paint'){sm.held=false;if(sm.idleAt){sm.idleAt=0;catIdle(false)}}$('#smPause').hidden=state!=='paint';$('#smPause').textContent='Pause';const el=$('#smState');el.className='sm-state'+(state==='paint'?' live':state==='wait'?' wait':'');$('#smStateT').textContent=text;
   $('#smGo').textContent=state==='off'?'Start':'Stop';$('#smGo').classList.toggle('ghost',state!=='off');$('#smNext').disabled=state==='off'}
 async function smStart(){
   if(sm.stream)return;const ac=audio();try{await ac.resume()}catch(e){}
@@ -4366,9 +4396,13 @@ function smTick(){
     $('#smStateT').textContent=sp.now&&sm.track&&!sp.now.playing?'Paused':`Painting song ${sm.n} · ${fmtTime(len)}`;const at=$('#artTitle').textContent;if(at&&$('#smTitle').textContent!==at)$('#smTitle').textContent=at;
     // following Spotify with nothing reaching the microphone: most likely headphones
     if(follow&&sm.src==='mic'&&sp.now.playing&&!sm.hinted&&performance.now()-sm.heardAt>12000){sm.hinted=true;$('#smSub').textContent='Fude can’t hear the music. Wearing headphones?';$('#smHp').hidden=false}
-    if(!follow&&(sm.quiet>=(len>40?2.2:6)||len>420))smEnd();
-    // a pause of fifteen seconds finishes the picture, also when the music app sends nothing more while paused
-    if(follow&&!sp.now.playing&&sp.pausedAt&&performance.now()-sp.pausedAt>15000)smEnd()}}
+    // no music: the cat stops and looks at you; twelve seconds of it and the picture is finished, unless you pressed Pause
+    const silent=sm.quiet>=1.5&&(!follow||sm.src==='tab'||sm.src==='sys')||follow&&!sp.now.playing;
+    if(silent||sm.held){if(!sm.idleAt){sm.idleAt=now;catIdle(true)}if(!sm.held)$('#smStateT').textContent='No music · the cat is waiting'
+      if(sm.held)sm.idleHeld=true;if(!sm.held&&now-sm.idleAt>12)smEnd();else if(sm.held)$('#smStateT').textContent='Paused · the cat waits for you'}
+    else{if(sm.idleAt){const gap=now-sm.idleAt,was=sm.idleHeld;sm.idleAt=0;sm.idleHeld=false;catIdle(false);
+        // heard through the microphone with no song names, a gap and then music again is most likely the next song, so this picture is finished
+        if(!follow&&!was&&gap>.8&&len>40){smEnd();return}}if(len>420)smEnd()}}}
 // five bars of the tab's sound, low to high, so it is plain that Fude hears it
 function smLevel(){const n=sm.an.frequencyBinCount;if(!sm.fq||sm.fq.length!==n)sm.fq=new Uint8Array(n);sm.an.getByteFrequencyData(sm.fq);const bars=$('#spLvl').children,ny=audio().sampleRate/2;
   [[60,250],[250,700],[700,1800],[1800,4500],[4500,11000]].forEach(([lo,hi],k)=>{const a=Math.floor(lo/ny*n),b=Math.max(a+1,Math.floor(hi/ny*n));let m=0;for(let i=a;i<b;i++)m+=sm.fq[i];m/=(b-a)*255;
@@ -4433,7 +4467,7 @@ function smInit(){
     chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
     extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
-  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPause').onclick=()=>{sm.held=!sm.held;$('#smPause').textContent=sm.held?'Resume':'Pause';if(!sm.held){sm.idleAt=0;catIdle(false)}};$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
   if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}

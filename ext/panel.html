@@ -944,6 +944,28 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 #pcTune .instrument{width:min(300px,100%)}
 #pcTune .tunepanel{width:100%}
 #pcTune #pcTuneUse{margin:10px auto 0;display:flex}
+
+/* the cat, paused: brush down, head tilted, looking at you */
+.painter.stare .pt-body{animation:pt-breathe 3.4s ease-in-out infinite}
+.painter.stare .pt-head{animation:pt-tilt 3.2s ease-in-out infinite}
+.painter.stare .pt-arm{animation:none;transform:rotate(18deg)!important;transition:transform .5s var(--ease)}
+.painter.stare .pt-tail{animation-duration:4.2s}
+@keyframes pt-tilt{0%,100%{transform:rotate(9deg)}50%{transform:rotate(5deg)}}
+.pt-emo{position:absolute;left:50%;top:-14px;translate:-50% 0;font-style:normal;font-family:var(--script);font-weight:700;font-size:24px;line-height:1;color:var(--fg);pointer-events:none;opacity:0;transition:opacity .4s}
+.painter.stare .pt-emo{opacity:1;animation:emoFloat 2.4s ease-in-out infinite}
+@keyframes emoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.painter.stare-ginger .pt-eyes{animation:none;transform:scale(1.18)}
+.painter.stare-midnight .pt-eyes{animation:pt-sleepy 3.6s ease-in-out infinite}
+@keyframes pt-sleepy{0%,30%,100%{transform:scaleY(1)}45%,70%{transform:scaleY(.18)}}
+.painter.stare-midnight .pt-emo{color:#C9A227}
+.painter.stare-snow .pt-eyes{animation:none;transform:scale(1.32)}
+.painter.stare-snow .pt-emo{color:#5AA9D6;animation:emoFloat 2.4s ease-in-out infinite,twinkle 1s ease-in-out infinite alternate}
+.painter.stare-sakura .pt-eyes{animation:none;transform:scale(1.15)}
+.painter.stare-sakura .pt-emo{color:#E0607E;font-family:var(--body);font-size:22px;animation:emoHeart 1.6s ease-in-out infinite}
+@keyframes emoHeart{0%{transform:translateY(4px) scale(.8);opacity:.2}40%{opacity:1}100%{transform:translateY(-14px) scale(1.15);opacity:0}}
+.painter.stare-golden .pt-eyes{display:none}.painter.stare-golden .pt-happy{display:inline}
+.painter.stare-golden .pt-emo{color:#D9A92A;animation:emoFloat 2.4s ease-in-out infinite,goldGlow 2s infinite}
+#smPause[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1248,7 +1270,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
   <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><div class="sm-words" id="smWords" hidden><ol id="smWordList"></ol></div><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>
-  <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button><button class="btn" id="smAccess" type="button" hidden>Allow access</button><button class="btn ghost small" id="smChange" type="button" hidden>Change picture</button></div>
+  <div class="sm-ctl"><button class="btn" id="smGo" type="button">Start</button><button class="btn ghost sp-link" id="smLink" type="button" hidden><i aria-hidden="true"></i>Link Spotify</button><button class="btn ghost small" id="smHp" type="button" hidden>Headphones on</button><button class="btn" id="smAccess" type="button" hidden>Allow access</button><button class="btn ghost small" id="smPause" type="button" hidden>Pause</button><button class="btn ghost small" id="smChange" type="button" hidden>Change picture</button></div>
   <div class="sm-strip" id="smStrip" aria-label="Paintings made here, newest first"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
