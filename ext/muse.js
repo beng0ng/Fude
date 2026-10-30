@@ -30,7 +30,11 @@ const PRESETS = {
   scriabin:{name:'Scriabin',year:'1911',c:['#E8231F','#8B4FB8','#F5D90A','#6E7FA6','#A9D8F0','#9C1C2E','#3A5FD0','#F08A1C','#A35FB4','#3FA34D','#7C8A99','#4C8FE0']},
   newton:{name:'Newton',year:'1704',c:['#D7263D','#E2552F','#F08A24','#F3B630','#F2D541','#6BB35A','#3E9A87','#3A78C2','#3E5BA8','#4B3F9E','#6A3FA0','#8E4CB0']},
   rimsky:{name:'Rimsky-Korsakov',year:'c. 1900',c:['#F2EFE6','#8E7FA0','#E8C14A','#4F5A6E','#2F5FA8','#5E9A55','#6E7FB8','#B08A3E','#A891B4','#E6A3A8','#6B6066','#39507A']},
-  ink:{name:'Ink and stone',year:'Fude',c:['#1F2421','#38413C','#505B55','#6A766F','#86928B','#A0ABA4','#B9C3BC','#CFD7D1','#8FA89A','#5F7D70','#B8A88A','#D9CDB4']}
+  ink:{name:'Ink and stone',year:'Fude',c:['#1F2421','#38413C','#505B55','#6A766F','#86928B','#A0ABA4','#B9C3BC','#CFD7D1','#8FA89A','#5F7D70','#B8A88A','#D9CDB4']},
+  sunset:{name:'Sunset',year:'Fude',c:['#2B1B3D','#5B2A55','#8C3463','#C2445E','#E8634F','#F48C47','#F9B34D','#FCD77A','#F6A6A0','#B66A8F','#7A4A7E','#3E3160']},
+  ocean:{name:'Ocean',year:'Fude',c:['#04293A','#064663','#0E7C9B','#1BA3B8','#52C7C4','#A5E3D8','#E6F4EA','#F2E3C6','#5D9DB8','#2E6F95','#16507A','#0B3A57']},
+  forest:{name:'Forest',year:'Fude',c:['#1E2B1F','#2F4A2D','#46683A','#6A8A45','#97AE5C','#C9D18A','#E8DFB0','#B98E52','#8A5E3B','#5C4A32','#3E5B4A','#2A3D35']},
+  neon:{name:'Neon night',year:'Fude',c:['#FF2E88','#FF6B2E','#FFE53B','#3BFF8F','#2EF2FF','#3B7BFF','#8E3BFF','#D23BFF','#FF3BD2','#14F1D9','#C6FF3B','#FF8A3B']}
 };
 let colors; // array of {h,s,l}
 function fromHexes(arr){return arr.map(x=>{const r=hex2rgb(x),o=rgb2hsl(...r);return{h:o.h,s:o.s,l:o.l}})}
@@ -1572,7 +1576,7 @@ Reply with only a JSON object:
 }
 
 /* ---------- behold ---------- */
-let last=null,liveJob=0;
+let last=null,liveJob=0,paintT0=0;
 const art=$('#art');
 function markStale(){if(last&&$('#liveBar').hidden)$('#staleNote').hidden=false}
 function captionFor(dist,stmtOverride){
@@ -1606,6 +1610,17 @@ function makePaper(W,H){const c=document.createElement('canvas');c.width=W;c.hei
   g.globalAlpha=.06;for(let i=0;i<W*H/60;i++){g.fillRect(rnd()*W,rnd()*H,1+rnd()*1.5,1)}g.globalAlpha=1;
   const v=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.hypot(W,H)*.6);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(90,70,40,.08)');g.fillStyle=v;g.fillRect(0,0,W,H);return c}
 // the Note sparks effect: little stars fly off the brush in the colour it carries, drawn over the picture so they never mark it
+// while the picture is under frosted glass, a clear window follows the brush, so the patch the cat is working on can be seen
+const PEEK={cv:null,x:-1,y:-1};
+function peekDraw(clear){let c=PEEK.cv;const on=!clear&&SIDEMODE&&$('#smode').classList.contains('veil')&&PEEK.x>=0;
+  if(!on){if(c&&c.width)c.getContext('2d').clearRect(0,0,c.width,c.height);return}
+  if(!c){c=PEEK.cv=document.createElement('canvas');c.className='peek';c.setAttribute('aria-hidden','true')}
+  const host=art.parentNode;if(c.parentNode!==host)host.insertBefore(c,art.nextSibling);
+  const cw=art.offsetWidth,ch=art.offsetHeight,d=Math.min(2,devicePixelRatio||1);if(!cw||!ch)return;
+  if(c.width!==Math.round(cw*d)||c.height!==Math.round(ch*d)){c.width=Math.round(cw*d);c.height=Math.round(ch*d);c.style.width=cw+'px';c.style.height=ch+'px'}
+  c.style.left=art.offsetLeft+'px';c.style.top=art.offsetTop+'px';
+  const g=c.getContext('2d'),R=Math.min(cw,ch)*.24*d,x=PEEK.x*d,y=PEEK.y*d-R*.15;g.globalCompositeOperation='copy';g.drawImage(art,0,0,c.width,c.height);
+  g.globalCompositeOperation='destination-in';const gr=g.createRadialGradient(x,y,R*.45,x,y,R);gr.addColorStop(0,'#000');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);g.globalCompositeOperation='source-over'}
 const SPK={cv:null};
 function sparkDraw(list,dt){
   const c=SPK.cv;if(!list){if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);return}
@@ -1661,10 +1676,10 @@ function artFlow(focus,progress,alive){
     if(press>.12){const R=diag*(.03+.026*press),steps=Math.max(1,Math.ceil(Math.hypot(nx-tip.x,ny-tip.y)/(R*.2)));
       for(let i=1;i<=steps;i++)dab(tip.x+(nx-tip.x)*i/steps,tip.y+(ny-tip.y)*i/steps,R,.065*press);
       if(fxOn('sparks')&&Math.random()<press*.5)sparks.push({x:tx,y:ty,vx:(Math.random()-.5)*60,vy:-20-Math.random()*50,life:1,c:$('#ptTip').getAttribute('fill')||'#F2C14E'})}
-    tip.x=nx;tip.y=ny;sparkDraw(sparks,dt);
+    tip.x=nx;tip.y=ny;sparkDraw(sparks,dt);PEEK.x=tx-L;PEEK.y=ty-T;
     // the whole picture also rises slowly out of the white as the music goes on; at the end it comes fully to light
-    if(end){const e=clamp((now-end.t)/end.ms,0,1),s=e*e*(3-2*e);if(e>=1){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);paint1(1);end.done();return}paint1(.85+.15*s,wipe+(1.25-wipe)*s);return}
-    if(redraw)paint1(.85,wipe)};
+    if(end){const e=clamp((now-end.t)/end.ms,0,1),s=e*e*(3-2*e);if(e>=1){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);peekDraw(true);paint1(1);end.done();return}paint1(.85+.15*s,wipe+(1.25-wipe)*s);peekDraw();return}
+    if(redraw){paint1(.85,wipe);peekDraw()}};
   // the picture rises out of the white from the bottom up, just behind the cat's rows; with no row given it shows evenly
   function paint1(gA,wp){const g=art.getContext('2d');g.globalCompositeOperation='source-over';g.globalAlpha=1;g.drawImage(paper,0,0);
     const w=work.getContext('2d');
@@ -1679,7 +1694,7 @@ function artFlow(focus,progress,alive){
     target(){},
     // the last picture, brought fully to light
     end(r,blooms){return new Promise(res=>{if(!running||!W){res();return}this.image(r,blooms,1);end={t:performance.now(),ms:REDUCED?1:1400,done:res}})},
-    stop(){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null)}};
+    stop(){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);peekDraw(true)}};
 }
 async function paint(scroll=true,still=false){
   stopSong();const job=++liveJob;
@@ -1713,14 +1728,14 @@ async function paint(scroll=true,still=false){
   const finish=async dist=>{
     if(!dist.share.some(v=>v>0)){$('#artStmt').textContent='Fude heard no clear notes, so there is nothing to paint yet.';return}
     const r=await render({...base,share:dist.share});if(flow)await flow.end(r,blooms);drawToArt(r,1,focus,blooms);const img=blooms.length?art.getContext('2d').getImageData(0,0,r.W,r.H):r.img;last={...r,img,kind:mode,id:base.id,seed,params,dist};renderChords(song);
-    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd();if(!still&&!shared)jrPic();
+    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd(!still&&!shared&&song?{song:song.title,by:song.by||'',ms:live&&paintT0?Math.round(performance.now()-paintT0):0}:null);if(!still&&!shared)jrPic();
   };
   try{
     if(!live){art.classList.add('busy');await finish(fullDist);return}
     if(song.stream)$('#liveStop').textContent='Stop listening';else $('#liveStop').textContent='Stop';
     // live: play, and repaint from what has been heard so far
     $('#liveBar').hidden=false;$('#artStmt').textContent=song.stream?'Fude is listening. Play your song, and the painting grows with every note it hears.':song.rec?'Fude is listening and painting what it hears.':'Fude is playing the melody and painting each note as it sounds.';
-    const ctl=startSource(song,null);if(!ctl)return;ctl.live=true;liveSwap=swap;playing=ctl;$('#playSong').textContent='Stop';markSongs();
+    const ctl=startSource(song,null);if(!ctl)return;ctl.live=true;liveSwap=swap;playing=ctl;paintT0=performance.now();$('#playSong').textContent='Stop';markSongs();
     let busy=false,lastRoot=-1,lastMark=null;const dynSaid={};const A=song.rec?null:arrangedSong(song);painterStart(focus);{const bpm=A?A.bpm:0,w=A&&A.score&&A.score.tempo_word,feel=!bpm?'':bpm<=80?'nice and slow, so long careful strokes':bpm<112?'a steady tempo, a steady paw':'quick tempo, quick little dabs!';chatStart([known?PAINT_LINES[pt.id]:THEME_LINES[th.id],feel&&(w?`“${w}”: ${feel}`:feel[0].toUpperCase()+feel.slice(1))])}flow=artFlow(focus,()=>ctl.progress(),()=>job===liveJob);
     await new Promise(resolve=>{
       const tick=async()=>{
@@ -2134,18 +2149,23 @@ function openShared(text){
 addEventListener('hashchange',()=>{if(location.hash.length>1)openShared(location.hash.slice(1))});
 // the gallery: the last twelve paintings made here, kept in this browser
 const GALLERY_MAX=12;let gallery=[];try{gallery=JSON.parse(localStorage.getItem('muse.gallery')||'[]');if(!Array.isArray(gallery))gallery=[]}catch(e){}
-function saveGallery(){try{localStorage.setItem('muse.gallery',JSON.stringify(gallery))}catch(e){}}
-function galleryAdd(){
-  const st=shareState();if(!st||st.err||!art.width)return;
+function saveGallery(){for(;;){try{localStorage.setItem('muse.gallery',JSON.stringify(gallery));return}catch(e){if(gallery.length<2)return;gallery.pop()}}}
+function galleryAdd(info){
+  // a painting of something heard can't be rebuilt from a link, so the gallery keeps a larger picture of it instead
+  let st=shareState();if(!art.width||(st&&st.err))return;if(!st&&!(song&&song.rec&&info))return;let pic='';
+  if(!st){try{const k=Math.min(1,560/Math.max(art.width,art.height)),c=document.createElement('canvas');c.width=Math.round(art.width*k);c.height=Math.round(art.height*k);c.getContext('2d').drawImage(art,0,0,c.width,c.height);pic=c.toDataURL('image/jpeg',.8)}catch(e){return}st={code:''}}
   const W=192,H=Math.max(1,Math.round(W*art.height/art.width)),th=document.createElement('canvas');th.width=W;th.height=H;th.getContext('2d').drawImage(art,0,0,W,H);
   let thumb;try{thumb=th.toDataURL('image/jpeg',.72)}catch(e){return}
-  gallery=gallery.filter(g=>g.code!==st.code);gallery.unshift({code:st.code,title:$('#artTitle').textContent,thumb,t:Date.now()});gallery=gallery.slice(0,GALLERY_MAX);saveGallery();renderGallery();
+  gallery=gallery.filter(g=>!st.code||g.code!==st.code);gallery.unshift({code:st.code,title:$('#artTitle').textContent,thumb,t:Date.now(),...(pic?{pic}:{}),...(info||{})});gallery=gallery.slice(0,GALLERY_MAX);saveGallery();renderGallery();
 }
+// what a painting heard and how long the cat took, for its card
+function galleryDownload(g){const a=document.createElement('a');a.href=g.pic;a.download=g.title.replace(/[^\w\s,-]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)+'.jpg';document.body.appendChild(a);a.click();a.remove()}
+function galleryAbout(g){return g&&g.song?`${g.song}${g.by?' by '+g.by:''}${g.ms?' · painted in '+fmtTime(g.ms/1000):''}`:''}
 function renderGallery(){
   const box=$('#galleryBox'),strip=$('#gstrip');if(!gallery.length){box.hidden=true;return}box.hidden=false;strip.innerHTML='';
-  gallery.forEach((g,i)=>{const b=document.createElement('button');b.type='button';b.className='gthumb';b.title='Open '+g.title;b.setAttribute('aria-label','Open '+g.title);
-    b.innerHTML=`<img src="${g.thumb}" alt=""><span class="gx" role="button" aria-label="Remove ${esc(g.title)} from the gallery">×</span>`;
-    b.onclick=e=>{if(e.target.classList.contains('gx')){gallery.splice(i,1);saveGallery();renderGallery();return}if(!openShared(g.code))toast('That painting could not be opened.')};
+  gallery.forEach((g,i)=>{const b=document.createElement('button');b.type='button';b.className='gthumb';const about=galleryAbout(g);b.title='Open '+g.title+(about?'\n'+about:'');b.setAttribute('aria-label','Open '+g.title+(about?'. '+about:''));
+    b.innerHTML=`<img src="${g.thumb}" alt="">${g.song?`<span class="gcap"><b>♪ ${esc(g.song)}</b><small>${esc([g.by,g.ms?'painted in '+fmtTime(g.ms/1000):''].filter(Boolean).join(' · '))}</small></span>`:''}<span class="gx" role="button" aria-label="Remove ${esc(g.title)} from the gallery">×</span>`;
+    b.onclick=e=>{if(e.target.classList.contains('gx')){gallery.splice(i,1);saveGallery();renderGallery();return}if(g.pic)galleryDownload(g);else if(!openShared(g.code))toast('That painting could not be opened.')};
     b.onkeydown=e=>{if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();gallery.splice(i,1);saveGallery();renderGallery();toast('Removed from the gallery')}};
     strip.appendChild(b)});
 }
@@ -2700,6 +2720,13 @@ function pjRender(){
   EFFECTS.forEach(f=>{const b=document.createElement('button'),ok=jrHas(f);b.type='button';b.className='pj-f';b.setAttribute('role','switch');b.disabled=!ok;b.setAttribute('aria-checked',fxOn(f.id));
     b.innerHTML=`<span>${f.name}<small>${f.note}</small></span>${ok?'<i class="sw" aria-hidden="true"></i>':`<span class="lk">${f.pics} paintings or ${hrsTxt(f.hrs)}</span>`}`;
     b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)})}
+function glOpen(){const l=$('#glList');l.innerHTML=gallery.length?'':'<p class="muted">Paintings you make appear here, each with the song it heard.</p>';
+  gallery.forEach(g=>{const b=document.createElement('button');b.type='button';b.className='gl-item';
+    b.innerHTML=`<img src="${g.thumb}" alt=""><span><b>${esc(g.title)}</b>${g.song?`<small class="gl-song">♪ ${esc(g.song)}${g.by?' · '+esc(g.by):''}</small>`:''}<small>${[g.ms?'Painted in '+fmtTime(g.ms/1000):'',new Date(g.t).toLocaleDateString([],{month:'short',day:'numeric'})].filter(Boolean).join(' · ')}</small></span>`;
+    b.onclick=()=>{if(g.pic)galleryDownload(g);else if(MUSE_EXT||!smHere){window.open(($('#smFull').getAttribute('href')||'./?full=1')+'#'+g.code,'_blank')}else{$('#galSheet').hidden=true;smLeave();openShared(g.code)}};l.appendChild(b)});
+  const sh=$('#galSheet');sh.hidden=false;$('#glClose').focus()}
+$('#glClose').onclick=()=>{$('#galSheet').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#galSheet').hidden)$('#galSheet').hidden=true});
 function pjOpen(){pjRender();const sh=$('#petSheet');sh.hidden=false;(sh.querySelector('button:not([disabled])')||sh).focus()}
 $('#pjClose').onclick=()=>{$('#petSheet').hidden=true};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#petSheet').hidden)$('#petSheet').hidden=true});
@@ -2718,18 +2745,71 @@ setInterval(()=>{if(!SIDEMODE||document.hidden)return;const on=sm.state==='paint
   else if(tot){txt='In '+NOTE_NAMES[order[0]];a=hexOf(order[0]);b=hexOf(sh[order[1]]>0?order[1]:order[0])}
   const t=$('#smTone');if(t.textContent!==txt){t.textContent=txt;t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop')}
   if(a){t.style.setProperty('--t0',a);t.style.setProperty('--t1',b)}},500);
+// the song's words, line by line, when the music app says which song it is and LRCLIB (a free, open lyrics library) has them with timings
+const LY={key:'',lines:null,at:0};
+async function lyricsFor(tr){const key=tr?tr.title+'|'+tr.by:'';if(key===LY.key)return;LY.key=key;LY.lines=null;$('#smWords').hidden=true;if(!tr||!tr.title||!lyricsOn())return;
+  const q=new URLSearchParams({track_name:tr.title,artist_name:(tr.by||'').split(',')[0]});if(tr.dur)q.set('duration',Math.round(tr.dur/1000));
+  const get=async u=>{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),6000);try{const r=await fetch(u,{signal:ac.signal});return r.ok?await r.json():null}catch(e){return null}finally{clearTimeout(t)}};
+  let j=await get('https://lrclib.net/api/get?'+q);if(!j||!j.syncedLyrics){const l=await get('https://lrclib.net/api/search?'+new URLSearchParams({track_name:tr.title,artist_name:(tr.by||'').split(',')[0]}));j=Array.isArray(l)?l.find(x=>x&&x.syncedLyrics):null}
+  if(LY.key!==key||!j||!j.syncedLyrics)return;
+  LY.lines=String(j.syncedLyrics).split('\n').map(l=>{const m=l.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/);return m?{t:+m[1]*60+ +m[2],w:m[3]}:null}).filter(Boolean)}
+function lyricsOn(){try{return localStorage.getItem('muse.lyrics')!=='off'}catch(e){return true}}
+// where the song is: what the music app last said plus the time since, or the time since this painting began
+function lyricsPos(){const n=sp.now;if(n&&sm.track&&n.id===sm.track.id&&n.pos)return(n.pos+(n.playing?performance.now()-sp.at:0))/1000;return performance.now()/1000-sm.segT}
+setInterval(()=>{if(!SIDEMODE||document.hidden||!LY.lines||sm.state!=='paint')return;const t=lyricsPos()+.25,L=LY.lines;let i=-1;for(let k=0;k<L.length;k++){if(L[k].t<=t)i=k;else break}
+  const box=$('#smWords'),w=i>=0?L[i].w:'',nx=L[i+1]?L[i+1].w:'';box.hidden=!(w||nx);const a=$('#smWord');if(a.textContent!==(w||'♪')){a.textContent=w||'♪';a.classList.remove('pop');void a.offsetWidth;a.classList.add('pop')}$('#smWordNext').textContent=nx},250);
 /* ---------- home: the picture is chosen before the painting starts ---------- */
 function smPickName(v){if(v==='any')return'A surprise';const[m,id]=v.split(':');return m==='known'?(PAINTINGS.find(p=>p.id===id)||{}).title:(THEMES.find(t=>t.id===id)||{}).name}
 function smPickBuild(){const g=$('#pkGrid');if(g.children.length)return;const pre=(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})();
-  const add=(v,inner,name,cls)=>{const b=document.createElement('button');b.type='button';b.className='pk'+(cls?' '+cls:'');b.setAttribute('role','option');b.dataset.v=v;b.setAttribute('aria-selected',v===pre);b.innerHTML=`<span class="pic">${inner}</span><small>${esc(name)}</small>`;b.onclick=()=>smChoose(v);g.appendChild(b)};
+  const add=(v,inner,name,cls)=>{const b=document.createElement('button');b.type='button';b.className='pk'+(cls?' '+cls:'');b.setAttribute('role','option');b.dataset.v=v;b.setAttribute('aria-selected',v===pre);b.innerHTML=`<span class="pic">${inner}</span><small>${esc(name)}</small>`;b.onclick=()=>smColorsStep(v);g.appendChild(b)};
   PAINTINGS.slice(0,5).forEach(p=>add('known:'+p.id,`<img alt="" src="${PAINT_SRC[p.id]}" loading="lazy">`,p.title));
   THEMES.forEach(t=>add('new:'+t.id,'<canvas width="112" height="112" aria-hidden="true"></canvas>',t.name));
   add('any','?','Surprise me','any');
   (async()=>{const share=new Array(12).fill(1/12);for(const t of THEMES){try{const r=await render({kind:'theme',id:t.id,share,seed:42,size:112}),cv=g.querySelector(`[data-v="new:${t.id}"] canvas`);cv.getContext('2d').putImageData(r.img,0,0)}catch(e){}await new Promise(requestAnimationFrame)}})()}
-function smHomeShow(on){const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#smChange').hidden=on||!sm.choice;
+function smHomeShow(on){const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#pkColors').hidden=true;$('#pkGrid').hidden=false;$('#smChange').hidden=on||!sm.choice;
   if(on){smPickBuild();$('#pkGrid').querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===(sm.choice||(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})())));
     if(!sm.err){$('#smTitle').textContent='What should the cat paint?';$('#smSub').textContent=sm.state==='paint'?'Your pick starts with the next song':'Pick a picture. The music gives it its colors.'}}}
-function smChoose(v){sm.choice=v;try{localStorage.setItem('muse.smpick',v)}catch(e){}smHomeShow(false);const name=smPickName(v);
+// home, second step: the colors the notes wear, from a palette, the ones already set, or a vibe put into words
+const VIBES=['Rainy café','Summer sunset','Cyberpunk city','Cozy autumn','Dreamy clouds','Deep ocean'];
+function smColorsStep(v){sm.pendingPick=v;$('#pkGrid').querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
+  const box=$('#pkColors');$('#pkGrid').hidden=true;box.hidden=false;$('#smPick').scrollTop=0;
+  $('#smTitle').textContent='Now choose the colors';$('#smSub').textContent=`For ${v==='any'?'a surprise picture':smPickName(v)}. Each of the 12 notes gets one color.`;
+  const strip=c=>`<span class="sw">${c.map(x=>`<i style="background:${x}"></i>`).join('')}</span>`;
+  const mine=[...Array(12)].map((_,i)=>hexOf(i));
+  box.innerHTML=`<button type="button" class="pc-back" id="pcBack">← Pictures</button>
+    <div class="pc-vibe"><b>Colors from a vibe</b><span>${sample?'Claude makes a palette from your words':'Describe a mood and Fude mixes a palette for it'}</span>
+      <form id="vibeForm"><input id="vibeIn" type="text" maxlength="80" placeholder="e.g. rainy café at night" aria-label="Describe a vibe" autocomplete="off"><button class="btn small" type="submit">Make</button></form>
+      <div class="pc-chips">${VIBES.map(x=>`<button type="button" class="chip" data-vibe="${x}">${x}</button>`).join('')}</div><div id="vibeOut"></div></div>
+    <div class="pc-list"><button type="button" class="pc" data-k="mine">${strip(mine)}<b>Keep my colors</b></button>
+    ${Object.entries(PRESETS).map(([k,p])=>`<button type="button" class="pc" data-k="${k}">${strip(p.c)}<b>${esc(p.name)}</b></button>`).join('')}</div>`;
+  $('#pcBack').onclick=()=>{box.hidden=true;$('#pkGrid').hidden=false;smHomeShow(true)};
+  box.querySelectorAll('.pc').forEach(b=>b.onclick=()=>{if(b.dataset.k!=='mine')smUseColors(PRESETS[b.dataset.k].c,PRESETS[b.dataset.k].name);smChoose(v)});
+  const go=async(txt,again)=>{txt=String(txt||'').trim();if(!txt)return;$('#vibeIn').value=txt;const out=$('#vibeOut');out.innerHTML='<p class="pc-wait">Mixing colors…</p>';
+    const pal=await vibePalette(txt,again);if(sm.pendingPick!==v)return;
+    out.innerHTML=`<div class="pc-made">${strip(pal.c)}<b>${esc(pal.name)}</b><div><button type="button" class="btn small" id="vibeUse">Use these</button><button type="button" class="btn ghost small" id="vibeAgain">Try again</button></div></div>`;
+    $('#vibeUse').onclick=()=>{smUseColors(pal.c,pal.name);smChoose(v)};$('#vibeAgain').onclick=()=>go(txt,true)};
+  $('#vibeForm').onsubmit=e=>{e.preventDefault();go($('#vibeIn').value)};box.querySelectorAll('[data-vibe]').forEach(b=>b.onclick=()=>go(b.dataset.vibe))}
+function smUseColors(hexes,name){colors=fromHexes(hexes);try{wheelL=-1;colorsChanged()}catch(e){saveColors()}toast(name+' colors')}
+// a palette for a mood: Claude makes it where Fude runs inside Claude; elsewhere Fude mixes one from the words, the same words giving the same colors
+let vibeN=0;
+async function vibePalette(txt,again){
+  if(sample){try{const j=await sample.json(`You make color palettes for Fude, an app that paints music. Each of the 12 musical notes (C, C#, D, D#, E, F, F#, G, G#, A, A#, B) gets one color. Make a palette of 12 distinct but harmonious colors for this vibe: "${txt.trim().slice(0,80)}". Vary lightness so a painting has shadows and light.${again?' Make a fresh take, different from the obvious one.':''} Reply with only a JSON object: {"name": a short evocative name of at most 3 words, "colors": an array of exactly 12 hex colors like "#A1B2C3"}`,{modelTier:'quick'});
+    const c=(j.colors||[]).filter(x=>/^#[0-9a-f]{6}$/i.test(x));if(c.length===12)return{name:String(j.name||txt).slice(0,40),c}}catch(e){if(e&&e.code==='not_granted')sample=null}}
+  return localVibe(txt,again?++vibeN:0)}
+function localVibe(txt,again){
+  const t=txt.toLowerCase(),has=(...w)=>w.some(x=>t.includes(x));let h=0;for(const ch of t)h=(h*31+ch.charCodeAt(0))|0;const rnd=mulberry32(h+again*7919);
+  // each word that is recognised pulls the palette toward its hues, its brightness and its strength
+  const moods=[[['sunset','summer','warm','fire','sun','desert','love','heart','peach'],[[8,40],[330,350]],1,0],[['ocean','sea','rain','water','blue','calm','ice','winter','cold','sky'],[[185,225],[160,180]],0,0],
+    [['forest','nature','green','spring','garden','tea','moss','jungle'],[[80,150],[40,60]],0,0],[['neon','cyber','party','electric','club','rave','synth'],[[290,330],[170,195],[50,60]],2,0],
+    [['autumn','cozy','coffee','café','cafe','fall','wood','vintage','candle'],[[18,42],[0,15],[80,100]],-1,0],[['dream','pastel','soft','cloud','baby','gentle','lofi','lo-fi'],[[260,340],[180,220]],-1,1],
+    [['night','dark','moody','sad','midnight','goth','storm','blues'],[[220,280],[200,240]],0,-1],[['happy','bright','joy','candy','pop','sunny'],[[40,60],[330,350],[180,200]],1,1],
+    [['jazz','soul','wine','velvet','smoky'],[[340,360],[25,40],[270,290]],0,-1],[['royal','gold','luxury'],[[40,50],[260,280]],0,0]];
+  let hues=[],sat=0,light=0;moods.forEach(([w,hs,s,l])=>{if(has(...w)){hues.push(...hs);sat+=s;light+=l}});
+  if(!hues.length){const b=rnd()*360;hues=[[b,b+40],[b+150,b+190]]}
+  const S=clamp(58+sat*14,22,96),L=clamp(52+light*12,26,80);
+  const c=[...Array(12)].map((_,i)=>{const r=hues[(i*5)%hues.length],hh=(r[0]+rnd()*(r[1]-r[0])+360)%360,l=clamp(L+((i*7)%12-5.5)*4.2+(rnd()-.5)*8,12,92),s=clamp(S+(rnd()-.5)*24,10,100);return rgb2hex(hsl2rgb(hh,s,l))});
+  return{name:txt.replace(/\b\w/g,m=>m.toUpperCase()).slice(0,40),c}}
+function smChoose(v){$('#pkColors').hidden=true;$('#pkGrid').hidden=false;sm.choice=v;try{localStorage.setItem('muse.smpick',v)}catch(e){}smHomeShow(false);const name=smPickName(v);
   if(sm.state==='paint'){toast(`The next song gets ${name}`);$('#smTitle').textContent=$('#artTitle').textContent;return}
   $('#smTitle').textContent=v==='any'?'A surprise picture':name;
   if(sm.stream){$('#smSub').textContent='Play some music and the cat starts painting';if(!last){$('#smEmpty').hidden=true}if(sm.loud>=.8)smBegin()}
@@ -2927,7 +3007,7 @@ function smBegin(){
   const t=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   const s={id:'side-'+(++recN),title:tr?tr.title:`Song ${sm.n}`,by:tr?tr.by:`Heard at ${t}`,year:t,rec:true,live:sm.src==='cover'?'cover':'mic',stream:sm.stream.clone(),notes:[],chroma:null,timeline:[]};
   if(sm.src==='cover'){sm.coverW=null;coverNotes(tr.small||tr.art).then(w=>{if(sm.track===tr)sm.coverW=w})}
-  addExtra(s);selectSong(s);$('#smEmpty').hidden=true;$('#smode').classList.remove('blank');smVeil(true);$('#smLyric').innerHTML='';smSet('paint',`Painting song ${sm.n}`);
+  addExtra(s);selectSong(s);$('#smEmpty').hidden=true;$('#smode').classList.remove('blank');smVeil(true);$('#smLyric').innerHTML='';lyricsFor(tr);smSet('paint',`Painting song ${sm.n}`);
   $('#smSub').textContent=tr?`${tr.by} · ${sm.src==='cover'?'painted from the colors of its cover':'the picture grows as it plays'}`:`Heard at ${t} · the picture grows as it plays`;
   paint(false);setTimeout(()=>{$('#smTitle').textContent=$('#artTitle').textContent},120)}
 function smEnd(){if(sm.state!=='paint')return;sm.finishing=true;clearTimeout(sm.finT);sm.finT=setTimeout(()=>{sm.finishing=false;if(sm.pendingBegin&&sm.stream){sm.pendingBegin=false;smBegin()}},10000);sm.track=null;smSet(sm.stream?'wait':'off',sm.stream?(following()?(sp.now&&!sp.now.playing?srcName()+' is paused':'Following '+srcName()):'Listening for the next song…'):'Not listening');sm.loud=0;if(playing&&!playing.stopped)playing.stop()}
@@ -2937,9 +3017,9 @@ function smDone(){
   if(fresh&&!sm.noHold)sm.holdUntil=performance.now()+9000;sm.noHold=false;
   if(sm.pendingBegin&&sm.stream){sm.pendingBegin=false;setTimeout(smBegin,0)}
   if(!fresh)return;
-  $('#smSave').disabled=!last;if(!sm.err)$('#smTitle').textContent=$('#artTitle').textContent,$('#smSub').textContent=`Done · saved to your gallery${sm.stream?(following()?' · the next track gets a new one':' · listening for the next song'):''}`;
+  $('#smSave').disabled=!last;if(!sm.err)$('#smTitle').textContent=$('#artTitle').textContent,$('#smSub').textContent=`Done${gallery[0]&&gallery[0].ms?' · painted in '+fmtTime(gallery[0].ms/1000):''} · saved to your gallery${sm.stream?(following()?' · the next track gets a new one':' · listening for the next song'):''}`;
   try{const k=Math.min(1,160/art.height),c=document.createElement('canvas');c.width=Math.round(art.width*k);c.height=Math.round(art.height*k);c.getContext('2d').drawImage(art,0,0,c.width,c.height);
-    const full=art.toDataURL('image/jpeg',.92),name=$('#artTitle').textContent,b=document.createElement('button');b.type='button';b.title='Save '+name;b.setAttribute('aria-label','Save '+name);
+    const full=art.toDataURL('image/jpeg',.92),name=$('#artTitle').textContent,b=document.createElement('button'),about=galleryAbout(gallery[0]&&gallery[0].title===name?gallery[0]:null);b.type='button';b.title='Save '+name+(about?'\n'+about:'');b.setAttribute('aria-label','Save '+name+(about?'. '+about:''));
     b.innerHTML=`<img alt="" src="${c.toDataURL('image/jpeg',.8)}">`;b.onclick=()=>{const a=document.createElement('a');a.href=full;a.download=name.replace(/[^\w\s,-]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)+'.jpg';document.body.appendChild(a);a.click();a.remove()};
     $('#smStrip').prepend(b);sm.made++}catch(e){}}
 // how Fude hears the music: the microphone (a speaker, or the phone's own), or each track's cover when the sound is in headphones
@@ -2965,7 +3045,7 @@ function smInit(){
   // the ⋯ menu: everything that is not Start lives here, and it closes on a choice, a tap outside or Escape
   const menu=$('#smMenu'),more=$('#smMore'),shut=()=>{menu.hidden=true;more.setAttribute('aria-expanded','false')};
   more.onclick=e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;more.setAttribute('aria-expanded',String(open));if(open)(menu.querySelector('[role^=menuitem]:not([hidden]):not([disabled])')||menu).focus()};
-  menu.addEventListener('click',e=>{if(e.target.closest('[role^=menuitem]')&&e.target.closest('#srcCover,#srcTab,#srcSys')===null)shut()});
+  menu.addEventListener('click',e=>{if(e.target.closest('[role^=menuitem]')&&e.target.closest('#srcCover,#srcTab,#srcSys,#smLyOn')===null)shut()});
   document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&e.target!==more&&!more.contains(e.target))shut()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){shut();more.focus()}});
   $('#spPrev').onclick=()=>spCmd('/me/player/previous','POST');$('#spNext').onclick=()=>spCmd('/me/player/next','POST');
@@ -2977,7 +3057,7 @@ function smInit(){
     chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
     extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
-  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPets').onclick=pjOpen;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
   if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}
