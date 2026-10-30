@@ -762,7 +762,7 @@ const CHORD_TYPES=[['',[0,4,7]],['m',[0,3,7]],['7',[0,4,7,10]],['maj7',[0,4,7,11
 function chordOf(ch,bass=-1){
   const n=Math.hypot(...ch);if(!n)return null;let best=null,bs=0;
   for(let r=0;r<12;r++)for(const[q,iv]of CHORD_TYPES){let dot=0;iv.forEach((d,k)=>dot+=ch[(r+d)%12]*(k===0?1.15:1));
-    const sc=dot/(n*Math.sqrt(iv.length))-(iv.length>3?.05:0)-(q==='sus4'||q==='sus2'||q==='dim'||q==='m7♭5'?.04:0)+(r===bass?.08:0);if(sc>bs){bs=sc;best={root:r,name:NOTE_NAMES[r]+q}}}
+    const sc=dot/(n*Math.sqrt(iv.length))-(iv.length>3?.05:0)-(q==='sus4'||q==='sus2'||q==='dim'||q==='m7♭5'?.04:0)+(r===bass?.08:0);if(sc>bs){bs=sc;best={root:r,q,name:NOTE_NAMES[r]+q}}}
   return bs>.6?best:null;
 }
 function trackChord(s,t){
@@ -1605,10 +1605,22 @@ function makePaper(W,H){const c=document.createElement('canvas');c.width=W;c.hei
   const rnd=mulberry32(7);g.globalAlpha=.05;g.fillStyle='#7A6A4F';for(let y=0;y<H;y+=3)g.fillRect(0,y,W,1);for(let x=0;x<W;x+=3)g.fillRect(x,0,1,H);
   g.globalAlpha=.06;for(let i=0;i<W*H/60;i++){g.fillRect(rnd()*W,rnd()*H,1+rnd()*1.5,1)}g.globalAlpha=1;
   const v=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.hypot(W,H)*.6);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(90,70,40,.08)');g.fillStyle=v;g.fillRect(0,0,W,H);return c}
+// the Note sparks effect: little stars fly off the brush in the colour it carries, drawn over the picture so they never mark it
+const SPK={cv:null};
+function sparkDraw(list,dt){
+  const c=SPK.cv;if(!list){if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);return}
+  if(!list.length&&!SPK.dirty)return;
+  if(!c){SPK.cv=document.createElement('canvas');SPK.cv.className='sparks';SPK.cv.setAttribute('aria-hidden','true');return sparkDraw(list,dt)}
+  const host=art.parentNode;if(c.parentNode!==host)host.appendChild(c);const hw=host.clientWidth,hh=host.clientHeight;if(c.width!==hw||c.height!==hh){c.width=hw;c.height=hh}
+  const g=c.getContext('2d');g.clearRect(0,0,hw,hh);if(list.length>60)list.splice(0,list.length-60);
+  for(let i=list.length-1;i>=0;i--){const p=list[i];p.life-=dt*1.3;if(p.life<=0){list.splice(i,1);continue}p.vy+=50*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    const r=2+4*p.life;g.globalAlpha=Math.min(1,p.life*1.4);g.fillStyle=p.c;g.beginPath();
+    for(let k=0;k<8;k++){const a=k*Math.PI/4+p.life*3,rr=k%2?r*.35:r;g.lineTo(p.x+Math.cos(a)*rr,p.y+Math.sin(a)*rr)}g.closePath();g.fill()}
+  g.globalAlpha=1;SPK.dirty=list.length>0}
 function artFlow(focus,progress,alive){
   const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
-  let W=0,H=0,paper,shown,prev,cur,mask,work,fadeT=0,end=null,endFrom=0,running=true,faded=false,last=performance.now(),flipped=pup.fx<0;
-  let tgt={x:focus[0],y:focus[1],t:last},tip=null,body=null,wa=Math.random()*6,ph=0,aim=0,turnAt=0;
+  let W=0,H=0,paper,shown,prev,cur,mask,work,fadeT=0,end=null,running=true,faded=false,last=performance.now(),flipped=pup.fx<0;
+  let tip=null,body=null,ph=0,aim=0,turnAt=0,lastP=0,wipe=0,t0=last,sparks=[];
   let beat=60/84;try{if(song&&!song.rec)beat=60/clamp(arrangedSong(song).bpm||84,50,168)}catch(e){}if(beat<.42)beat*=2;helper.style.setProperty('--bob',(2*beat).toFixed(2)+'s');const sizeTo=(w,h)=>{if(w===W&&h===H)return;W=w;H=h;art.width=W;art.height=H;paper=makePaper(W,H);shown=mk(W,H);prev=mk(W,H);mask=mk(W,H);work=mk(W,H);cur=null};
   helper.classList.add('flowing');
   // the canvas is wiped to white the moment the music starts
@@ -1617,17 +1629,18 @@ function artFlow(focus,progress,alive){
   const dab=(x,y,R,a)=>{const g=mask.getContext('2d'),gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,`rgba(0,0,0,${a})`);gr.addColorStop(.55,`rgba(0,0,0,${a*.55})`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,2*R,2*R)};
   const frame=now=>{
     if(!running)return;if(!alive()){running=false;helper.classList.remove('flowing');armRest();return}requestAnimationFrame(frame);
-    // in the small companion view, thirty brush frames a second look the same and cost half as much
-    if(SIDEMODE&&now-last<30)return;
     const dt=Math.min(.05,(now-last)/1000);last=now;if(!cur)return;
+    // the cat moves every frame so it glides; in the small companion view the picture itself is redrawn thirty times a second, which looks the same and costs half as much
+    const redraw=!SIDEMODE||now-lastP>=30||!!end;if(redraw)lastP=now;
     // the newest picture fades in over the last one, so colours shift rather than jump
-    if(!faded){const a=clamp((now-fadeT)/600,0,1),sg=shown.getContext('2d');sg.globalAlpha=1;sg.drawImage(prev,0,0);sg.globalAlpha=a*a*(3-2*a);sg.drawImage(cur,0,0);sg.globalAlpha=1;if(a>=1)faded=true}
-    // where the cat is working: a point that wanders slowly around the current patch, widening as it works
-    const diag=Math.hypot(W,H),age=(now-tgt.t)/1000,rho=Math.min(.2,.04+age*.03);wa+=dt*.42;
-    const dx=clamp(tgt.x+rho*Math.cos(wa)*.9,.08,.92),dy=clamp(tgt.y+rho*Math.sin(wa*1.37)*.7,.1,.9);
+    if(!faded&&redraw){const a=clamp((now-fadeT)/600,0,1),sg=shown.getContext('2d');sg.globalAlpha=1;sg.drawImage(prev,0,0);sg.globalAlpha=a*a*(3-2*a);sg.drawImage(cur,0,0);sg.globalAlpha=1;if(a>=1)faded=true}
+    // where the cat is working: row by row from the bottom of the canvas to the top, sweeping across and back like a house painter;
+    // a song longer than the climb gets a second coat, starting again from the bottom
+    const diag=Math.hypot(W,H),el=(now-t0)/1000,pr=clamp(progress(),0,1),rise=pr<1?pr:(el/150)%1;wipe=Math.max(wipe,pr<1?pr:1);
+    const dx=.5-.38*Math.cos(el*Math.PI/Math.max(2.4,beat*4)),dy=.88-.76*rise;
     painterHost();const L=art.offsetLeft,T=art.offsetTop,cw=art.offsetWidth,ch=art.offsetHeight,sx=L+dx*cw,sy=T+dy*ch;
     // the picture is out of sight (another tab of the app): the colours keep coming up, the cat waits
-    if(!cw||!ch){let gA=Math.pow(clamp(progress(),0,1),1.25)*.8;if(end){const e=clamp((now-end.t)/end.ms,0,1);gA=1;if(e>=1){running=false;helper.classList.remove('flowing');armRest();paint1(1);end.done();return}}paint1(gA);return}
+    if(!cw||!ch){if(end){const e=clamp((now-end.t)/end.ms,0,1);if(e>=1){running=false;helper.classList.remove('flowing');armRest();paint1(1);end.done();return}paint1(1);return}if(redraw)paint1(.85,wipe);return}
     // the body glides there on a soft spring, never faster than a stroll
     if(!body)body={x:pup.init?pup.x:sx,y:pup.init?pup.y:sy,vx:0,vy:0};const om=2.3,vmax=.42*Math.max(cw,ch);
     body.vx+=(om*om*(sx-body.x)-2*om*body.vx)*dt;body.vy+=(om*om*(sy-body.y)-2*om*body.vy)*dt;const sp=Math.hypot(body.vx,body.vy);if(sp>vmax){body.vx*=vmax/sp;body.vy*=vmax/sp}
@@ -1646,24 +1659,27 @@ function artFlow(focus,progress,alive){
     const tx=pup.left+(60+(tp[0]-60)*pup.fxv)*pup.k,ty=pup.top+tp[1]*pup.k,nx=(tx-L)/cw*W,ny=(ty-T)/ch*H;
     if(!tip)tip={x:nx,y:ny};
     if(press>.12){const R=diag*(.03+.026*press),steps=Math.max(1,Math.ceil(Math.hypot(nx-tip.x,ny-tip.y)/(R*.2)));
-      for(let i=1;i<=steps;i++)dab(tip.x+(nx-tip.x)*i/steps,tip.y+(ny-tip.y)*i/steps,R,.065*press)}
-    tip.x=nx;tip.y=ny;
+      for(let i=1;i<=steps;i++)dab(tip.x+(nx-tip.x)*i/steps,tip.y+(ny-tip.y)*i/steps,R,.065*press);
+      if(fxOn('sparks')&&Math.random()<press*.5)sparks.push({x:tx,y:ty,vx:(Math.random()-.5)*60,vy:-20-Math.random()*50,life:1,c:$('#ptTip').getAttribute('fill')||'#F2C14E'})}
+    tip.x=nx;tip.y=ny;sparkDraw(sparks,dt);
     // the whole picture also rises slowly out of the white as the music goes on; at the end it comes fully to light
-    let gA=Math.pow(clamp(progress(),0,1),1.25)*.8;if(end){const e=clamp((now-end.t)/end.ms,0,1),s=e*e*(3-2*e);gA=endFrom+(1-endFrom)*s;if(e>=1){running=false;helper.classList.remove('flowing');armRest();paint1(1);end.done();return}}
-    paint1(gA)};
-  function paint1(gA){const g=art.getContext('2d');g.globalCompositeOperation='source-over';g.globalAlpha=1;g.drawImage(paper,0,0);
-    g.globalAlpha=gA;g.drawImage(shown,0,0);g.globalAlpha=1;
-    const w=work.getContext('2d');w.globalCompositeOperation='copy';w.drawImage(shown,0,0);w.globalCompositeOperation='destination-in';w.drawImage(mask,0,0);w.globalCompositeOperation='source-over';g.drawImage(work,0,0)}
+    if(end){const e=clamp((now-end.t)/end.ms,0,1),s=e*e*(3-2*e);if(e>=1){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);paint1(1);end.done();return}paint1(.85+.15*s,wipe+(1.25-wipe)*s);return}
+    if(redraw)paint1(.85,wipe)};
+  // the picture rises out of the white from the bottom up, just behind the cat's rows; with no row given it shows evenly
+  function paint1(gA,wp){const g=art.getContext('2d');g.globalCompositeOperation='source-over';g.globalAlpha=1;g.drawImage(paper,0,0);
+    const w=work.getContext('2d');
+    if(wp==null){g.globalAlpha=gA;g.drawImage(shown,0,0);g.globalAlpha=1}
+    else{const y=(.97-wp*1.12)*H,f=H*.16;w.globalCompositeOperation='copy';w.drawImage(shown,0,0);w.globalCompositeOperation='destination-in';const gr=w.createLinearGradient(0,y-f,0,y+f*.35);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,`rgba(0,0,0,${gA})`);w.fillStyle=gr;w.fillRect(0,0,W,H);w.globalCompositeOperation='source-over';g.drawImage(work,0,0)}w.globalCompositeOperation='copy';w.drawImage(shown,0,0);w.globalCompositeOperation='destination-in';w.drawImage(mask,0,0);w.globalCompositeOperation='source-over';g.drawImage(work,0,0)}
   requestAnimationFrame(frame);
   return{
     // a newly rendered picture, shaded by the dynamics so far
     image(r,blooms,p){sizeTo(r.W,r.H);const c=mk(W,H),g=c.getContext('2d');g.putImageData(r.img,0,0);shadeBlooms(g,r,p,blooms);
       if(cur){const pg=prev.getContext('2d');pg.globalCompositeOperation='copy';pg.drawImage(shown,0,0);pg.globalCompositeOperation='source-over'}else{prev.getContext('2d').drawImage(c,0,0)}
       cur=c;fadeT=performance.now();faded=false},
-    target(b){tgt={x:b.x,y:b.y,t:performance.now()}},
+    target(){},
     // the last picture, brought fully to light
-    end(r,blooms){return new Promise(res=>{if(!running||!W){res();return}this.image(r,blooms,1);endFrom=Math.pow(clamp(progress(),0,1),1.25)*.8;end={t:performance.now(),ms:REDUCED?1:1400,done:res}})},
-    stop(){running=false;helper.classList.remove('flowing');armRest()}};
+    end(r,blooms){return new Promise(res=>{if(!running||!W){res();return}this.image(r,blooms,1);end={t:performance.now(),ms:REDUCED?1:1400,done:res}})},
+    stop(){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null)}};
 }
 async function paint(scroll=true,still=false){
   stopSong();const job=++liveJob;
@@ -1697,7 +1713,7 @@ async function paint(scroll=true,still=false){
   const finish=async dist=>{
     if(!dist.share.some(v=>v>0)){$('#artStmt').textContent='Fude heard no clear notes, so there is nothing to paint yet.';return}
     const r=await render({...base,share:dist.share});if(flow)await flow.end(r,blooms);drawToArt(r,1,focus,blooms);const img=blooms.length?art.getContext('2d').getImageData(0,0,r.W,r.H):r.img;last={...r,img,kind:mode,id:base.id,seed,params,dist};renderChords(song);
-    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd();
+    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd();if(!still&&!shared)jrPic();
   };
   try{
     if(!live){art.classList.add('busy');await finish(fullDist);return}
@@ -2493,9 +2509,11 @@ setInterval(()=>{if(document.hidden)return;let sum=0;for(let i=0;i<12;i++){WASH.
   // a pool keeps its colour while that note stays among the most heard, so the wash shifts slowly instead of reshuffling
   const keep=WASH.el.map(e=>top.includes(+e.dataset.pc)&&e.dataset.pc!==''?+e.dataset.pc:-1),free=top.filter(pc=>!keep.includes(pc));
   WASH.el.forEach((e,i)=>{const pc=keep[i]>=0?keep[i]:free.length?free.shift():-1,c=pc>=0?hexOf(pc):'';
-    e.dataset.pc=pc>=0?pc:'';if(e.dataset.c===c)return;e.dataset.c=c;c?e.style.setProperty('--c',c):e.style.removeProperty('--c')})},1500);
+    e.dataset.pc=pc>=0?pc:'';if(e.dataset.c===c)return;e.dataset.c=c;c?e.style.setProperty('--c',c):e.style.removeProperty('--c')});
+  // the swirl behind the companion view turns in the same colours
+  if(SIDEMODE){const sw=$('#swirl');for(let i=0;i<4;i++){const pc=top.length?top[i%top.length]:-1;pc>=0?sw.style.setProperty('--sw'+i,hexOf(pc)):sw.style.removeProperty('--sw'+i)}}},1500);
 function bgNote(pc,midi=60,dur=1){
-  WASH.h[pc]+=Math.min(dur,2)+.3;
+  WASH.h[pc]+=Math.min(dur,2)+.3;if(SIDEMODE&&sm.state==='paint'&&!document.hidden)smLyric(pc);
   if(REDUCED||!BG.w)return;
   const x=((pc+.5)/12+(bgRand()-.5)*.06)*BG.w,y=clamp(1-(midi-36)/56,.1,.92)*BG.h;
   BG.notes.push(bgNoteGlyph(x,y,pc,{life:1,s:.9+Math.min(dur,2)*.2,vy:-30,glow:1}));
@@ -2634,6 +2652,91 @@ const following=()=>!!(sp.tok||tb.id||np.on),srcName=()=>tb.id?(tb.site||'the ta
 // with the tab's sound already asked for; Start then tries the tab in front, that tab, and that ready sound, in turn
 const sidFor=id=>new Promise((res,rej)=>chrome.tabCapture.getMediaStreamId({targetTabId:id},v=>chrome.runtime.lastError?rej(new Error(chrome.runtime.lastError.message)):res(v)));
 async function extInvoked(){try{const v=(await chrome.storage.session.get('fudeTab')).fudeTab;return v&&v.tabId?v:null}catch(e){return null}}
+
+/* ---------- the journey: hours of music and paintings made unlock new pets for the painter and new effects ---------- */
+const PET_KEYS=['#FFDCA8','#F7BB74','#EC9F58','#F4B26A','#F2AD62','#FFEBCF','#FFF3E2','#FFD9A6','#E79A55','#E8934B','#C9483A','#E06A57','#4FA38A','#3F8E77','#5A3B2A'];
+const PETS=[
+ {id:'ginger',name:'Ginger',pics:0,hrs:0},
+ {id:'midnight',name:'Midnight',pics:5,hrs:1,coat:['#6B6478','#4A4456','#36303F','#4F4859','#463F50','#8E86A0','#8C849C','#5D566A','#2E2936','#2E2936','#E2B33C','#F2CC5E','#6C5FC7','#5A4EB0','#D9A521']},
+ {id:'snow',name:'Snow',pics:15,hrs:3,coat:['#FFFFFF','#F1F0F4','#DAD8E2','#E9E7EF','#DCD9E4','#FFFFFF','#FFFFFF','#F7F6FA','#C9C6D4','#CFCBD9','#2F4A7A','#41629C','#9FD3E8','#7FBFD9','#3B7FB8']},
+ {id:'sakura',name:'Sakura',pics:40,hrs:8,coat:['#FFE3EC','#F9B9CC','#EE97B0','#F6AFC3','#F3A7BD','#FFF0F5','#FFF4F7','#FFD3DF','#E0869F','#E58AA4','#8E5BB5','#A774CC','#7FC4A0','#69AD8A','#7A3E5A']},
+ {id:'golden',name:'Golden',pics:100,hrs:20,coat:['#FFF1B8','#F4CF5A','#D9A92A','#EDC24B','#E9BE46','#FFF7D6','#FFF8E0','#FBE08A','#C69420','#C99A25','#1F1A14','#3A322A','#C9483A','#B23A2E','#6A4A10']}];
+const EFFECTS=[
+ {id:'sparks',name:'Note sparks',note:'Stars fly off the brush in each note’s color',pics:3,hrs:.5},
+ {id:'frame',name:'Gold frame',note:'Every painting hangs in gold',pics:10,hrs:2},
+ {id:'aurora',name:'Aurora swirl',note:'A brighter, faster swirl behind the music',pics:25,hrs:5},
+ {id:'stars',name:'Constellation',note:'Stars twinkle over the painting',pics:60,hrs:12}];
+const JR=(()=>{let j={};try{j=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{}}catch(e){}return Object.assign({sec:0,pics:0,pet:'ginger',fx:{},seen:[]},j)})();
+// more than one Fude window can count at once, so each adds what it counted to what is stored rather than overwriting it
+const JRD={sec:0,pics:0};
+function jrSave(){try{const o=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{};JR.sec=(o.sec||0)+JRD.sec;JR.pics=(o.pics||0)+JRD.pics;JRD.sec=JRD.pics=0;
+  JR.seen=[...new Set([...(o.seen||[]),...JR.seen])];localStorage.setItem('muse.journey',JSON.stringify(JR))}catch(e){}}
+const jrHas=u=>!!u&&(JR.pics>=u.pics||JR.sec>=u.hrs*3600);
+const hrsTxt=h=>h<1?Math.round(h*60)+' min':h===1?'1 hour':h+' hours';
+const listenTxt=sec=>{const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h} h ${m} min`:`${m} min`};
+function fxOn(id){return !!JR.fx[id]&&jrHas(EFFECTS.find(f=>f.id===id))}
+{let css='';PETS.forEach(p=>{if(!p.coat)return;p.coat.forEach((c,i)=>{const o=PET_KEYS[i];for(const sc of[`body.pet-${p.id} :is(#painter,#mascot)`,`.pj-pet.pet-${p.id}`])css+=`${sc} [fill="${o}"]{fill:${c}}${sc} [stroke="${o}"]{stroke:${c}}${sc} [stop-color="${o}"]{stop-color:${c}}`})});
+  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st)}
+function jrApply(){const b=document.body;PETS.forEach(p=>b.classList.toggle('pet-'+p.id,p.id===JR.pet&&!!p.coat&&jrHas(p)));EFFECTS.forEach(f=>b.classList.toggle('fx-'+f.id,fxOn(f.id)));
+  const sub=$('#smPetsSub');if(sub)sub.textContent=`${JR.pics} painting${JR.pics===1?'':'s'} · ${listenTxt(JR.sec)} of music`}
+// something new comes in: effects switch on by themselves, a new pet waits to be chosen
+function jrCheck(){const fresh=[...PETS,...EFFECTS].filter(u=>u.pics&&jrHas(u)&&!JR.seen.includes(u.id));if(!fresh.length)return;
+  fresh.forEach(u=>{JR.seen.push(u.id);if(EFFECTS.includes(u))JR.fx[u.id]=true});jrSave();jrApply();const u=fresh[fresh.length-1];
+  toast(PETS.includes(u)?`New pet: ${u.name}. Choose it in Pets and effects`:`New effect: ${u.name}`);if(!$('#petSheet').hidden)pjRender()}
+function jrPic(){JR.pics++;JRD.pics++;jrSave();jrCheck();jrApply()}
+setInterval(()=>{if(playing&&!playing.stopped&&playing.live){JR.sec++;JRD.sec++;if(JR.sec%15===0){jrSave();jrCheck();jrApply()}}},1000);
+addEventListener('pagehide',jrSave);
+function pjRender(){
+  $('#pjStats').textContent=`${JR.pics} painting${JR.pics===1?'':'s'} made · ${listenTxt(JR.sec)} of music`;
+  const next=[...PETS,...EFFECTS].filter(u=>u.pics&&!jrHas(u)).map(u=>({u,f:Math.max(JR.pics/u.pics,JR.sec/(u.hrs*3600))})).sort((a,b)=>b.f-a.f)[0];
+  $('#pjNextT').textContent=next?`Next: ${next.u.name}, at ${next.u.pics} paintings or ${hrsTxt(next.u.hrs)} of music`:'Everything is unlocked. The cat is proud of you.';
+  $('#pjNextBar').style.width=(next?Math.min(100,next.f*100):100).toFixed(1)+'%';
+  const pets=$('#pjPets');pets.innerHTML='';
+  PETS.forEach(p=>{const b=document.createElement('button'),ok=jrHas(p),on=ok&&(JR.pet===p.id||(!jrHas(PETS.find(x=>x.id===JR.pet))&&p.id==='ginger'));b.type='button';b.className='pj-pet pet-'+p.id;b.disabled=!ok;b.setAttribute('aria-pressed',on);
+    b.innerHTML=helperSvg.outerHTML.replace(/id="([\w-]+)"/g,`id="$1-pk${p.id}"`).replace(/url\(#([\w-]+)\)/g,`url(#$1-pk${p.id})`).replace(/style="[^"]*"/,'')+`<b>${p.name}</b><small>${ok?(on?'Painting now':'Choose'):`${p.pics} paintings or ${hrsTxt(p.hrs)}`}</small>`;
+    b.setAttribute('aria-label',p.name+(ok?'':`, unlocks at ${p.pics} paintings or ${hrsTxt(p.hrs)} of music`));
+    b.onclick=()=>{JR.pet=p.id;jrSave();jrApply();pjRender()};pets.appendChild(b)});
+  const fx=$('#pjFx');fx.innerHTML='';
+  EFFECTS.forEach(f=>{const b=document.createElement('button'),ok=jrHas(f);b.type='button';b.className='pj-f';b.setAttribute('role','switch');b.disabled=!ok;b.setAttribute('aria-checked',fxOn(f.id));
+    b.innerHTML=`<span>${f.name}<small>${f.note}</small></span>${ok?'<i class="sw" aria-hidden="true"></i>':`<span class="lk">${f.pics} paintings or ${hrsTxt(f.hrs)}</span>`}`;
+    b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)})}
+function pjOpen(){pjRender();const sh=$('#petSheet');sh.hidden=false;(sh.querySelector('button:not([disabled])')||sh).focus()}
+$('#pjClose').onclick=()=>{$('#petSheet').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#petSheet').hidden)$('#petSheet').hidden=true});
+jrApply();
+/* ---------- live, in the companion view: the tone in script, the notes as they go by, and how much of each note there is ---------- */
+const TONE_WORDS={'':'major',m:'minor','7':'seventh',maj7:'major seventh',m7:'minor seventh',sus4:'sus four',sus2:'sus two',dim:'diminished','6':'sixth','m7♭5':'half diminished'};
+const LV={last:0,chord:null,chordAt:0};
+function smLyric(pc){const now=performance.now();if(now-LV.last<140)return;LV.last=now;const box=$('#smLyric'),i=document.createElement('i');i.textContent=NOTE_NAMES[pc];i.style.setProperty('--c',hexOf(pc));box.appendChild(i);while(box.children.length>14)box.firstChild.remove()}
+setInterval(()=>{if(!SIDEMODE||document.hidden)return;const on=sm.state==='paint'&&!!playing&&!playing.stopped&&!!playing.live;const box=$('#smLive');if(box.hidden===on)box.hidden=!on;if(!on){LV.chord=null;return}
+  let d;try{d=playing.dist()}catch(e){return}const sh=d.share,tot=sh.reduce((a,b)=>a+b,0),bar=$('#smDist');
+  if(bar.children.length!==12){bar.innerHTML='';for(let i=0;i<12;i++)bar.appendChild(document.createElement('i'))}
+  [...bar.children].forEach((e,i)=>{e.style.width=tot?(sh[i]/tot*100).toFixed(2)+'%':'0';e.style.background=hexOf(i)});
+  const now=performance.now();if(song&&song.chord){LV.chord=song.chord;LV.chordAt=now}else if(now-LV.chordAt>2500)LV.chord=null;
+  const c=LV.chord,order=[...sh.keys()].sort((a,b)=>sh[b]-sh[a]);let txt='Listening…',a='',b='';
+  if(c){txt=NOTE_NAMES[c.root]+' '+(TONE_WORDS[c.q]!=null?TONE_WORDS[c.q]:'');a=hexOf(c.root);b=hexOf((c.root+(/^m(?!aj)|dim/.test(c.q||'')?3:4))%12)}
+  else if(tot){txt='In '+NOTE_NAMES[order[0]];a=hexOf(order[0]);b=hexOf(sh[order[1]]>0?order[1]:order[0])}
+  const t=$('#smTone');if(t.textContent!==txt){t.textContent=txt;t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop')}
+  if(a){t.style.setProperty('--t0',a);t.style.setProperty('--t1',b)}},500);
+/* ---------- home: the picture is chosen before the painting starts ---------- */
+function smPickName(v){if(v==='any')return'A surprise';const[m,id]=v.split(':');return m==='known'?(PAINTINGS.find(p=>p.id===id)||{}).title:(THEMES.find(t=>t.id===id)||{}).name}
+function smPickBuild(){const g=$('#pkGrid');if(g.children.length)return;const pre=(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})();
+  const add=(v,inner,name,cls)=>{const b=document.createElement('button');b.type='button';b.className='pk'+(cls?' '+cls:'');b.setAttribute('role','option');b.dataset.v=v;b.setAttribute('aria-selected',v===pre);b.innerHTML=`<span class="pic">${inner}</span><small>${esc(name)}</small>`;b.onclick=()=>smChoose(v);g.appendChild(b)};
+  PAINTINGS.slice(0,5).forEach(p=>add('known:'+p.id,`<img alt="" src="${PAINT_SRC[p.id]}" loading="lazy">`,p.title));
+  THEMES.forEach(t=>add('new:'+t.id,'<canvas width="112" height="112" aria-hidden="true"></canvas>',t.name));
+  add('any','?','Surprise me','any');
+  (async()=>{const share=new Array(12).fill(1/12);for(const t of THEMES){try{const r=await render({kind:'theme',id:t.id,share,seed:42,size:112}),cv=g.querySelector(`[data-v="new:${t.id}"] canvas`);cv.getContext('2d').putImageData(r.img,0,0)}catch(e){}await new Promise(requestAnimationFrame)}})()}
+function smHomeShow(on){const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#smChange').hidden=on||!sm.choice;
+  if(on){smPickBuild();$('#pkGrid').querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===(sm.choice||(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})())));
+    if(!sm.err){$('#smTitle').textContent='What should the cat paint?';$('#smSub').textContent=sm.state==='paint'?'Your pick starts with the next song':'Pick a picture. The music gives it its colors.'}}}
+function smChoose(v){sm.choice=v;try{localStorage.setItem('muse.smpick',v)}catch(e){}smHomeShow(false);const name=smPickName(v);
+  if(sm.state==='paint'){toast(`The next song gets ${name}`);$('#smTitle').textContent=$('#artTitle').textContent;return}
+  $('#smTitle').textContent=v==='any'?'A surprise picture':name;
+  if(sm.stream){$('#smSub').textContent='Play some music and the cat starts painting';if(!last){$('#smEmpty').hidden=true}if(sm.loud>=.8)smBegin()}
+  else if(EXT_TAB){$('#smSub').textContent='Now play music in a tab and click the Fude button there';extStep(1)}
+  else{$('#smSub').textContent='Press Start, then play some music';if(!last)$('#smEmpty').hidden=false}}
+function smVeil(on){const box=$('#smode');if(box.classList.contains('veil')===on)return;box.classList.toggle('veil',on);$('#smVeil').hidden=!on;
+  if(!on){box.classList.add('reveal');setTimeout(()=>box.classList.remove('reveal'),1300)}}
 async function tabStream(){
   const [act]=await chrome.tabs.query({active:true,lastFocusedWindow:true}),inv=await extInvoked(),ids=[];
   if(act&&/^https?:/.test(act.url||'https:'))ids.push(act.id);if(inv&&!ids.includes(inv.tabId))ids.push(inv.tabId);
@@ -2787,7 +2890,7 @@ async function smStart(){
   const src=ac.createMediaStreamSource(sm.stream);sm.an=ac.createAnalyser();sm.an.fftSize=2048;sm.buf=new Float32Array(sm.an.fftSize);src.connect(sm.an);sm.src_=src;
   sm.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',()=>smStop()));
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);if(last)$('#smode').classList.remove('blank');$('#smEmpty').querySelectorAll('li.now').forEach(li=>li.classList.remove('now'));
-  smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||following();if(!last&&!following())$('#smTitle').textContent='Play some music';
+  smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||following();if(!last&&!following()&&!$('#smode').classList.contains('home'))$('#smTitle').textContent='Play some music';
   clearInterval(sm.timer);sm.timer=setInterval(smTick,100);if(sp.tok&&!tb.id&&!np.on)spPoll();if(np.on)NP.current().then(npSeen).catch(()=>{})}
 function smStop(){clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);[...$('#spLvl').children].forEach(b=>b.style.transform='');if(sm.src==='sys')spDraw();if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
 // the sound level, ten times a second. Without Spotify, music starts a painting and a pause after a song ends it; with Spotify, its track changes do
@@ -2815,19 +2918,23 @@ function smLevel(){const n=sm.an.frequencyBinCount;if(!sm.fq||sm.fq.length!==n)s
   [[60,250],[250,700],[700,1800],[1800,4500],[4500,11000]].forEach(([lo,hi],k)=>{const a=Math.floor(lo/ny*n),b=Math.max(a+1,Math.floor(hi/ny*n));let m=0;for(let i=a;i<b;i++)m+=sm.fq[i];m/=(b-a)*255;
     bars[k].style.transform=`scaleY(${Math.max(.12,Math.min(1,m*1.6)).toFixed(2)})`})}
 function smBegin(){
-  if(sm.state==='paint'||!sm.stream)return;const tr=spFollow()?sp.now:null;if(sm.src==='cover'&&!tr)return;
-  sm.pendingBegin=false;sm.n++;sm.segT=performance.now()/1000;sm.quiet=0;sm.segLevel=0;sm.heardAt=performance.now();sm.track=tr;sm.pi=(sm.pi+1)%sm.pics.length;const [m,id]=sm.pics[sm.pi].split(':');
+  if(sm.state==='paint'||!sm.stream)return;
+  // a finished picture stays in view a few seconds before the next song covers the canvas again
+  if(performance.now()<(sm.holdUntil||0)){if(!sm.holdT)sm.holdT=setTimeout(()=>{sm.holdT=0;smBegin()},sm.holdUntil-performance.now()+50);return}
+  if(!sm.choice){if(!$('#smode').classList.contains('home'))smHomeShow(true);$('#smStateT').textContent='Hearing music · pick a picture';return}const tr=spFollow()?sp.now:null;if(sm.src==='cover'&&!tr)return;
+  sm.pendingBegin=false;sm.n++;sm.segT=performance.now()/1000;sm.quiet=0;sm.segLevel=0;sm.heardAt=performance.now();sm.track=tr;let ch=sm.choice;if(ch==='any'){sm.pi=(sm.pi+1)%sm.pics.length;ch=sm.pics[sm.pi]}const [m,id]=ch.split(':');
   if(m==='known')pick.painting=id;else pick.theme=id;setMode(m);
   const t=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   const s={id:'side-'+(++recN),title:tr?tr.title:`Song ${sm.n}`,by:tr?tr.by:`Heard at ${t}`,year:t,rec:true,live:sm.src==='cover'?'cover':'mic',stream:sm.stream.clone(),notes:[],chroma:null,timeline:[]};
   if(sm.src==='cover'){sm.coverW=null;coverNotes(tr.small||tr.art).then(w=>{if(sm.track===tr)sm.coverW=w})}
-  addExtra(s);selectSong(s);$('#smEmpty').hidden=true;$('#smode').classList.remove('blank');smSet('paint',`Painting song ${sm.n}`);
+  addExtra(s);selectSong(s);$('#smEmpty').hidden=true;$('#smode').classList.remove('blank');smVeil(true);$('#smLyric').innerHTML='';smSet('paint',`Painting song ${sm.n}`);
   $('#smSub').textContent=tr?`${tr.by} · ${sm.src==='cover'?'painted from the colors of its cover':'the picture grows as it plays'}`:`Heard at ${t} · the picture grows as it plays`;
   paint(false);setTimeout(()=>{$('#smTitle').textContent=$('#artTitle').textContent},120)}
 function smEnd(){if(sm.state!=='paint')return;sm.finishing=true;clearTimeout(sm.finT);sm.finT=setTimeout(()=>{sm.finishing=false;if(sm.pendingBegin&&sm.stream){sm.pendingBegin=false;smBegin()}},10000);sm.track=null;smSet(sm.stream?'wait':'off',sm.stream?(following()?(sp.now&&!sp.now.playing?srcName()+' is paused':'Following '+srcName()):'Listening for the next song…'):'Not listening');sm.loud=0;if(playing&&!playing.stopped)playing.stop()}
 // a finished song: its picture joins the strip and the gallery, and a song already waiting starts
 function smDone(){
-  sm.finishing=false;clearTimeout(sm.finT);const fresh=last&&last!==sm.lastRef;sm.lastRef=last;
+  sm.finishing=false;clearTimeout(sm.finT);const fresh=last&&last!==sm.lastRef;sm.lastRef=last;smVeil(false);
+  if(fresh&&!sm.noHold)sm.holdUntil=performance.now()+9000;sm.noHold=false;
   if(sm.pendingBegin&&sm.stream){sm.pendingBegin=false;setTimeout(smBegin,0)}
   if(!fresh)return;
   $('#smSave').disabled=!last;if(!sm.err)$('#smTitle').textContent=$('#artTitle').textContent,$('#smSub').textContent=`Done · saved to your gallery${sm.stream?(following()?' · the next track gets a new one':' · listening for the next song'):''}`;
@@ -2840,7 +2947,7 @@ function smSource(k,quiet){npAsked();sm.src=k;try{localStorage.setItem('muse.sms
   if(!quiet&&sm.stream){smStop();smStart()}else if(!quiet&&k==='cover'&&NP&&!np.on)npStart()}
 let smHere=null;
 function smInit(){
-  if(sm.ready){document.body.classList.add('sidemode');$('#smode').hidden=false;$('#smCanvas').appendChild(art);spDraw();if(sp.tok)spPoll();if(sm.wasOn){sm.wasOn=false;smStart()}return}
+  if(sm.ready){document.body.classList.add('sidemode');$('#smode').hidden=false;$('#smCanvas').appendChild(art);if(sm.state!=='paint')smHomeShow(true);spDraw();if(sp.tok)spPoll();if(sm.wasOn){sm.wasOn=false;smStart()}return}
   if(!smHere&&document.body.classList.contains('tabs'))smHere={parent:art.parentNode,next:art.nextSibling,y:0};
   sm.ready=true;document.body.classList.add('sidemode');const box=$('#smode');box.hidden=false;$('#smCanvas').appendChild(art);box.classList.toggle('blank',!last);sm.pics=smPics();
   document.title='Fude · listening';
@@ -2848,7 +2955,7 @@ function smInit(){
   if(window.opener||(window.self!==window.top&&!IN_VIEWER)){$('#smHome').target='_blank';$('#smFull').target='_blank'}
   const leave=e=>{if(smHere){e.preventDefault();smLeave()}};$('#smHome').onclick=leave;$('#smFull').onclick=leave;
   $('#smGo').onclick=()=>{if(sm.stream)smStop();else smStart()};
-  $('#smNext').onclick=()=>{if(sm.state==='paint')smEnd();if(!sm.stream)return;if(sm.finishing)sm.pendingBegin=true;else smBegin()};
+  $('#smNext').onclick=()=>{sm.holdUntil=0;sm.noHold=true;if(sm.state==='paint')smEnd();if(!sm.stream)return;if(sm.finishing)sm.pendingBegin=true;else smBegin()};
   $('#smSave').onclick=()=>{const b=$('#smStrip button');if(b)b.click()};
   $('#smLink').onclick=()=>spLink();$('#smZen').onclick=()=>{if(smHere)smLeave();else{SIDEMODE=false;smStop();document.body.classList.remove('sidemode');$('#smode').hidden=true}zenStart()};$('#spUnlink').onclick=()=>spUnlink();
   $('#srcCover').onclick=()=>smSource(sm.src==='cover'?'mic':'cover');$('#srcTab').onclick=()=>smSource(sm.src==='tab'?'mic':'tab');
@@ -2870,7 +2977,7 @@ function smInit(){
     chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
     extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
-  $('#smEmpty').hidden=!!last;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPets').onclick=pjOpen;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
   if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}
