@@ -2794,6 +2794,8 @@ function artFlow(focus,progress,alive){
   const dab=(x,y,R,a)=>{const g=mask.getContext('2d'),gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,`rgba(0,0,0,${a})`);gr.addColorStop(.55,`rgba(0,0,0,${a*.55})`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,2*R,2*R)};
   const frame=now=>{
     if(!running)return;if(!alive()){running=false;helper.classList.remove('flowing');armRest();return}requestAnimationFrame(frame);
+    // in the small companion view, thirty brush frames a second look the same and cost half as much
+    if(SIDEMODE&&now-last<30)return;
     const dt=Math.min(.05,(now-last)/1000);last=now;if(!cur)return;
     // the newest picture fades in over the last one, so colours shift rather than jump
     if(!faded){const a=clamp((now-fadeT)/600,0,1),sg=shown.getContext('2d');sg.globalAlpha=1;sg.drawImage(prev,0,0);sg.globalAlpha=a*a*(3-2*a);sg.drawImage(cur,0,0);sg.globalAlpha=1;if(a>=1)faded=true}
@@ -2891,10 +2893,10 @@ async function paint(scroll=true,still=false){
           const rootNew=root>=0&&root!==lastRoot;if(rootNew){lastRoot=root;const a=root/12*Math.PI*2-Math.PI/2;blooms.push({x:focus[0]+.34*Math.cos(a),y:focus[1]+.3*Math.sin(a),p0:ctl.progress(),lv});flow.target(blooms[blooms.length-1])}
           // a new printed dynamic opens a region of its own, so its shade shows
           if(mk&&mk!==lastMark){if(lastMark!==null||blooms.length){const a=Math.random()*Math.PI*2;blooms.push({x:clamp(focus[0]+.28*Math.cos(a),.12,.88),y:clamp(focus[1]+.24*Math.sin(a),.12,.88),p0:ctl.progress(),lv});flow.target(blooms[blooms.length-1])}if(!(dynSaid[mk]>performance.now()-20000)){painterSay(DYN_WORDS[mk]||'');dynSaid[mk]=performance.now()}lastMark=mk}
-          if(d.share.some(v=>v>0)){const r=await render({...base,share:d.share,light:song.rec?light():base.light});if(job===liveJob){flow.image(r,blooms,ctl.progress());drawChart(d,r.canvasShare)}}
+          if(d.share.some(v=>v>0)){const r=await render({...base,share:d.share,light:song.rec?light():base.light});if(job===liveJob){flow.image(r,blooms,ctl.progress());if(!SIDEMODE)drawChart(d,r.canvasShare)}}
           const lead=d.share.indexOf(Math.max(...d.share));if(d.share[lead]>0)painterTip(hexOf(lead));painterChat({p:ctl.progress(),lead:d.share[lead]>0?lead:-1,root:rootNew?root:-1});
           $('#liveText').textContent=`${song.rec?'Listening':'Playing'} · ${fmtTime(ctl.elapsed())}${song.rec&&song.chord?` · chord ${song.chord.name}`:d.share[lead]>0?` · ${NOTE_NAMES[lead]} leads`:''}`;
-          renderChords(song,true);busy=false}
+          if(!SIDEMODE)renderChords(song,true);busy=false}
         setTimeout(tick,song.rec?600:350)};
       tick();
     });
@@ -3631,7 +3633,7 @@ function introStill(){ // the finished frame, for viewers who prefer reduced mot
   I.barLanded=I.barNeed.slice();I.lastT=12;introFrame(12,0);
 }
 let introT0=performance.now(),introPrev=performance.now(),introVisible=true;
-function introLoop(now){if(introVisible){const dt=clamp((now-introPrev)/1000,0,.05);introFrame((now-introT0)/1000,dt)}introPrev=now;requestAnimationFrame(introLoop)}
+function introLoop(now){if(introVisible&&!SIDEMODE&&!document.hidden){const dt=clamp((now-introPrev)/1000,0,.05);introFrame((now-introT0)/1000,dt)}introPrev=now;requestAnimationFrame(introLoop)}
 new IntersectionObserver(es=>{introVisible=es[0].isIntersecting}).observe($('#introCanvas'));
 $('#introSound').onclick=()=>{const ac=audio(),n=IN_NOTES.length;introT0=performance.now();I=null;
   IN_NOTES.forEach((nn,i)=>tone(nn.midi,ac.currentTime+.05+i/n*IN.ph.notes,.5,.4))};
@@ -3728,9 +3730,11 @@ if(REDUCED)bgFrame(performance.now());else requestAnimationFrame(bgLoop);
 
 /* ---------- boot ---------- */
 setActive(0);paintKeys();renderPaintings();renderSongs();selectSong(SONGS[0]);updatePaintSummary();
-prepIntro().then(()=>{if(REDUCED)introStill();else{introT0=introPrev=performance.now();requestAnimationFrame(introLoop)}
+// the opening animation is made only where it is seen: opened straight into the companion, it waits until the full Fude is shown
+const bootIntro=()=>prepIntro().then(()=>{if(REDUCED)introStill();else{introT0=introPrev=performance.now();requestAnimationFrame(introLoop)}
   // decode the other works while the page is idle, so later loops start without a hitch
   const idle=window.requestIdleCallback||(f=>setTimeout(f,800));let q=INTRO_WORKS.slice();const next=()=>{const id=q.shift();if(!id)return;getLum(id).catch(()=>{}).then(()=>idle(next))};idle(next)});
+if(SIDEMODE)document.addEventListener('muse:leftnow',bootIntro,{once:true});else bootIntro();
 /* ---------- the four steps, ticked off in the menu as you go ---------- */
 function stepDone(k){let st={};try{st=JSON.parse(localStorage.getItem('muse.steps')||'{}')}catch(e){}if(!st[k]){st[k]=1;try{localStorage.setItem('muse.steps',JSON.stringify(st))}catch(e){}}markSteps(st)}
 function markSteps(st){if(!st){st={};try{st=JSON.parse(localStorage.getItem('muse.steps')||'{}')}catch(e){}}

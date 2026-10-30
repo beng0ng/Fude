@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Fude: paint your music",
   "short_name": "Fude",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
   "icons": {
     "16": "icon-16.png",

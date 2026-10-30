@@ -16,7 +16,17 @@ order=sorted(range(3),key=lambda i:('/*ENGINE-START*/' in scripts[i],len(scripts
 kinds={}
 for i,s in enumerate(scripts):
     kinds[i]='muse.js' if '/*ENGINE-START*/' in s else 'theme.js' if len(s)<400 else 'abc.js'
-for i,s in enumerate(scripts):open(f'{OUT}/{kinds[i]}','w').write(s)
+# the paintings as image files beside the script, rather than text inside it: a smaller script to read when the panel opens
+import base64
+def unpack(js):
+    m=re.search(r'const PAINT_SRC = (\{.*?\});\n',js,flags=re.S)
+    if not m:return js
+    srcs=json.loads(m.group(1));os.makedirs(f'{OUT}/img',exist_ok=True);out={}
+    for k,v in srcs.items():
+        head,data=v.split(',',1);ext='jpg' if 'jpeg' in head else 'png' if 'png' in head else 'webp'
+        open(f'{OUT}/img/{k}.{ext}','wb').write(base64.b64decode(data));out[k]=f'img/{k}.{ext}'
+    return js[:m.start(1)]+json.dumps(out)+js[m.end(1):]
+for i,s in enumerate(scripts):open(f'{OUT}/{kinds[i]}','w').write(unpack(s) if kinds[i]=='muse.js' else s)
 k=[0]
 def sub(m):
     i=k[0];k[0]+=1;return f'<script src="{kinds[i]}"></script>'
@@ -62,7 +72,7 @@ navigator.permissions.query({name:'microphone'}).then(p=>{if(p.state==='granted'
 ic=Image.open('site/icon-512.png').convert('RGBA')
 for n in (16,32,48,128):ic.resize((n,n),Image.LANCZOS).save(f'{OUT}/icon-{n}.png')
 music=['https://open.spotify.com/*','https://music.youtube.com/*','https://www.youtube.com/*','https://music.apple.com/*','https://soundcloud.com/*','https://www.deezer.com/*','https://listen.tidal.com/*','https://*.bandcamp.com/*']
-man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.0.2",
+man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.0.3",
  "description":"Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
  "icons":{str(n):f'icon-{n}.png' for n in (16,32,48,128)},
  "action":{"default_title":"Paint this music with Fude","default_icon":{str(n):f'icon-{n}.png' for n in (16,32)}},
