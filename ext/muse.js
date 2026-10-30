@@ -2613,15 +2613,23 @@ try{const k=localStorage.getItem('muse.smsrc');if(k==='cover'||(k==='tab'&&EXT_T
 // in the Android app, with notification access, Fude sees what any music app is playing: the song, its cover, where it is, and play and skip.
 // No Spotify sign-in is needed, so it works for everyone, and with headphones in it is how Fude keeps up with the music
 const NP=(()=>{const C=window.Capacitor,capPlugin=n=>{try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};try{return C&&C.getPlatform&&C.getPlatform()==='android'&&(!C.isNativePlatform||C.isNativePlatform())?capPlugin('NowPlaying'):null}catch(e){return null}})(),np={on:false,app:'',asked:false,h:null};
-const EXT_STEPS='<div class="sm-steps"><b>Paint any tab</b><ol><li><span>Play music in a tab<small>YouTube, Spotify, SoundCloud, anything</small></span></li><li><span>On that tab, click the <span class="tbtn"><i></i></span> Fude button in the toolbar</span></li><li><span>Press Start<small>Each song becomes a new painting</small></span></li></ol></div>';
+const EXT_STEPS='<div class="sm-steps"><b>Paint any tab</b><ol><li><span>Play music in a tab<small>YouTube, Spotify, SoundCloud, anything</small></span></li><li><span>On that tab, click the <span class="tbtn"><i></i></span> Fude button in the toolbar<small>or press Alt+Shift+F</small></span></li><li><span>Fude starts painting<small>Each song becomes a new picture. If nothing happens, press Start</small></span></li></ol></div>';
 // which step to point at when the tab can't be heard
 function extStep(n){const e=$('#smEmpty');if(!e.querySelector('.sm-steps'))e.innerHTML=EXT_STEPS;e.querySelectorAll('li').forEach((li,i)=>li.classList.toggle('now',i===n-1));e.hidden=false;$('#smode').classList.add('blank')}
 const following=()=>!!(sp.tok||tb.id||np.on),srcName=()=>tb.id?(tb.site||'the tab'):np.on?(np.app||'your music app'):'Spotify';
+// Chrome lets Fude hear a tab once its toolbar button was pressed there. The press opens this panel and leaves word of which tab it was,
+// with the tab's sound already asked for; Start then tries the tab in front, that tab, and that ready sound, in turn
+const sidFor=id=>new Promise((res,rej)=>chrome.tabCapture.getMediaStreamId({targetTabId:id},v=>chrome.runtime.lastError?rej(new Error(chrome.runtime.lastError.message)):res(v)));
+async function extInvoked(){try{const v=(await chrome.storage.session.get('fudeTab')).fudeTab;return v&&v.tabId?v:null}catch(e){return null}}
 async function tabStream(){
-  const [t]=await chrome.tabs.query({active:true,lastFocusedWindow:true});
-  if(!t||!/^https?:/.test(t.url||'https:'))throw Object.assign(new Error('no tab'),{name:'NoTab'});
-  const sid=await new Promise((res,rej)=>chrome.tabCapture.getMediaStreamId({targetTabId:t.id},v=>chrome.runtime.lastError?rej(new Error(chrome.runtime.lastError.message)):res(v)));
+  const [act]=await chrome.tabs.query({active:true,lastFocusedWindow:true}),inv=await extInvoked(),ids=[];
+  if(act&&/^https?:/.test(act.url||'https:'))ids.push(act.id);if(inv&&!ids.includes(inv.tabId))ids.push(inv.tabId);
+  if(!ids.length)throw Object.assign(new Error('no tab'),{name:'NoTab'});
+  let sid='',id=null,err=null;for(const k of ids){try{sid=await sidFor(k);id=k;break}catch(e){err=e}}
+  if(!sid&&inv&&inv.streamId&&Date.now()-inv.at<30000){sid=inv.streamId;id=inv.tabId;try{chrome.storage.session.set({fudeTab:{...inv,streamId:''}})}catch(e){}}
+  if(!sid)throw err||new Error('no stream');
   const st=await navigator.mediaDevices.getUserMedia({audio:{mandatory:{chromeMediaSource:'tab',chromeMediaSourceId:sid}},video:false});
+  let t={id};try{t=await chrome.tabs.get(id)}catch(e){}
   tb.id=t.id;tb.title=t.title||'';tb.icon=t.favIconUrl||'';try{tb.site=new URL(t.url).hostname.replace(/^(www|open|music|listen)\./,'')}catch(e){tb.site=''}return st}
 // what the tab says is playing, every two seconds; a site without a Media Session leaves the songs to the sound level
 async function tabPoll(){clearTimeout(tb.timer);if(!tb.id)return;
@@ -2755,7 +2763,8 @@ async function smStart(){
     // capturing a tab silences it, so its sound is played on through Fude
     tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination);setTimeout(tabPoll,300)}
   else if(sm.src==='cover'){sm.dest=ac.createMediaStreamDestination();sm.stream=sm.dest.stream;clearInterval(sm.voiceT);sm.voiceT=setInterval(smVoice,900)}
-  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok||NP?'Fude could not open a microphone here. Headphones on, in the ⋯ menu, follows your music without it.':'Fude could not open a microphone here.';return}
+  else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){
+    if(MUSE_EXT==='panel'&&e&&e.name==='NotAllowedError'){smSet('off','Microphone not allowed yet');$('#smSub').textContent='Chrome asks for the microphone in a new tab. Allow it there, then press Start here.';try{chrome.tabs.create({url:chrome.runtime.getURL('mic.html')})}catch(x){}return}smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok||NP?'Fude could not open a microphone here. Headphones on, in the ⋯ menu, follows your music without it.':'Fude could not open a microphone here.';return}
   const src=ac.createMediaStreamSource(sm.stream);sm.an=ac.createAnalyser();sm.an.fftSize=2048;sm.buf=new Float32Array(sm.an.fftSize);src.connect(sm.an);sm.src_=src;
   sm.stream.getAudioTracks().forEach(t=>t.addEventListener('ended',()=>smStop()));
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);if(last)$('#smode').classList.remove('blank');$('#smEmpty').querySelectorAll('li.now').forEach(li=>li.classList.remove('now'));
@@ -2834,7 +2843,11 @@ function smInit(){
   $('#spPrev').onclick=()=>spCmd('/me/player/previous','POST');$('#spNext').onclick=()=>spCmd('/me/player/next','POST');
   $('#spPlay').onclick=()=>{const p=!!(sp.now&&sp.now.playing);if(sp.now){sp.now.pos+=p?performance.now()-sp.at:0;sp.at=performance.now();sp.now.playing=!p;spDraw()}spCmd(p?'/me/player/pause':'/me/player/play','PUT')};
   const os=$('#smSpotify');if(MOBILE||window.Capacitor){os.href='spotify:';os.removeAttribute('target')}
-  if(MUSE_EXT){$('#smFull').href=$('#smHome').href='full.html';$('#smFull').target=$('#smHome').target='_blank';if(EXT_TAB){document.body.classList.add('ext');$('#smEmpty').innerHTML=EXT_STEPS;$('#smSub').textContent='Fude hears the tab itself, so headphones are fine'}}
+  if(MUSE_EXT){$('#smFull').href=$('#smHome').href='full.html';$('#smFull').target=$('#smHome').target='_blank';if(EXT_TAB){document.body.classList.add('ext');$('#smEmpty').innerHTML=EXT_STEPS;$('#smSub').textContent='Fude hears the tab itself, so headphones are fine';
+    // the Fude button pressed on a tab: start painting it, or move over to it from another tab
+    const go=async v=>{if(!v||!v.tabId||Date.now()-v.at>30000)return;if(sm.src!=='tab')smSource('tab',true);if(sm.stream&&tb.id===v.tabId)return;if(sm.stream)smStop();smStart()};
+    chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
+    extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
   $('#smEmpty').hidden=!!last;spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away

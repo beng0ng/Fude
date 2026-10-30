@@ -5,10 +5,10 @@ Fude sits in the browser's side panel and paints whatever is playing in the tab 
 ## Try it now (unpacked)
 1. Open `chrome://extensions` (or `edge://extensions`) and turn on **Developer mode**.
 2. Choose **Load unpacked** and pick this `fude-extension` folder (or unzip `fude-extension.zip` and pick that).
-3. Pin Fude to the toolbar. Open your music in a tab, then click the Fude button. The side panel opens beside it.
-4. Press **Start**. You'll keep hearing the music through Fude while it paints.
+3. Pin Fude to the toolbar. Open your music in a tab, then click the Fude button (or press **Alt+Shift+F**). The side panel opens beside it and starts painting that tab straight away.
+4. You'll keep hearing the music through Fude while it paints. Clicking the button on another tab moves Fude over to that tab.
 
-If Fude says it can't hear the tab, click the Fude button again while the music tab is in front, then press Start. Chrome only lets an extension listen to a tab after you click its button on that tab. In the ⋯ menu, **Listen to the music tab** off switches to the microphone instead. **All of Fude** opens the full app in a tab.
+If Fude says it can't hear the tab, click the Fude button again while the music tab is in front. Chrome only lets an extension listen to a tab after you click its button on that tab. In the ⋯ menu, **Listen to the music tab** off switches to the microphone instead; the first time, Fude opens a tab where Chrome asks for the microphone, because a side panel can't ask. **All of Fude** opens the full app in a tab.
 
 ## What it asks for, and why
 - **Tab capture, active tab**: to hear the tab you clicked Fude on. Nothing is recorded or sent anywhere.

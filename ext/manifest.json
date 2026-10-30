@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Fude: paint your music",
   "short_name": "Fude",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
   "icons": {
     "16": "icon-16.png",
@@ -28,8 +28,17 @@
     "tabCapture",
     "activeTab",
     "scripting",
-    "identity"
+    "identity",
+    "storage"
   ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "Paint the music in this tab"
+    }
+  },
   "host_permissions": [
     "https://open.spotify.com/*",
     "https://music.youtube.com/*",
