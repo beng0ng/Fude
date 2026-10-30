@@ -966,6 +966,11 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 .painter.stare-golden .pt-eyes{display:none}.painter.stare-golden .pt-happy{display:inline}
 .painter.stare-golden .pt-emo{color:#D9A92A;animation:emoFloat 2.4s ease-in-out infinite,goldGlow 2s infinite}
 #smPause[hidden]{display:none}
+
+.sp-switch{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--muted);flex:none}
+.sp-switch[hidden]{display:none}
+.sp-switch:hover{background:color-mix(in srgb,var(--fg) 7%,transparent);color:var(--fg)}.sp-switch:focus-visible{outline:2px solid var(--focus)}
+.sp-switch svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -1252,6 +1257,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <button type="button" role="menuitem" id="smNext" disabled>New painting</button>
     <button type="button" role="menuitem" id="smSave" disabled>Save this picture</button>
     <button type="button" role="menuitemcheckbox" id="srcTab" aria-checked="false" hidden><span>Listen to the music tab<small>Off uses the microphone</small></span><i class="sw" aria-hidden="true"></i></button>
+    <button type="button" role="menuitem" id="srcSwitch" hidden><span>Switch tab<small>Listen to music in another tab</small></span></button>
     <button type="button" role="menuitemcheckbox" id="srcSys" aria-checked="false" hidden><span>Hear the whole computer<small>For desktop apps like Spotify · best on Windows</small></span><i class="sw" aria-hidden="true"></i></button>
     <button type="button" role="menuitemcheckbox" id="srcCover" aria-checked="false" hidden><span>Headphones on<small>Paints from each song’s cover</small></span><i class="sw" aria-hidden="true"></i></button>
     <a role="menuitem" id="smSpotify" href="https://open.spotify.com" target="_blank" rel="noopener">Open Spotify</a>
@@ -1264,7 +1270,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <button type="button" role="menuitem" id="smAbout">About and privacy</button>
   </div>
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
-    <span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
+    <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
     <div class="sm-pick" id="smPick" hidden><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>

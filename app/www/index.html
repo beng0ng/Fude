@@ -967,6 +967,11 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 .painter.stare-golden .pt-eyes{display:none}.painter.stare-golden .pt-happy{display:inline}
 .painter.stare-golden .pt-emo{color:#D9A92A;animation:emoFloat 2.4s ease-in-out infinite,goldGlow 2s infinite}
 #smPause[hidden]{display:none}
+
+.sp-switch{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--muted);flex:none}
+.sp-switch[hidden]{display:none}
+.sp-switch:hover{background:color-mix(in srgb,var(--fg) 7%,transparent);color:var(--fg)}.sp-switch:focus-visible{outline:2px solid var(--focus)}
+.sp-switch svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -1253,6 +1258,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <button type="button" role="menuitem" id="smNext" disabled>New painting</button>
     <button type="button" role="menuitem" id="smSave" disabled>Save this picture</button>
     <button type="button" role="menuitemcheckbox" id="srcTab" aria-checked="false" hidden><span>Listen to the music tab<small>Off uses the microphone</small></span><i class="sw" aria-hidden="true"></i></button>
+    <button type="button" role="menuitem" id="srcSwitch" hidden><span>Switch tab<small>Listen to music in another tab</small></span></button>
     <button type="button" role="menuitemcheckbox" id="srcSys" aria-checked="false" hidden><span>Hear the whole computer<small>For desktop apps like Spotify · best on Windows</small></span><i class="sw" aria-hidden="true"></i></button>
     <button type="button" role="menuitemcheckbox" id="srcCover" aria-checked="false" hidden><span>Headphones on<small>Paints from each song’s cover</small></span><i class="sw" aria-hidden="true"></i></button>
     <a role="menuitem" id="smSpotify" href="https://open.spotify.com" target="_blank" rel="noopener">Open Spotify</a>
@@ -1265,7 +1271,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <button type="button" role="menuitem" id="smAbout">About and privacy</button>
   </div>
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
-    <span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
+    <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
     <div class="sm-pick" id="smPick" hidden><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
@@ -2006,7 +2012,9 @@ function markSongs(){songsEl.querySelectorAll('.song[data-id]').forEach(d=>{cons
 $('#songQ').addEventListener('input',()=>{showAll=false;if($('#songQ').value.trim()&&chip!=='mine')chip='all';renderSongs()});
 $('#moreSongs').onclick=()=>{showAll=true;renderSongs()};
 const fmtTime=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
-function css(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+// colors read from the stylesheet, remembered for half a second, since reading them is slow and they are asked for every frame
+const cssMemo=new Map();let cssAt=0;
+function css(name){const t=performance.now();if(t-cssAt>500){cssMemo.clear();cssAt=t}let v=cssMemo.get(name);if(v==null){v=getComputedStyle(document.documentElement).getPropertyValue(name).trim();cssMemo.set(name,v)}return v}
 
 // a song as a small record: its notes spiral outward from the center, each arc as long as the note is held
 function drawDisc(cv,s){
@@ -3018,16 +3026,19 @@ function makePaper(W,H){const c=document.createElement('canvas');c.width=W;c.hei
   const v=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.hypot(W,H)*.6);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(90,70,40,.08)');g.fillStyle=v;g.fillRect(0,0,W,H);return c}
 // the Note sparks effect: little stars fly off the brush in the colour it carries, drawn over the picture so they never mark it
 // while the picture is under frosted glass, a clear window follows the brush, so the patch the cat is working on can be seen
-const PEEK={cv:null,x:-1,y:-1};
-function peekDraw(clear){let c=PEEK.cv;const on=!clear&&SIDEMODE&&$('#smode').classList.contains('veil')&&PEEK.x>=0;
-  if(!on){if(c&&c.width)c.getContext('2d').clearRect(0,0,c.width,c.height);return}
+const PEEK={cv:null,x:-1,y:-1,src:null};let smBox=null;
+function peekDraw(clear){if(clear)PEEK.src=null;let c=PEEK.cv;const on=!clear&&SIDEMODE&&$('#smode').classList.contains('veil')&&PEEK.x>=0;
+  if(!on){if(c&&c.width&&PEEK.bb){c.getContext('2d').clearRect(0,0,c.width,c.height);PEEK.bb=null}return}
   if(!c){c=PEEK.cv=document.createElement('canvas');c.className='peek';c.setAttribute('aria-hidden','true')}
   const host=art.parentNode;if(c.parentNode!==host)host.insertBefore(c,art.nextSibling);
   const cw=art.offsetWidth,ch=art.offsetHeight,d=Math.min(2,devicePixelRatio||1);if(!cw||!ch)return;
-  if(c.width!==Math.round(cw*d)||c.height!==Math.round(ch*d)){c.width=Math.round(cw*d);c.height=Math.round(ch*d);c.style.width=cw+'px';c.style.height=ch+'px'}
+  if(c.width!==Math.round(cw*d)||c.height!==Math.round(ch*d)){PEEK.bb=null;c.width=Math.round(cw*d);c.height=Math.round(ch*d);c.style.width=cw+'px';c.style.height=ch+'px'}
   c.style.left=art.offsetLeft+'px';c.style.top=art.offsetTop+'px';
-  const g=c.getContext('2d'),R=Math.min(cw,ch)*.24*d,x=PEEK.x*d,y=PEEK.y*d-R*.15;g.globalCompositeOperation='copy';g.drawImage(art,0,0,c.width,c.height);
-  g.globalCompositeOperation='destination-in';const gr=g.createRadialGradient(x,y,R*.45,x,y,R);gr.addColorStop(0,'#000');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,c.width,c.height);g.globalCompositeOperation='source-over'}
+  // only the box around the brush is copied and masked, never the whole picture
+  const g=c.getContext('2d'),R=Math.min(cw,ch)*.24*d,x=PEEK.x*d,y=PEEK.y*d-R*.15,bb=PEEK.bb;if(bb)g.clearRect(bb[0]-1,bb[1]-1,bb[2]+2,bb[3]+2);
+  const bx=Math.max(0,Math.floor(x-R)),by=Math.max(0,Math.floor(y-R)),bw=Math.min(c.width,Math.ceil(x+R))-bx,bh=Math.min(c.height,Math.ceil(y+R))-by;if(bw<=0||bh<=0){PEEK.bb=null;return}
+  const src=PEEK.src&&PEEK.src.width?PEEK.src:art,kx=src.width/c.width,ky=src.height/c.height;g.globalCompositeOperation='source-over';g.drawImage(src,bx*kx,by*ky,bw*kx,bh*ky,bx,by,bw,bh);
+  g.globalCompositeOperation='destination-in';const gr=g.createRadialGradient(x,y,R*.45,x,y,R);gr.addColorStop(0,'#000');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(bx,by,bw,bh);g.globalCompositeOperation='source-over';PEEK.bb=[bx,by,bw,bh]}
 const SPK={cv:null};
 function sparkDraw(list,dt){
   const c=SPK.cv;if(!list){if(c)c.getContext('2d').clearRect(0,0,c.width,c.height);return}
@@ -3042,8 +3053,10 @@ function sparkDraw(list,dt){
 function artFlow(focus,progress,alive){
   const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
   let W=0,H=0,paper,shown,prev,cur,mask,work,fadeT=0,end=null,running=true,faded=false,last=performance.now(),flipped=pup.fx<0;
-  let tip=null,body=null,ph=0,aim=0,turnAt=0,lastP=0,wipe=0,t0=last,sparks=[],idle=false,wk=0,hold=null;
-  let beat=60/84;try{if(song&&!song.rec)beat=60/clamp(arrangedSong(song).bpm||84,50,168)}catch(e){}if(beat<.42)beat*=2;helper.style.setProperty('--bob',(2*beat).toFixed(2)+'s');const sizeTo=(w,h)=>{if(w===W&&h===H)return;W=w;H=h;art.width=W;art.height=H;paper=makePaper(W,H);shown=mk(W,H);prev=mk(W,H);mask=mk(W,H);work=mk(W,H);cur=null};
+  let tip=null,body=null,ph=0,aim=0,turnAt=0,lastP=0,lastK=0,wipe=0,t0=last,sparks=[],idle=false,wk=0,hold=null;
+  let beat=60/84;try{if(song&&!song.rec)beat=60/clamp(arrangedSong(song).bpm||84,50,168)}catch(e){}if(beat<.42)beat*=2;helper.style.setProperty('--bob',(2*beat).toFixed(2)+'s');// in the small companion view the strokes are laid at the size the picture is shown, not its full size, which is several times less work a frame;
+  // the finished picture is drawn at full size at the end
+  let full=null;const sizeTo=(w,h)=>{const k=SIDEMODE?Math.min(1,Math.max(320,(art.parentNode&&art.parentNode.clientWidth||400)*Math.min(2,devicePixelRatio||1))/Math.max(w,h)*1.15):1;w=Math.round(w*k);h=Math.round(h*k);if(w===W&&h===H)return;W=w;H=h;art.width=W;art.height=H;paper=makePaper(W,H);shown=mk(W,H);prev=mk(W,H);mask=mk(W,H);work=mk(W,H);cur=null};
   helper.classList.add('flowing');
   // the canvas is wiped to white the moment the music starts
   if(art.width&&art.height){sizeTo(art.width,art.height);art.getContext('2d').drawImage(paper,0,0)}
@@ -3053,7 +3066,9 @@ function artFlow(focus,progress,alive){
     if(!running)return;if(!alive()){running=false;helper.classList.remove('flowing');armRest();return}requestAnimationFrame(frame);
     const dt=Math.min(.05,(now-last)/1000);last=now;if(!cur)return;
     // the cat moves every frame so it glides; in the small companion view the picture itself is redrawn thirty times a second, which looks the same and costs half as much
-    const redraw=!SIDEMODE||now-lastP>=30||!!end;if(redraw)lastP=now;
+    // under the frosted glass the picture itself only needs a few frames a second; the clear window over the brush keeps thirty
+    const veiled=SIDEMODE&&smBox.classList.contains('veil'),redraw=(!SIDEMODE||now-lastP>=(veiled?150:30)||!!end)&&!(idle&&faded&&!end&&!sparks.length);if(redraw)lastP=now;
+    const peekNow=veiled&&now-lastK>=30&&!idle;if(peekNow)lastK=now;
     // the newest picture fades in over the last one, so colours shift rather than jump
     if(!faded&&redraw){const a=clamp((now-fadeT)/600,0,1),sg=shown.getContext('2d');sg.globalAlpha=1;sg.drawImage(prev,0,0);sg.globalAlpha=a*a*(3-2*a);sg.drawImage(cur,0,0);sg.globalAlpha=1;if(a>=1)faded=true}
     // where the cat is working: row by row from the bottom of the canvas to the top, sweeping across and back like a house painter;
@@ -3087,7 +3102,7 @@ function artFlow(focus,progress,alive){
     tip.x=nx;tip.y=ny;sparkDraw(sparks,dt);PEEK.x=tx-L;PEEK.y=ty-T;
     // the whole picture also rises slowly out of the white as the music goes on; at the end it comes fully to light
     if(end){const e=clamp((now-end.t)/end.ms,0,1),s=e*e*(3-2*e);if(e>=1){running=false;helper.classList.remove('flowing');armRest();sparkDraw(null);peekDraw(true);paint1(1);end.done();return}paint1(.85+.15*s,wipe+(1.25-wipe)*s);peekDraw();return}
-    if(redraw){paint1(.85,wipe);peekDraw()}};
+    if(redraw)paint1(.85,wipe);if(peekNow||redraw&&veiled){PEEK.src=shown;peekDraw()}};
   // the picture rises out of the white from the bottom up, just behind the cat's rows; with no row given it shows evenly
   function paint1(gA,wp){const g=art.getContext('2d');g.globalCompositeOperation='source-over';g.globalAlpha=1;g.drawImage(paper,0,0);
     const w=work.getContext('2d');
@@ -3096,7 +3111,9 @@ function artFlow(focus,progress,alive){
   requestAnimationFrame(frame);
   return{
     // a newly rendered picture, shaded by the dynamics so far
-    image(r,blooms,p){sizeTo(r.W,r.H);const c=mk(W,H),g=c.getContext('2d');g.putImageData(r.img,0,0);shadeBlooms(g,r,p,blooms);
+    image(r,blooms,p){sizeTo(r.W,r.H);const c=mk(W,H),g=c.getContext('2d');
+      if(W===r.W&&H===r.H){g.putImageData(r.img,0,0);shadeBlooms(g,r,p,blooms)}
+      else{if(!full||full.width!==r.W||full.height!==r.H)full=mk(r.W,r.H);const fg=full.getContext('2d');fg.putImageData(r.img,0,0);shadeBlooms(fg,r,p,blooms);g.imageSmoothingQuality='high';g.drawImage(full,0,0,W,H)}
       if(cur){const pg=prev.getContext('2d');pg.globalCompositeOperation='copy';pg.drawImage(shown,0,0);pg.globalCompositeOperation='source-over'}else{prev.getContext('2d').drawImage(c,0,0)}
       cur=c;fadeT=performance.now();faded=false},
     target(){},
@@ -3579,7 +3596,7 @@ function galleryAbout(g){return g&&g.song?`${g.song}${g.by?' by '+g.by:''}${g.ms
 function renderGallery(){
   const box=$('#galleryBox'),strip=$('#gstrip');if(!gallery.length){box.hidden=true;return}box.hidden=false;strip.innerHTML='';
   gallery.forEach((g,i)=>{const b=document.createElement('button');b.type='button';b.className='gthumb';const about=galleryAbout(g);b.title='Open '+g.title+(about?'\n'+about:'');b.setAttribute('aria-label','Open '+g.title+(about?'. '+about:''));
-    b.innerHTML=`<img src="${g.thumb}" alt="">${g.song?`<span class="gcap"><b>♪ ${esc(g.song)}</b><small>${esc([g.by,g.ms?'painted in '+fmtTime(g.ms/1000):''].filter(Boolean).join(' · '))}</small></span>`:''}<span class="gx" role="button" aria-label="Remove ${esc(g.title)} from the gallery">×</span>`;
+    b.innerHTML=`<img src="${/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(g.thumb||''))?g.thumb:''}" alt="">${g.song?`<span class="gcap"><b>♪ ${esc(g.song)}</b><small>${esc([g.by,g.ms?'painted in '+fmtTime(g.ms/1000):''].filter(Boolean).join(' · '))}</small></span>`:''}<span class="gx" role="button" aria-label="Remove ${esc(g.title)} from the gallery">×</span>`;
     b.onclick=e=>{if(e.target.classList.contains('gx')){gallery.splice(i,1);saveGallery();renderGallery();return}if(g.pic)galleryDownload(g);else if(!openShared(g.code))toast('That painting could not be opened.')};
     b.onkeydown=e=>{if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();gallery.splice(i,1);saveGallery();renderGallery();toast('Removed from the gallery')}};
     strip.appendChild(b)});
@@ -4137,7 +4154,7 @@ function pjRender(){
     b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)})}
 function glOpen(){const l=$('#glList');l.innerHTML=gallery.length?'':'<p class="muted">Paintings you make appear here, each with the song it heard.</p>';
   gallery.forEach(g=>{const b=document.createElement('button');b.type='button';b.className='gl-item';
-    b.innerHTML=`<img src="${g.thumb}" alt=""><span><b>${esc(g.title)}</b>${g.song?`<small class="gl-song">♪ ${esc(g.song)}${g.by?' · '+esc(g.by):''}</small>`:''}<small>${[g.ms?'Painted in '+fmtTime(g.ms/1000):'',new Date(g.t).toLocaleDateString([],{month:'short',day:'numeric'})].filter(Boolean).join(' · ')}</small></span>`;
+    b.innerHTML=`<img src="${/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(g.thumb||''))?g.thumb:''}" alt=""><span><b>${esc(g.title)}</b>${g.song?`<small class="gl-song">♪ ${esc(g.song)}${g.by?' · '+esc(g.by):''}</small>`:''}<small>${[g.ms?'Painted in '+fmtTime(g.ms/1000):'',new Date(g.t).toLocaleDateString([],{month:'short',day:'numeric'})].filter(Boolean).join(' · ')}</small></span>`;
     b.onclick=()=>{if(g.pic)galleryDownload(g);else if(MUSE_EXT||!smHere){window.open(($('#smFull').getAttribute('href')||'./?full=1')+'#'+g.code,'_blank')}else{$('#galSheet').hidden=true;smLeave();openShared(g.code)}};l.appendChild(b)});
   const sh=$('#galSheet');sh.hidden=false;$('#glClose').focus()}
 $('#glClose').onclick=()=>{$('#galSheet').hidden=true};
@@ -4243,6 +4260,16 @@ function smChoose(v){tuneBack();$('#pkColors').hidden=true;$('#pkGrid').hidden=f
   else{$('#smSub').textContent='Press Start, then play some music';if(!last)$('#smEmpty').hidden=false}}
 function smVeil(on){const box=$('#smode');if(box.classList.contains('veil')===on)return;box.classList.toggle('veil',on);$('#smVeil').hidden=!on;
   if(!on){box.classList.add('reveal');setTimeout(()=>box.classList.remove('reveal'),1300)}}
+// Switch tab: Chrome's own picker lists the open tabs, and the one chosen is heard without being silenced; Chrome's sharing bar
+// then offers to share another tab instead, so the music can move from tab to tab without coming back here
+async function switchTab(){let st;
+  try{st=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'browser',width:{max:160},height:{max:120},frameRate:{max:1}},audio:{suppressLocalAudioPlayback:false,echoCancellation:false,noiseSuppression:false,autoGainControl:false},preferCurrentTab:false,selfBrowserSurface:'exclude',surfaceSwitching:'include',systemAudio:'exclude',monitorTypeSurfaces:'exclude'})}
+  catch(e){if(e&&e.name!=='NotAllowedError'&&e.name!=='AbortError')toast('Chrome could not open its tab picker here');return}
+  const au=st.getAudioTracks();if(!au.length){st.getTracks().forEach(t=>t.stop());toast('Choose a tab and keep “Also share tab audio” on');return}
+  if(sm.stream)smStop();sm.picked={all:st,audio:new MediaStream(au),on:false};smSource('tab',true);smStart()}
+// which tab that is, for its song name: the tab making sound
+async function pickedTab(){try{const ts=(await chrome.tabs.query({audible:true})).filter(t=>/^https?:/.test(t.url||''));const t=ts.find(x=>x.id===tb.id)||ts[0];
+  if(t){tb.id=t.id;tb.title=t.title||'';tb.icon=t.favIconUrl||'';try{tb.site=new URL(t.url).hostname.replace(/^(www|open|music|listen)\./,'')}catch(e){tb.site=''}}}catch(e){}}
 async function tabStream(){
   const [act]=await chrome.tabs.query({active:true,lastFocusedWindow:true}),inv=await extInvoked(),ids=[];
   if(act&&/^https?:/.test(act.url||'https:'))ids.push(act.id);if(inv&&!ids.includes(inv.tabId))ids.push(inv.tabId);
@@ -4254,14 +4281,17 @@ async function tabStream(){
   let t={id};try{t=await chrome.tabs.get(id)}catch(e){}
   tb.id=t.id;tb.title=t.title||'';tb.icon=t.favIconUrl||'';try{tb.site=new URL(t.url).hostname.replace(/^(www|open|music|listen)\./,'')}catch(e){tb.site=''}return st}
 // what the tab says is playing, every two seconds; a site without a Media Session leaves the songs to the sound level
-async function tabPoll(){clearTimeout(tb.timer);if(!tb.id)return;
+async function tabPoll(){clearTimeout(tb.timer);if(sm.picked&&sm.picked.on)await pickedTab();if(!tb.id){if(sm.picked&&sm.picked.on)tb.timer=setTimeout(tabPoll,3000);return}
   try{const [r]=await chrome.scripting.executeScript({target:{tabId:tb.id},world:'MAIN',func:()=>{const ms=navigator.mediaSession,m=ms&&ms.metadata;if(!m||!m.title)return null;const a=[...(m.artwork||[])],els=[...document.querySelectorAll('audio,video')];
       // where the song is, for the lyrics: the playing audio or video, or a music site's own time readout
       const el=els.filter(e=>e.duration>0&&isFinite(e.duration)).sort((x,y)=>(x.paused-y.paused)||(y.duration-x.duration))[0],sec=t=>{const p=String(t||'').trim().split(':').map(Number);return p.length>1&&p.every(n=>n===n)?p.reduce((a,n)=>a*60+n,0):NaN};
       let pos=el?el.currentTime:NaN,dur=el?el.duration:NaN;const q=s=>document.querySelector(s);const pp=q('[data-testid="playback-position"]'),pd=q('[data-testid="playback-duration"]');if(pp&&pd){pos=sec(pp.textContent);dur=sec(pd.textContent)}
       return{title:m.title,by:m.artist||'',art:a.length?a[a.length-1].src:'',small:a.length?a[0].src:'',pos:pos===pos?pos*1000:0,dur:dur===dur?dur*1000:0,playing:ms.playbackState==='playing'||(ms.playbackState!=='paused'&&(!els.length||els.some(e=>!e.paused)))}}});
     try{const t=await chrome.tabs.get(tb.id);tb.title=t.title||tb.title;tb.icon=t.favIconUrl||tb.icon}catch(e){}
-    const m=r&&r.result;spSeen(m?{id:m.title+'|'+m.by,title:m.title,by:m.by||tb.site,art:m.art,small:m.small||m.art,dur:m.dur||0,pos:m.pos||0,playing:m.playing}:null)}catch(e){}
+    // what a page reports is its own to say: only short text, plain numbers and web or data images are taken from it
+    const r0=r&&r.result,str=(v,n)=>String(v==null?'':v).slice(0,n),img=v=>{v=str(v,4000);return/^(https:|http:|data:image\/)/i.test(v)?v:''},num=v=>{v=+v;return isFinite(v)&&v>0?Math.min(v,864e5):0};
+    const m=r0&&typeof r0==='object'&&r0.title?{title:str(r0.title,200),by:str(r0.by,200),art:img(r0.art),small:img(r0.small),dur:num(r0.dur),pos:num(r0.pos),playing:!!r0.playing}:null;
+    spSeen(m?{id:m.title+'|'+m.by,title:m.title,by:m.by||tb.site,art:m.art,small:m.small||m.art,dur:m.dur,pos:m.pos,playing:m.playing}:null)}catch(e){}
   if(tb.id)tb.timer=setTimeout(tabPoll,document.hidden?5000:2000)}
 // Spotify: the client ID of a Spotify app made at developer.spotify.com, with this page's address as its redirect URI. Left empty, linking stays off
 const SPOTIFY_CLIENT_ID='';
@@ -4389,10 +4419,10 @@ async function smStart(){
   if(sm.src==='sys'){try{sm.stream=await sysStream();spDraw()}catch(e){const n=e&&e.name;sm.err=n||'error';smSet('off',n==='Cancelled'?'Not listening':'Can’t hear the computer');
       $('#smTitle').textContent=n==='NoAudio'?'No computer sound was shared':n==='Cancelled'?'Ready when the music is':'Chrome didn’t share the screen';
       $('#smSub').textContent=n==='NoAudio'?'Choose Entire screen and turn on Share system audio. If your computer can’t share it (many Macs can’t), play Spotify in a tab at open.spotify.com instead.':n==='Cancelled'?'Press Start and choose Entire screen to paint everything this computer plays':'Press Start, choose Entire screen and turn on Share system audio';return}}
-  else if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){const no=e&&e.name==='NoTab';sm.err='tab';smSet('off','Can’t hear that tab');$('#smTitle').textContent=no?'Open your music in a tab':'Click the Fude button on the music tab';
+  else if(sm.src==='tab'){try{sm.stream=sm.picked?sm.picked.audio:await tabStream()}catch(e){const no=e&&e.name==='NoTab';sm.err='tab';smSet('off','Can’t hear that tab');$('#smTitle').textContent=no?'Open your music in a tab':'Click the Fude button on the music tab';
       $('#smSub').textContent=no?'Then come back here and press Start':'Chrome only lets Fude hear a tab after you click its button there. Then press Start.';extStep(no?1:2);return}
     // capturing a tab silences it, so its sound is played on through Fude
-    tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination);setTimeout(tabPoll,300)}
+    if(sm.picked){sm.picked.on=true;await pickedTab()}else{tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination)}setTimeout(tabPoll,300)}
   else if(sm.src==='cover'){sm.dest=ac.createMediaStreamDestination();sm.stream=sm.dest.stream;clearInterval(sm.voiceT);sm.voiceT=setInterval(smVoice,900)}
   else try{sm.stream=await navigator.mediaDevices.getUserMedia(MIC_OPTS)}catch(e){
     if(MUSE_EXT==='panel'&&e&&e.name==='NotAllowedError'){smSet('off','Microphone not allowed yet');$('#smSub').textContent='Chrome asks for the microphone in a new tab. Allow it there, then press Start here.';try{chrome.tabs.create({url:chrome.runtime.getURL('mic.html')})}catch(x){}return}smSet('off',e&&e.name==='NotAllowedError'?'Microphone not allowed':'No microphone');$('#smSub').textContent=e&&e.name==='NotAllowedError'?'Allow the microphone for Fude in your browser’s site settings, then start again.':sp.tok||NP?'Fude could not open a microphone here. Headphones on, in the ⋯ menu, follows your music without it.':'Fude could not open a microphone here.';return}
@@ -4401,7 +4431,7 @@ async function smStart(){
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);if(last)$('#smode').classList.remove('blank');$('#smEmpty').querySelectorAll('li.now').forEach(li=>li.classList.remove('now'));
   smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||following();if(!last&&!following()&&!$('#smode').classList.contains('home'))$('#smTitle').textContent='Play some music';
   clearInterval(sm.timer);sm.timer=setInterval(smTick,100);if(sp.tok&&!tb.id&&!np.on)spPoll();if(np.on)NP.current().then(npSeen).catch(()=>{})}
-function smStop(){clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);[...$('#spLvl').children].forEach(b=>b.style.transform='');if(sm.src==='sys')spDraw();if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
+function smStop(){if(sm.picked){try{sm.picked.all.getTracks().forEach(t=>t.stop())}catch(e){}sm.picked=null}clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);[...$('#spLvl').children].forEach(b=>b.style.transform='');if(sm.src==='sys')spDraw();if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
 // the sound level, ten times a second. Without Spotify, music starts a painting and a pause after a song ends it; with Spotify, its track changes do
 function smTick(){
   if(!sm.an)return;sm.an.getFloatTimeDomainData(sm.buf);let q=0;for(let i=0;i<sm.buf.length;i++)q+=sm.buf[i]*sm.buf[i];const r=Math.sqrt(q/sm.buf.length),now=performance.now()/1000;
@@ -4459,7 +4489,7 @@ function smDone(){
 function smSource(k,quiet){npAsked();sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#srcSys').setAttribute('aria-checked',k==='sys');$('#srcSys').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
   if(!quiet&&sm.stream){smStop();smStart()}else if(!quiet&&k==='cover'&&NP&&!np.on)npStart()}
 let smHere=null;
-function smInit(){
+function smInit(){smBox=$('#smode');
   if(sm.ready){document.body.classList.add('sidemode');$('#smode').hidden=false;$('#smCanvas').appendChild(art);if(sm.state!=='paint')smHomeShow(true);spDraw();if(sp.tok)spPoll();if(sm.wasOn){sm.wasOn=false;smStart()}return}
   if(!smHere&&document.body.classList.contains('tabs'))smHere={parent:art.parentNode,next:art.nextSibling,y:0};
   sm.ready=true;document.body.classList.add('sidemode');const box=$('#smode');box.hidden=false;$('#smCanvas').appendChild(art);box.classList.toggle('blank',!last);sm.pics=smPics();
@@ -4490,7 +4520,7 @@ function smInit(){
     chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
     extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
-  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);$('#smPause').onclick=()=>{sm.held=!sm.held;$('#smPause').textContent=sm.held?'Resume':'Pause';if(!sm.held){sm.idleAt=0;catIdle(false)}};$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);if(EXT_TAB){$('#srcSwitch').hidden=false;$('#spSwitch').hidden=false;$('#srcSwitch').onclick=switchTab;$('#spSwitch').onclick=switchTab}$('#smPause').onclick=()=>{sm.held=!sm.held;$('#smPause').textContent=sm.held?'Resume':'Pause';if(!sm.held){sm.idleAt=0;catIdle(false)}};$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
   if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}
