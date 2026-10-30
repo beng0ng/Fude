@@ -18,13 +18,14 @@ If Fude says it can't hear the tab, click the Fude button again while the music 
 - **Tab capture, active tab**: to hear the tab you clicked Fude on. Nothing is recorded or sent anywhere.
 - **Scripting, and the music sites listed in the manifest**: to read the song's name, artist and cover from the page's Media Session (what your keyboard's media keys and lock screen show).
 - **Side panel**: to show Fude beside the page.
-- **Identity, and the Spotify addresses**: only for the optional Link Spotify.
+- **Storage**: to keep your settings, colors and unlocked pets on this computer.
+- **Desktop capture** (asked for only when you turn on Hear the whole computer) and **identity** (asked for only if Link Spotify is turned on): optional, and not granted at install.
 
 ## Publishing it
-Upload `fude-extension.zip` in the Chrome Web Store developer dashboard (and in Microsoft Partner Center for Edge). The store review will ask why each permission is needed; the list above is the answer.
+Upload `fude-extension.zip` in the Chrome Web Store developer dashboard (and in Microsoft Partner Center for Edge). The store review will ask why each permission is needed; `store/README.md` has the answers ready to paste, along with the listing text.
 
 ## Link Spotify (optional)
-Fude already follows Spotify's web player without a Spotify login. Linking adds play, pause and skip, and lets Fude follow the Spotify desktop or phone app. To turn it on, add `https://<extension-id>.chromiumapp.org/spotify` as a redirect URI in your Spotify app (the ID is shown on `chrome://extensions`; it changes once the extension is in the store). Then set `SPOTIFY_CLIENT_ID` in `muse.js`.
+Fude already follows Spotify's web player without a Spotify login. Linking adds play, pause and skip, and lets Fude follow the Spotify desktop or phone app. To turn it on, add `https://<extension-id>.chromiumapp.org/spotify` as a redirect URI in your Spotify app (the ID is shown on `chrome://extensions`; it changes once the extension is in the store). Then set `SPOTIFY_CLIENT_ID` in `muse.js`. Fude asks for the identity permission the first time someone presses Link Spotify.
 
 ## Rebuilding
 These files are made from the Fude site. When Fude changes, the extension is rebuilt from the new `index.html`: each script becomes its own file, because extension pages can't run inline scripts.

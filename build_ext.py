@@ -72,17 +72,17 @@ navigator.permissions.query({name:'microphone'}).then(p=>{if(p.state==='granted'
 ic=Image.open('site/icon-512.png').convert('RGBA')
 for n in (16,32,48,128):ic.resize((n,n),Image.LANCZOS).save(f'{OUT}/icon-{n}.png')
 music=['https://open.spotify.com/*','https://music.youtube.com/*','https://www.youtube.com/*','https://music.apple.com/*','https://soundcloud.com/*','https://www.deezer.com/*','https://listen.tidal.com/*','https://*.bandcamp.com/*']
-man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.0.8",
+man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.1.0",
  "description":"Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
  "icons":{str(n):f'icon-{n}.png' for n in (16,32,48,128)},
  "action":{"default_title":"Paint this music with Fude","default_icon":{str(n):f'icon-{n}.png' for n in (16,32)}},
  "side_panel":{"default_path":"panel.html"},
  "background":{"service_worker":"background.js"},
- "permissions":["sidePanel","tabCapture","activeTab","scripting","identity","storage"],
- "optional_permissions":["desktopCapture"],
+ "permissions":["sidePanel","tabCapture","activeTab","scripting","storage"],
+ "optional_permissions":["desktopCapture","identity"],
  "content_security_policy":{"extension_pages":"script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"},
  "commands":{"_execute_action":{"suggested_key":{"default":"Alt+Shift+F"},"description":"Paint the music in this tab"}},
- "host_permissions":music+['https://api.spotify.com/*','https://accounts.spotify.com/*'],
+ "host_permissions":music,
  "minimum_chrome_version":"116"}
 open(f'{OUT}/manifest.json','w').write(json.dumps(man,indent=2))
 print(sorted(os.listdir(OUT)))

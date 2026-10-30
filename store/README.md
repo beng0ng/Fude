@@ -1,6 +1,6 @@
 # Fude: release kit
 
-Everything needed to put Fude on the App Store and Google Play. The app itself is in the `fude-app` folder next to this one.
+Everything needed to put Fude on the App Store, Google Play and the Chrome Web Store. The phone app is in the `fude-app` folder next to this one and the browser extension in `fude-extension`.
 
 ## What is in this folder
 
@@ -12,6 +12,9 @@ Everything needed to put Fude on the App Store and Google Play. The app itself i
 | `google-play/phone/1.png` … `5.png` | Phone screenshots for Google Play, 1080 × 1920 |
 | `google-play/feature-graphic.png` | Google Play feature graphic, 1024 × 500 |
 | `google-play/icon-512.png` | Google Play app icon, 512 × 512 |
+| `chrome-web-store/screenshot-1.png` … `5.png` | Chrome Web Store screenshots, 1280 × 800 |
+| `chrome-web-store/promo-small.png` | Chrome Web Store small promo tile, 440 × 280 |
+| `chrome-web-store/icon-128.png` | Chrome Web Store icon (the same one inside the extension) |
 | `privacy.html` | The privacy policy. It is also in `fude-site`, so it goes online with the site. |
 
 ## Store listing
@@ -22,18 +25,20 @@ Everything needed to put Fude on the App Store and Google Play. The app itself i
 **Subtitle (App Store) / short description (Google Play):** Every song becomes a painting
 
 **Promotional text (App Store, can change any time):**
-Keep Fude open while your music plays. It listens, finds the notes, and paints a new picture for every song, while a little cat paints along.
+Pick a famous painting, choose its colors, and let your music repaint it. A little cat paints along, and the more you listen, the more pets and effects you unlock.
 
 **Description:**
 
 Fude turns the music you listen to into paintings.
 
-Put on a song, in Spotify or anywhere else, and open Fude. It listens, works out the notes as they sound, and paints them. Every note has its own color, and each color covers exactly as much of the canvas as its note is played. When the song changes, a new painting begins.
+Put on a song, in Spotify or anywhere else, and open Fude. It listens, works out the notes as they sound, and paints them. Every note has its own color, and each color covers exactly as much of the canvas as its note is played. A little cat paints the picture from the bottom up while the song plays, and when the song changes, a new painting begins.
 
-• Every song becomes a painting: famous pictures like The Starry Night and The Great Wave, recolored by your music, or new abstract ones.
-• Give each note your own color, or start from the color scales of Newton, Scriabin and Rimsky-Korsakov.
-• Listen live through the microphone, play a song from the built-in library, or bring your own music and sheet music.
-• A gallery keeps every painting, with a chart of the notes behind it. Save posters or share them.
+• Start from a famous picture like The Starry Night or The Great Wave, or a new abstract one, and let the music recolor it while every brushstroke stays sharp.
+• Choose the colors: your own, a preset like Sunset, Ocean or Neon night, a color wheel, or the scales of Newton, Scriabin and Rimsky-Korsakov.
+• Watch the song's mood in words, the notes as they arrive, and the lyrics scrolling in time when Fude knows the song.
+• Earn new pets and effects the more you listen and paint. When the music stops, your pet stops too and looks up at you.
+• A gallery keeps every painting with the song it came from and how long it took to paint. Save posters or share them.
+• Listen through the microphone, follow your music app on Android, play songs from the built-in library, or bring your own.
 • Calm by design: light and dark modes, a zen mode, and no ads.
 
 Private by design: Fude works out the notes on your device. Nothing it hears is recorded or sent anywhere, and it has no accounts and no tracking.
@@ -50,9 +55,51 @@ music,painting,art,visualizer,color,synesthesia,notes,zen,relax,piano,song,canva
 
 ## Privacy answers
 
-- **App Store, App Privacy:** choose **Data Not Collected**. Fude has no server, no analytics and no tracking. The microphone is processed on the device and never leaves it.
+- **App Store, App Privacy:** choose **Data Not Collected**. Fude has no server, no analytics and no tracking. The microphone is processed on the device and never leaves it. The only thing sent anywhere is a song's title, artist and length to LRCLIB for lyrics, which is not linked to the person and can be switched off, so it does not count as collected data.
 - **Google Play, Data safety:** "Does your app collect or share any of the required user data types?" **No.** Sound the app processes on the device only, without sending it off the device, does not count as collected. The same goes for the song names and covers the Android app reads from the music app with headphones in: they never leave the phone.
 - **Export compliance (App Store):** already answered in the app (`ITSAppUsesNonExemptEncryption` is set to NO), because Fude only uses standard HTTPS.
+
+## Chrome Web Store (and Microsoft Edge Add-ons)
+
+Upload `fude-extension.zip`. The same zip works for Edge in Microsoft Partner Center.
+
+**Name:** Fude: paint your music (taken from the extension itself)
+
+**Summary (132 characters max):** Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.
+
+**Category:** Entertainment. **Language:** English.
+
+**Description:**
+
+Fude turns the music playing in your browser into paintings, right in the side panel.
+
+Play a song on Spotify, YouTube, YouTube Music, Apple Music, SoundCloud, Deezer, Tidal, Bandcamp or any other site, then click the Fude button. Fude hears that tab (headphones are fine, no microphone needed), works out the notes as they sound and paints them. Every note has its own color, and each color covers exactly as much of the canvas as its note is played. A little cat paints from the bottom up while the song plays, and a new painting starts with every new song.
+
+• Pick a famous painting or an abstract one each time you open Fude, then choose its colors: your own, a preset, a color wheel, or a mood you describe.
+• A peek window shows the corner the cat is painting; the full picture is revealed when it's done.
+• See the song's mood, the notes as they arrive, and the lyrics scrolling in time with the song.
+• Earn new pets and effects the more you listen and paint. When the music stops, your pet stops and looks up at you; press Pause to keep the painting open.
+• Switch tab lets Fude follow music in another tab, and Hear the whole computer covers desktop apps on Windows and ChromeOS.
+• A gallery keeps every painting with its song and how long it took.
+
+Private by design: the sound is turned into notes on your computer and is never recorded or sent. No accounts, no ads, no tracking.
+
+**Single purpose:** Fude turns the music playing in a browser tab into a painting shown in the side panel.
+
+**Permission justifications** (paste each into its box):
+- `sidePanel`: Fude's whole interface is the side panel beside the music tab.
+- `tabCapture`: to hear the music tab the person clicked Fude's button on, or picked with Switch tab, and turn its sound into notes on the computer. Nothing is recorded or sent.
+- `activeTab`: lets Fude capture and read the tab only after the person clicks its button on that tab.
+- `scripting`: to read the song's title, artist, cover and play position from the page's Media Session on the listed music sites, so each painting is named after its song and a new painting starts when the song changes.
+- `storage`: keeps settings, colors and unlocked pets on the computer.
+- Host permissions (open.spotify.com, music.youtube.com, www.youtube.com, music.apple.com, soundcloud.com, www.deezer.com, listen.tidal.com, *.bandcamp.com): the music sites whose Media Session Fude reads, as above. Nothing else on the page is read.
+- Optional `desktopCapture`: asked for only when the person turns on Hear the whole computer, to hear a desktop music app. Only the sound is kept.
+- Optional `identity`: asked for only if Spotify linking is ever turned on (it is off in this release).
+- **Remote code:** No, Fude does not use remote code. All scripts are in the package.
+
+**Data usage (Privacy practices tab):** tick none of the data types. Then tick all three certifications (no selling, no unrelated use, no creditworthiness use). Song titles and artists are sent to LRCLIB only to fetch lyrics and are not collected by Fude.
+
+**Privacy policy URL:** the same `https://<your site>/privacy.html`.
 
 ## Notes for the App Review team
 
@@ -76,7 +123,11 @@ Paste this into App Store Connect under App Review Information → Notes:
    4. Choose Build → Generate Signed App Bundle and create an upload key. **Keep the key file and its password safe.** Every future update must be signed with the same key.
    5. In Play Console, create the app, fill in the listing and the Data safety form from this page, and upload the `.aab` file.
    6. Google requires new personal developer accounts to run a closed test with at least 12 testers for 14 days before they can publish to everyone. Start that test early.
-4. **Spotify linking (optional, can stay off).** The app works with Spotify without linking: through the microphone with a speaker, and on Android with headphones too, by following the music app. The **Link Spotify** button stays hidden until you add a Spotify Client ID (see "Listening with Spotify" in the `fude-app` README). Spotify now allows only 5 hand-picked accounts per app and only opens apps to everyone for registered businesses, so release without it.
+4. **Chrome and Edge**
+   1. Register as a Chrome Web Store developer at chrome.google.com/webstore/devconsole ($5 once).
+   2. Choose **New item**, upload `fude-extension.zip`, and fill in the listing, privacy tab and permission answers from the Chrome Web Store section above. Add the pictures from `chrome-web-store`.
+   3. For Edge, sign in at partner.microsoft.com/dashboard/microsoftedge (free) and upload the same zip.
+5. **Spotify linking (optional, can stay off).** The app works with Spotify without linking: through the microphone with a speaker, and on Android with headphones too, by following the music app. The **Link Spotify** button stays hidden until you add a Spotify Client ID (see "Listening with Spotify" in the `fude-app` README). Spotify now allows only 5 hand-picked accounts per app and only opens apps to everyone for registered businesses, so release without it.
 
 ## For each update
 
@@ -85,3 +136,4 @@ Paste this into App Store Connect under App Review Information → Notes:
    - **iPhone:** in Xcode, under General → Identity.
 2. Copy the new `fude-site` files into `fude-app/www`.
 3. Run `npx cap sync` and build again.
+4. **Extension:** upload the new `fude-extension.zip` in the Chrome Web Store dashboard under Package. The version inside it must be higher than the last one.

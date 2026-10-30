@@ -4309,8 +4309,9 @@ addEventListener('muse:theme',sysBars);try{matchMedia('(prefers-color-scheme: da
 // About: the version, and what Fude does with what it hears
 $('#abVer').textContent='Version '+MUSE_VERSION;if(IN_VIEWER)$('#abMore').hidden=true;
 $('#smAbout').onclick=()=>{$('#aboutSheet').hidden=false;$('#abClose').focus()};$('#abClose').onclick=()=>{$('#aboutSheet').hidden=true};
-const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.identity&&chrome.identity.launchWebAuthFlow);
-const spRedirect=()=>NATIVE?SP_APP_REDIRECT:EXT_ID?chrome.identity.getRedirectURL('spotify'):location.origin+location.pathname,spCan=()=>!!sp.id&&!IN_VIEWER&&(NATIVE||EXT_ID||/^https?:$/.test(location.protocol));
+// the extension asks for chrome.identity only when someone links Spotify
+const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.permissions&&chrome.runtime&&chrome.runtime.id);
+const spRedirect=()=>NATIVE?SP_APP_REDIRECT:EXT_ID?(chrome.identity?chrome.identity.getRedirectURL('spotify'):'https://'+chrome.runtime.id+'.chromiumapp.org/spotify'):location.origin+location.pathname,spCan=()=>!!sp.id&&!IN_VIEWER&&(NATIVE||EXT_ID||/^https?:$/.test(location.protocol));
 const spFollow=()=>!!((sp.tok||tb.id||np.on)&&sp.now);
 // SHA-256 for the sign-in code, where the browser's own is missing (a page that is not a secure context)
 async function sha256(bytes){if(window.crypto&&crypto.subtle)try{return await crypto.subtle.digest('SHA-256',bytes)}catch(e){}
@@ -4325,6 +4326,7 @@ const b64u=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,
 function spSave(){try{if(sp.tok)localStorage.setItem('muse.spotify',JSON.stringify(sp.tok));else localStorage.removeItem('muse.spotify')}catch(e){}}
 // signing in: Spotify's own page, with a one-time code exchanged here (PKCE), so no secret lives in the app
 async function spLink(){
+  if(EXT_ID){let ok=false;try{ok=await chrome.permissions.request({permissions:['identity']})}catch(e){}if(!ok||!chrome.identity)return toast('Spotify was not linked')}
   const v=b64u(crypto.getRandomValues(new Uint8Array(48))),ch=b64u(await sha256(new TextEncoder().encode(v))),st='muse-'+b64u(crypto.getRandomValues(new Uint8Array(9)));
   try{localStorage.setItem('muse.spv',v);localStorage.setItem('muse.sps',st)}catch(e){}
   const url='https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:sp.id,response_type:'code',redirect_uri:spRedirect(),code_challenge_method:'S256',code_challenge:ch,scope:'user-read-currently-playing user-read-playback-state user-modify-playback-state',state:st});

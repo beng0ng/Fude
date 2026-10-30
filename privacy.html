@@ -34,13 +34,15 @@ a{color:var(--fg)}
 <main>
   <a class="back" href="./" id="back"><span aria-hidden="true">←</span> Back to Fude</a>
   <h1>Privacy</h1>
-  <p class="date">Fude · updated 29 October 2026</p>
+  <p class="date">Fude · updated 30 October 2026</p>
 
   <div class="short"><p>Fude does not collect anything about you. It has no accounts, no ads, no analytics and no tracking, and it has no server of its own. What it hears and what you make stay on your device.</p></div>
 
   <h2>The microphone</h2>
   <p>Fude uses the microphone only while you have asked it to listen, for example after you press <b>Start</b>. It works out the notes being played in real time, on your device, and uses them to paint. The sound is never recorded, saved or sent anywhere. Your phone shows that the microphone is in use whenever Fude is listening, and you can turn the permission off in your phone’s settings at any time.</p>
-  <p>In the browser extension, Fude can listen to a browser tab that you choose instead of the microphone. The same applies: the sound is turned into notes on your computer and is never kept or sent.</p>
+  <h2>The browser extension</h2>
+  <p>In Chrome or Edge, Fude can listen to a browser tab instead of the microphone, but only a tab you click Fude’s button on or pick with <b>Switch tab</b>. If you turn on <b>Hear the whole computer</b>, Chrome asks you first and Fude keeps only the sound. Either way the sound is turned into notes on your computer and is never recorded, kept or sent.</p>
+  <p>On music sites such as Spotify, YouTube, Apple Music, SoundCloud, Deezer, Tidal and Bandcamp, Fude reads what the page already tells your media keys: the song’s name, artist, cover, length and play position. It does not read anything else on the page, and none of it leaves your computer, except the title, artist and length sent for lyrics (below).</p>
 
   <h2>Following your music app (Android)</h2>
   <p>With headphones in, the microphone can’t hear your music. In the Android app you can then let Fude follow your music app instead, by turning on <b>notification access</b> for Fude in Android’s settings. Fude uses it only to see what is playing: the song’s name, artist, cover, length and whether it is playing, and to send play, pause and skip to that app when you press those buttons in Fude. It does not read your notifications. None of this is stored or sent anywhere, and you can turn the access off in Android’s settings at any time.</p>
@@ -67,7 +69,7 @@ a{color:var(--fg)}
   <p>If this policy changes, the new version will be posted on this page with a new date.</p>
 
   <h2>Questions</h2>
-  <p id="contact">Get in touch through Fude’s page on the App Store or Google Play.</p>
+  <p id="contact">Get in touch through Fude’s page on the App Store, Google Play or the Chrome Web Store.</p>
 </main>
 <script>document.getElementById('back').addEventListener('click',e=>{if(history.length>1&&document.referrer){e.preventDefault();history.back()}})</script>
 </body>
