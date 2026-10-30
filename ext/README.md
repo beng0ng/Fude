@@ -10,6 +10,10 @@ Fude sits in the browser's side panel and paints whatever is playing in the tab 
 
 If Fude says it can't hear the tab, click the Fude button again while the music tab is in front. Chrome only lets an extension listen to a tab after you click its button on that tab. In the ⋯ menu, **Listen to the music tab** off switches to the microphone instead; the first time, Fude opens a tab where Chrome asks for the microphone, because a side panel can't ask. **All of Fude** opens the full app in a tab.
 
+**Which music works**
+- Anything playing in a Chrome or Edge tab: YouTube, YouTube Music, Spotify's web player (open.spotify.com), SoundCloud, Apple Music on the web, Deezer, Tidal, Bandcamp. On those sites Fude also shows the song's name and cover and starts a new painting when the song changes; on other sites it shows the tab's title and starts a new painting after a pause.
+- Desktop apps, such as the Spotify app: turn on **Hear the whole computer** in the ⋯ menu. Chrome asks once for permission to capture the screen, then shows its picker: choose **Entire screen** and turn on **Share system audio**. Fude keeps only the sound. This works on Windows and ChromeOS; on many Macs Chrome can't share the computer's sound, so play Spotify in a tab instead.
+
 ## What it asks for, and why
 - **Tab capture, active tab**: to hear the tab you clicked Fude on. Nothing is recorded or sent anywhere.
 - **Scripting, and the music sites listed in the manifest**: to read the song's name, artist and cover from the page's Media Session (what your keyboard's media keys and lock screen show).

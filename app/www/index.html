@@ -615,7 +615,7 @@ body.sidemode .wrap,body.sidemode .mini,body.sidemode #side,body.sidemode #sideT
 .themebtn svg{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
 .top .themebtn{margin-left:auto}
 @media (min-width:761px){.top nav{margin-left:auto}.top .themebtn{margin-left:0}}
-.sm-menu{position:absolute;z-index:3;top:calc(48px + env(safe-area-inset-top,0px));right:14px;min-width:220px;padding:6px;border-radius:14px;background:var(--surface);box-shadow:0 0 0 1px var(--line),0 18px 40px -18px rgba(0,0,0,.35);display:flex;flex-direction:column;animation:menuIn .18s var(--ease)}
+.sm-menu{position:absolute;z-index:40;top:calc(48px + env(safe-area-inset-top,0px));right:14px;min-width:220px;padding:6px;border-radius:14px;background:var(--surface);box-shadow:0 0 0 1px var(--line),0 18px 40px -18px rgba(0,0,0,.35);display:flex;flex-direction:column;animation:menuIn .18s var(--ease)}
 .sm-menu[hidden]{display:none}
 @keyframes menuIn{from{opacity:0;transform:translateY(-4px)}}
 .sm-menu>*{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:9px;font-size:14px;color:var(--fg)}
@@ -750,6 +750,7 @@ body.tabs .mv.cur{background:none;box-shadow:none}
 .sm-canvas:has(#smEmpty:not([hidden])) .sm-empty{top:calc(50% + 46px);max-width:300px;margin-inline:auto}
 /* The browser extension's side panel: how to start, in three steps; the tab being heard, with its sound level; help that stays readable */
 .sm-now span{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-wrap:balance}
+#smode:has(.sm-state:not(.live):not(.wait)) .sm-now span{-webkit-line-clamp:4}
 .sp-lvl{display:none;align-items:flex-end;gap:3px;height:22px;padding:0 8px 0 4px;flex:none}
 .sp-lvl i{width:4px;height:100%;border-radius:2px;background:var(--accent);transform-origin:bottom;transform:scaleY(.12);transition:transform .12s linear}
 #smSp.tabsrc .sp-lvl{display:flex}
@@ -1065,6 +1066,7 @@ body.tabs:not(.sidemode)::after{content:"";position:fixed;left:0;right:0;bottom:
     <button type="button" role="menuitem" id="smNext" disabled>New painting</button>
     <button type="button" role="menuitem" id="smSave" disabled>Save this picture</button>
     <button type="button" role="menuitemcheckbox" id="srcTab" aria-checked="false" hidden><span>Listen to the music tab<small>Off uses the microphone</small></span><i class="sw" aria-hidden="true"></i></button>
+    <button type="button" role="menuitemcheckbox" id="srcSys" aria-checked="false" hidden><span>Hear the whole computer<small>For desktop apps like Spotify · best on Windows</small></span><i class="sw" aria-hidden="true"></i></button>
     <button type="button" role="menuitemcheckbox" id="srcCover" aria-checked="false" hidden><span>Headphones on<small>Paints from each song’s cover</small></span><i class="sw" aria-hidden="true"></i></button>
     <a role="menuitem" id="smSpotify" href="https://open.spotify.com" target="_blank" rel="noopener">Open Spotify</a>
     <button type="button" role="menuitem" id="spUnlink" hidden>Unlink Spotify</button>
@@ -3807,11 +3809,20 @@ if(APP_TABS){document.body.classList.add('tabs');
 const sm={stream:null,state:'off',n:0,segT:0,quiet:0,loud:0,floor:.002,segLevel:0,pics:[],pi:-1,timer:0,an:null,buf:null,made:0,src:'mic',heardAt:0,track:null,coverW:null,dest:null,voiceT:0};
 // in the browser extension Fude hears the music tab itself: its sound through the extension's tab capture, and the song's name and cover from the tab's Media Session
 const EXT_TAB=!!(MUSE_EXT&&window.chrome&&chrome.tabCapture&&chrome.tabs),tb={id:null,timer:0,site:'',through:null};
-try{const k=localStorage.getItem('muse.smsrc');if(k==='cover'||(k==='tab'&&EXT_TAB)||k==='mic')sm.src=k;else if(EXT_TAB)sm.src='tab'}catch(e){if(EXT_TAB)sm.src='tab'}
+try{const k=localStorage.getItem('muse.smsrc');if(k==='cover'||((k==='tab'||k==='sys')&&EXT_TAB)||k==='mic')sm.src=k;else if(EXT_TAB)sm.src='tab'}catch(e){if(EXT_TAB)sm.src='tab'}
 // in the Android app, with notification access, Fude sees what any music app is playing: the song, its cover, where it is, and play and skip.
 // No Spotify sign-in is needed, so it works for everyone, and with headphones in it is how Fude keeps up with the music
 const NP=(()=>{const C=window.Capacitor,capPlugin=n=>{try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};try{return C&&C.getPlatform&&C.getPlatform()==='android'&&(!C.isNativePlatform||C.isNativePlatform())?capPlugin('NowPlaying'):null}catch(e){return null}})(),np={on:false,app:'',asked:false,h:null};
 const EXT_STEPS='<div class="sm-steps"><b>Paint any tab</b><ol><li><span>Play music in a tab<small>YouTube, Spotify, SoundCloud, anything</small></span></li><li><span>On that tab, click the <span class="tbtn"><i></i></span> Fude button in the toolbar<small>or press Alt+Shift+F</small></span></li><li><span>Fude starts painting<small>Each song becomes a new picture. If nothing happens, press Start</small></span></li></ol></div>';
+// the whole computer's sound, through Chrome's screen picker: the way to hear desktop apps such as Spotify's.
+// Chrome shares it with Entire screen on Windows and ChromeOS; the picture itself is dropped at once
+async function sysStream(){
+  const id=await new Promise(res=>chrome.desktopCapture.chooseDesktopMedia(['screen','audio'],v=>res(v)));
+  if(!id)throw Object.assign(new Error('cancelled'),{name:'Cancelled'});
+  const st=await navigator.mediaDevices.getUserMedia({audio:{mandatory:{chromeMediaSource:'desktop',chromeMediaSourceId:id}},video:{mandatory:{chromeMediaSource:'desktop',chromeMediaSourceId:id,maxWidth:8,maxHeight:8,maxFrameRate:1}}});
+  st.getVideoTracks().forEach(t=>{t.stop();st.removeTrack(t)});
+  if(!st.getAudioTracks().length)throw Object.assign(new Error('no audio'),{name:'NoAudio'});
+  return st}
 // which step to point at when the tab can't be heard
 function extStep(n){const e=$('#smEmpty');if(!e.querySelector('.sm-steps'))e.innerHTML=EXT_STEPS;e.querySelectorAll('li').forEach((li,i)=>li.classList.toggle('now',i===n-1));e.hidden=false;$('#smode').classList.add('blank')}
 const following=()=>!!(sp.tok||tb.id||np.on),srcName=()=>tb.id?(tb.site||'the tab'):np.on?(np.app||'your music app'):'Spotify';
@@ -3904,8 +3915,10 @@ function spSeen(t){sp.now=t;sp.at=performance.now();spDraw();if(!sm.stream)retur
     if(sm.state==='wait')smSet('wait','Following '+srcName())}
   else if(sm.state==='paint'){if(!sp.pausedAt)sp.pausedAt=performance.now();else if(performance.now()-sp.pausedAt>15000)smEnd()}
   else if(sm.state==='wait'&&following())smSet('wait',t?srcName()+' is paused':'Waiting for '+srcName()+' to play')}
-function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id||np.on;$('#srcCover').hidden=(!sp.tok&&!NP)||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;$('#smSp').hidden=!on;$('#smSp').classList.toggle('noctl',(!sp.tok&&!np.on)||!!tb.id);$('#smSp').classList.toggle('tabsrc',!!tb.id);$('#smSp').classList.toggle('cover',!!(tb.id&&t&&t.art));
-  if(!on)return;const a=$('#spArt');
+function spDraw(){const t=sp.now,on=following();$('#smLink').hidden=!spCan()||!!sp.tok||!!tb.id||np.on;$('#srcCover').hidden=(!sp.tok&&!NP)||sm.src==='tab';$('#spUnlink').hidden=!sp.tok;const sys=sm.src==='sys'&&!!sm.stream;$('#smSp').hidden=!on&&!sys;$('#smSp').classList.toggle('noctl',(!sp.tok&&!np.on)||!!tb.id||sys);$('#smSp').classList.toggle('tabsrc',!!tb.id||sys);$('#smSp').classList.toggle('cover',!!(tb.id&&t&&t.art));
+  const a=$('#spArt');
+  if(sys&&!on){a.hidden=true;$('#spTitle').textContent='This computer';$('#spBy').innerHTML='<span class="sp-site">Hearing everything it plays</span>';$('.sp-bar').style.visibility='hidden';return}
+  if(!on)return;
   // a tab with no song details: its title and icon, and the site it is on
   if(tb.id&&!t){a.hidden=!tb.icon;if(tb.icon&&a.getAttribute('src')!==tb.icon)a.src=tb.icon;$('#spTitle').textContent=tb.title||tb.site||'The music tab';$('#spBy').innerHTML='<span class="sp-site"></span>';$('#spBy').firstChild.textContent='Hearing '+(tb.site||'the tab');$('#spProg').style.transform='scaleX(0)';spProg();return}
   if(!t){a.hidden=true;a.removeAttribute('src');$('#spTitle').textContent='Nothing playing'+(np.on?'':' on Spotify');$('#spBy').textContent='Play something there, and Fude picks it up here';$('#spProg').style.transform='scaleX(0)';$('#spPlay').classList.remove('on');$('#spPlay').setAttribute('aria-label','Play');return}
@@ -3955,8 +3968,12 @@ function smSet(state,text){sm.state=state;const el=$('#smState');el.className='s
 async function smStart(){
   if(sm.stream)return;const ac=audio();try{await ac.resume()}catch(e){}
   if(sm.src==='cover'&&!sp.tok&&!np.on){if(!NP)smSource('mic',true);else if(!(await npStart()))return}
-  if(sm.src==='tab'&&!EXT_TAB)smSource('mic',true);
-  if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){const no=e&&e.name==='NoTab';smSet('off','Can’t hear that tab');$('#smTitle').textContent=no?'Open your music in a tab':'Click the Fude button on the music tab';
+  if((sm.src==='tab'||sm.src==='sys')&&!EXT_TAB)smSource('mic',true);
+  sm.err='';
+  if(sm.src==='sys'){try{sm.stream=await sysStream();spDraw()}catch(e){const n=e&&e.name;sm.err=n||'error';smSet('off',n==='Cancelled'?'Not listening':'Can’t hear the computer');
+      $('#smTitle').textContent=n==='NoAudio'?'No computer sound was shared':n==='Cancelled'?'Ready when the music is':'Chrome didn’t share the screen';
+      $('#smSub').textContent=n==='NoAudio'?'Choose Entire screen and turn on Share system audio. If your computer can’t share it (many Macs can’t), play Spotify in a tab at open.spotify.com instead.':n==='Cancelled'?'Press Start and choose Entire screen to paint everything this computer plays':'Press Start, choose Entire screen and turn on Share system audio';return}}
+  else if(sm.src==='tab'){try{sm.stream=await tabStream()}catch(e){const no=e&&e.name==='NoTab';sm.err='tab';smSet('off','Can’t hear that tab');$('#smTitle').textContent=no?'Open your music in a tab':'Click the Fude button on the music tab';
       $('#smSub').textContent=no?'Then come back here and press Start':'Chrome only lets Fude hear a tab after you click its button there. Then press Start.';extStep(no?1:2);return}
     // capturing a tab silences it, so its sound is played on through Fude
     tb.through=ac.createMediaStreamSource(sm.stream);tb.through.connect(ac.destination);setTimeout(tabPoll,300)}
@@ -3968,12 +3985,12 @@ async function smStart(){
   sm.loud=sm.quiet=0;sm.heardAt=performance.now();smWake(true);if(last)$('#smode').classList.remove('blank');$('#smEmpty').querySelectorAll('li.now').forEach(li=>li.classList.remove('now'));
   smSet('wait',following()?(sp.now&&sp.now.playing?'Following '+srcName():'Waiting for '+srcName()+' to play'):'Listening for music…');$('#smEmpty').hidden=!!last||following();if(!last&&!following())$('#smTitle').textContent='Play some music';
   clearInterval(sm.timer);sm.timer=setInterval(smTick,100);if(sp.tok&&!tb.id&&!np.on)spPoll();if(np.on)NP.current().then(npSeen).catch(()=>{})}
-function smStop(){clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);[...$('#spLvl').children].forEach(b=>b.style.transform='');if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
+function smStop(){clearInterval(sm.timer);clearInterval(sm.voiceT);sm.pendingBegin=false;if(sm.state==='paint')smEnd();try{sm.stream&&sm.stream.getTracks().forEach(t=>t.stop());sm.src_&&sm.src_.disconnect()}catch(e){}sm.stream=null;sm.dest=null;clearTimeout(tb.timer);[...$('#spLvl').children].forEach(b=>b.style.transform='');if(sm.src==='sys')spDraw();if(tb.id){tb.id=null;try{tb.through&&tb.through.disconnect()}catch(e){}tb.through=null;sp.now=null;spDraw()}smWake(false);smSet('off','Not listening')}
 // the sound level, ten times a second. Without Spotify, music starts a painting and a pause after a song ends it; with Spotify, its track changes do
 function smTick(){
   if(!sm.an)return;sm.an.getFloatTimeDomainData(sm.buf);let q=0;for(let i=0;i<sm.buf.length;i++)q+=sm.buf[i]*sm.buf[i];const r=Math.sqrt(q/sm.buf.length),now=performance.now()/1000;
   if(audio().state!=='running'){$('#smStateT').textContent='Tap Start to begin';return}
-  if(tb.id)smLevel();
+  if(tb.id||sm.src==='sys')smLevel();
   const loudAt=Math.max(sm.floor*3.5,.004),quietAt=Math.max(sm.floor*2.2,sm.segLevel*.1,.0022),follow=spFollow();if(r>loudAt)sm.heardAt=performance.now();
   if(sm.state==='wait'){
     if(r<loudAt)sm.floor+=(Math.min(r,.05)-sm.floor)*.02;
@@ -4009,13 +4026,13 @@ function smDone(){
   sm.finishing=false;clearTimeout(sm.finT);const fresh=last&&last!==sm.lastRef;sm.lastRef=last;
   if(sm.pendingBegin&&sm.stream){sm.pendingBegin=false;setTimeout(smBegin,0)}
   if(!fresh)return;
-  $('#smTitle').textContent=$('#artTitle').textContent;$('#smSave').disabled=!last;$('#smSub').textContent=`Done · saved to your gallery${sm.stream?(following()?' · the next track gets a new one':' · listening for the next song'):''}`;
+  $('#smSave').disabled=!last;if(!sm.err)$('#smTitle').textContent=$('#artTitle').textContent,$('#smSub').textContent=`Done · saved to your gallery${sm.stream?(following()?' · the next track gets a new one':' · listening for the next song'):''}`;
   try{const k=Math.min(1,160/art.height),c=document.createElement('canvas');c.width=Math.round(art.width*k);c.height=Math.round(art.height*k);c.getContext('2d').drawImage(art,0,0,c.width,c.height);
     const full=art.toDataURL('image/jpeg',.92),name=$('#artTitle').textContent,b=document.createElement('button');b.type='button';b.title='Save '+name;b.setAttribute('aria-label','Save '+name);
     b.innerHTML=`<img alt="" src="${c.toDataURL('image/jpeg',.8)}">`;b.onclick=()=>{const a=document.createElement('a');a.href=full;a.download=name.replace(/[^\w\s,-]+/g,'').trim().replace(/\s+/g,'-').slice(0,60)+'.jpg';document.body.appendChild(a);a.click();a.remove()};
     $('#smStrip').prepend(b);sm.made++}catch(e){}}
 // how Fude hears the music: the microphone (a speaker, or the phone's own), or each track's cover when the sound is in headphones
-function smSource(k,quiet){npAsked();sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
+function smSource(k,quiet){npAsked();sm.src=k;try{localStorage.setItem('muse.smsrc',k)}catch(e){}$('#srcCover').setAttribute('aria-checked',k==='cover');$('#srcTab').setAttribute('aria-checked',k==='tab');$('#srcTab').hidden=!EXT_TAB;$('#srcSys').setAttribute('aria-checked',k==='sys');$('#srcSys').hidden=!EXT_TAB;$('#smHp').hidden=true;sm.hinted=false;
   if(!quiet&&sm.stream){smStop();smStart()}else if(!quiet&&k==='cover'&&NP&&!np.on)npStart()}
 let smHere=null;
 function smInit(){
@@ -4030,12 +4047,14 @@ function smInit(){
   $('#smNext').onclick=()=>{if(sm.state==='paint')smEnd();if(!sm.stream)return;if(sm.finishing)sm.pendingBegin=true;else smBegin()};
   $('#smSave').onclick=()=>{const b=$('#smStrip button');if(b)b.click()};
   $('#smLink').onclick=()=>spLink();$('#smZen').onclick=()=>{if(smHere)smLeave();else{SIDEMODE=false;smStop();document.body.classList.remove('sidemode');$('#smode').hidden=true}zenStart()};$('#spUnlink').onclick=()=>spUnlink();
-  $('#srcCover').onclick=()=>smSource(sm.src==='cover'?'mic':'cover');$('#srcTab').onclick=()=>smSource(sm.src==='tab'?'mic':'tab');$('#smHp').onclick=()=>smSource('cover');smSource(sm.src,true);
+  $('#srcCover').onclick=()=>smSource(sm.src==='cover'?'mic':'cover');$('#srcTab').onclick=()=>smSource(sm.src==='tab'?'mic':'tab');
+  // asked for when first chosen, so the extension doesn't ask to see the screen at install
+  $('#srcSys').onclick=async()=>{if(sm.src==='sys')return smSource('tab');let ok=false;try{ok=await chrome.permissions.request({permissions:['desktopCapture']})}catch(e){}if(ok){const was=!!sm.stream;smSource('sys');if(!was)smStart()}};$('#smHp').onclick=()=>smSource('cover');smSource(sm.src,true);
   $('#smAccess').onclick=()=>{np.asked=true;NP.openSettings().catch(()=>{np.asked=false;toast('Open Settings, then Notification access, and turn on Fude')})};
   // the ⋯ menu: everything that is not Start lives here, and it closes on a choice, a tap outside or Escape
   const menu=$('#smMenu'),more=$('#smMore'),shut=()=>{menu.hidden=true;more.setAttribute('aria-expanded','false')};
   more.onclick=e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;more.setAttribute('aria-expanded',String(open));if(open)(menu.querySelector('[role^=menuitem]:not([hidden]):not([disabled])')||menu).focus()};
-  menu.addEventListener('click',e=>{if(e.target.closest('[role^=menuitem]')&&e.target.closest('#srcCover,#srcTab')===null)shut()});
+  menu.addEventListener('click',e=>{if(e.target.closest('[role^=menuitem]')&&e.target.closest('#srcCover,#srcTab,#srcSys')===null)shut()});
   document.addEventListener('pointerdown',e=>{if(!menu.hidden&&!menu.contains(e.target)&&e.target!==more&&!more.contains(e.target))shut()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){shut();more.focus()}});
   $('#spPrev').onclick=()=>spCmd('/me/player/previous','POST');$('#spNext').onclick=()=>spCmd('/me/player/next','POST');
