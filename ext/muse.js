@@ -2888,14 +2888,14 @@ try{sp.id=SPOTIFY_CLIENT_ID||localStorage.getItem('muse.spotify.id')||'';sp.tok=
 // in the iPhone and Android app, Spotify's sign-in opens in the system browser and comes back through the app's own address
 const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.fude.paint://spotify';
 const capPlugin=n=>{const C=window.Capacitor;if(!C)return null;try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};
-const MUSE_VERSION='1.0.0';
+const MUSE_VERSION='1.1.0';  // build_ext.py reads the extension's version from here
 // in the phone app, the status bar's clock and battery stay readable against Fude's light or dark
 function sysBars(){const S=NATIVE&&capPlugin('SystemBars');if(!S||!S.setStyle)return;const r=document.documentElement,
   dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
   try{Promise.resolve(S.setStyle({style:dark?'DARK':'LIGHT'})).catch(()=>{})}catch(e){}}
 addEventListener('muse:theme',sysBars);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',sysBars)}catch(e){}sysBars();
 // About: the version, and what Fude does with what it hears
-$('#abVer').textContent='Version '+MUSE_VERSION;if(IN_VIEWER)$('#abMore').hidden=true;
+$('#abVer').textContent='Version '+MUSE_VERSION;if(MUSE_EXT)$('#abHelp').hidden=false;if(IN_VIEWER)$('#abMore').hidden=true;
 $('#smAbout').onclick=()=>{$('#aboutSheet').hidden=false;$('#abClose').focus()};$('#abClose').onclick=()=>{$('#aboutSheet').hidden=true};
 // the extension asks for chrome.identity only when someone links Spotify
 const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.permissions&&chrome.runtime&&chrome.runtime.id);

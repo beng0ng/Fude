@@ -20,11 +20,11 @@ assert fl
 # the site and the app carry their own copies of the fonts, so they look right offline and make no requests to Google
 GF=GF.replace(fl.group(0),'<link rel="stylesheet" href="fonts/fonts.css">')
 import os,shutil
-shutil.copy('privacy.html','site/privacy.html')
+shutil.copy('privacy.html','site/privacy.html');shutil.copy('back.js','site/back.js')
 FONTFILES=['./fonts/fonts.css']+['./fonts/'+f for f in sorted(os.listdir('site/fonts')) if f.endswith('.woff2')]
 open('site/index.html','w').write('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'+desc+head+reset+GF+'\n</head>\n<body>\n'+full[i:]+sw+'\n</body>\n</html>\n')
 open('site/sw.js','w').write("""// Fude offline: the page is fetched from the network when it can be and kept for when it cannot
-const CACHE='muse-%s',FILES=['./','./index.html','./privacy.html','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png',%s];
+const CACHE='muse-%s',FILES=['./','./index.html','./privacy.html','./back.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png',%s];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin||e.request.method!=='GET')return;

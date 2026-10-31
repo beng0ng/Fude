@@ -47,7 +47,8 @@ open(f'{OUT}/voice-worker.js','w').write(voice+vtail[1:-1].replace('\\n','\n'))
 open(f'{OUT}/background.js','w').write("""// Fude: the toolbar button (or Alt+Shift+F) opens the side panel beside the tab and lets Fude hear that tab.
 // Chrome only lets an extension hear a tab after its button was pressed on that tab, so the press is handled here:
 // it opens the panel, asks Chrome for the tab's sound at once, and tells the panel which tab to paint
-chrome.runtime.onInstalled.addListener(()=>{chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{})});
+// a first install opens a short how-to, since Fude only starts from its toolbar button
+chrome.runtime.onInstalled.addListener(d=>{chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{});if(d.reason==='install')chrome.tabs.create({url:'welcome.html'}).catch(()=>{})});
 chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{});
 chrome.action.onClicked.addListener(tab=>{
   chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});
@@ -72,7 +73,8 @@ navigator.permissions.query({name:'microphone'}).then(p=>{if(p.state==='granted'
 ic=Image.open('site/icon-512.png').convert('RGBA')
 for n in (16,32,48,128):ic.resize((n,n),Image.LANCZOS).save(f'{OUT}/icon-{n}.png')
 music=['https://open.spotify.com/*','https://music.youtube.com/*','https://www.youtube.com/*','https://music.apple.com/*','https://soundcloud.com/*','https://www.deezer.com/*','https://listen.tidal.com/*','https://*.bandcamp.com/*']
-man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":"1.1.0",
+VERSION=re.search(r"const MUSE_VERSION='([\d.]+)'",open('fude.src.html').read()).group(1)
+man={"manifest_version":3,"name":"Fude: paint your music","short_name":"Fude","version":VERSION,
  "description":"Fude paints the music playing in your browser, song by song, in the side panel: Spotify, YouTube and more.",
  "icons":{str(n):f'icon-{n}.png' for n in (16,32,48,128)},
  "action":{"default_title":"Paint this music with Fude","default_icon":{str(n):f'icon-{n}.png' for n in (16,32)}},

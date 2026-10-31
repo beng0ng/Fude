@@ -84,6 +84,8 @@ Play a song on Spotify, YouTube, YouTube Music, Apple Music, SoundCloud, Deezer,
 
 Private by design: the sound is turned into notes on your computer and is never recorded or sent. No accounts, no ads, no tracking.
 
+**What a new user sees:** installing opens a short how-to page, and the ⋯ menu's About and privacy has the version, the how-to and the privacy policy, so reviewers can find their way without instructions.
+
 **Single purpose:** Fude turns the music playing in a browser tab into a painting shown in the side panel.
 
 **Permission justifications** (paste each into its box):

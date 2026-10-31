@@ -1,7 +1,8 @@
 // Fude: the toolbar button (or Alt+Shift+F) opens the side panel beside the tab and lets Fude hear that tab.
 // Chrome only lets an extension hear a tab after its button was pressed on that tab, so the press is handled here:
 // it opens the panel, asks Chrome for the tab's sound at once, and tells the panel which tab to paint
-chrome.runtime.onInstalled.addListener(()=>{chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{})});
+// a first install opens a short how-to, since Fude only starts from its toolbar button
+chrome.runtime.onInstalled.addListener(d=>{chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{});if(d.reason==='install')chrome.tabs.create({url:'welcome.html'}).catch(()=>{})});
 chrome.sidePanel.setPanelBehavior({openPanelOnActionClick:false}).catch(()=>{});
 chrome.action.onClicked.addListener(tab=>{
   chrome.sidePanel.open({windowId:tab.windowId}).catch(()=>{});

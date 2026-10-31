@@ -1304,6 +1304,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <p class="about-ver" id="abVer"></p>
   <p>Fude only listens while you ask it to, and it works out the notes on this device. Nothing it hears is recorded or sent anywhere.</p>
   <p>Your colors, paintings and settings stay on this device too. If you link Spotify, Fude reads which song is playing, and you can unlink it at any time from the ⋯ menu. To show a song’s words, Fude asks the open lyrics library LRCLIB for them using the song’s title and artist; Show song lyrics in the ⋯ menu turns this off.</p>
+  <p id="abHelp" hidden><a href="welcome.html" target="_blank" rel="noopener">How to use Fude</a></p>
   <p id="abMore"><a href="privacy.html">Read the full privacy policy</a></p>
   <button class="btn small" id="abClose" type="button">Close</button>
 </div>
@@ -4300,14 +4301,14 @@ try{sp.id=SPOTIFY_CLIENT_ID||localStorage.getItem('muse.spotify.id')||'';sp.tok=
 // in the iPhone and Android app, Spotify's sign-in opens in the system browser and comes back through the app's own address
 const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.fude.paint://spotify';
 const capPlugin=n=>{const C=window.Capacitor;if(!C)return null;try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};
-const MUSE_VERSION='1.0.0';
+const MUSE_VERSION='1.1.0';  // build_ext.py reads the extension's version from here
 // in the phone app, the status bar's clock and battery stay readable against Fude's light or dark
 function sysBars(){const S=NATIVE&&capPlugin('SystemBars');if(!S||!S.setStyle)return;const r=document.documentElement,
   dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
   try{Promise.resolve(S.setStyle({style:dark?'DARK':'LIGHT'})).catch(()=>{})}catch(e){}}
 addEventListener('muse:theme',sysBars);try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',sysBars)}catch(e){}sysBars();
 // About: the version, and what Fude does with what it hears
-$('#abVer').textContent='Version '+MUSE_VERSION;if(IN_VIEWER)$('#abMore').hidden=true;
+$('#abVer').textContent='Version '+MUSE_VERSION;if(MUSE_EXT)$('#abHelp').hidden=false;if(IN_VIEWER)$('#abMore').hidden=true;
 $('#smAbout').onclick=()=>{$('#aboutSheet').hidden=false;$('#abClose').focus()};$('#abClose').onclick=()=>{$('#aboutSheet').hidden=true};
 // the extension asks for chrome.identity only when someone links Spotify
 const EXT_ID=!!(MUSE_EXT&&window.chrome&&chrome.permissions&&chrome.runtime&&chrome.runtime.id);
