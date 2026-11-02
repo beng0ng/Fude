@@ -10,7 +10,8 @@ It runs as a website, an iPhone and Android app, and a Chrome or Edge side panel
 |---|---|
 | `fude.src.html` | The whole app, in one file. Edit this. |
 | `build.sh` | Rebuilds everything below from `fude.src.html`. |
-| `site/` | The website. Publish this folder (Netlify, GitHub Pages, Cloudflare Pages). It works offline and installs to the home screen. |
+| `web/` | The website: a page about the browser extension, with short demo videos, the privacy policy and a download of the extension. Made by `build_landing.py` from `landing/`. Publish this folder (Netlify, GitHub Pages, Cloudflare Pages). |
+| `site/` | The full Fude web app, used inside the phone app. |
 | `app/` | The iPhone and Android app (Capacitor). See `app/README.md`. |
 | `ext/` | The browser extension. Load it unpacked from `chrome://extensions`. |
 | `store/` | App Store and Google Play screenshots, listing text and the privacy policy. See `store/README.md`. |
