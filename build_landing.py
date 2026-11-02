@@ -2,7 +2,8 @@
 import os,shutil,zipfile
 OUT='web'
 shutil.rmtree(OUT,ignore_errors=True);os.makedirs(OUT+'/downloads')
-shutil.copy('landing/index.html',OUT+'/index.html')
+html=open('landing/index.html').read().replace('<!--cat-->',open('landing/media/cat.svg').read())  # the painter cat, drawn inline so it can wave its brush
+open(OUT+'/index.html','w').write(html)
 shutil.copytree('landing/media',OUT+'/media')
 shutil.copytree('site/fonts',OUT+'/fonts')
 for f in ('privacy.html','back.js','icon.svg','icon-192.png','icon-512.png'):shutil.copy('site/'+f,OUT+'/'+f)
