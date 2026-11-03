@@ -35,6 +35,7 @@ Put on a song, in Spotify or anywhere else, and open Fude. It listens, works out
 
 • Start from a famous picture like The Starry Night or The Great Wave, or a new abstract one, and let the music recolor it while every brushstroke stays sharp.
 • Choose the colors: your own, a preset like Sunset, Ocean or Neon night, a color wheel, or the scales of Newton, Scriabin and Rimsky-Korsakov.
+• Color your own drawings: upload a pencil sketch, or describe a scene and Fude sketches it, then the music colors it in like a coloring book.
 • Watch the song's mood in words, the notes as they arrive, and the lyrics scrolling in time when Fude knows the song.
 • Earn new pets and effects the more you listen and paint. When the music stops, your pet stops too and looks up at you.
 • A gallery keeps every painting with the song it came from and how long it took to paint. Save posters or share them.
@@ -76,6 +77,7 @@ Fude turns the music playing in your browser into paintings, right in the side p
 Play a song on Spotify, YouTube, YouTube Music, Apple Music, SoundCloud, Deezer, Tidal, Bandcamp or any other site, then click the Fude button. Fude hears that tab (headphones are fine, no microphone needed), works out the notes as they sound and paints them. Every note has its own color, and each color covers exactly as much of the canvas as its note is played. A little cat paints from the bottom up while the song plays, and a new painting starts with every new song.
 
 • Pick a famous painting or an abstract one each time you open Fude, then choose its colors: your own, a preset, a color wheel, or a mood you describe.
+• Bring your own pencil sketch, or describe a scene and Fude sketches it, and the music colors it in like a coloring book.
 • A peek window shows the corner the cat is painting; the full picture is revealed when it's done.
 • See the song's mood, the notes as they arrive, and the lyrics scrolling in time with the song.
 • Earn new pets and effects the more you listen and paint. When the music stops, your pet stops and looks up at you; press Pause to keep the painting open.

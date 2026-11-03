@@ -831,6 +831,14 @@ body.fx-aurora #swirl{--swa:.62;--sws:26s;filter:saturate(1.5)}
 .pk .pic{aspect-ratio:1;border-radius:9px;overflow:hidden;background:var(--line);display:grid;place-items:center}
 .pk img,.pk canvas{width:100%;height:100%;object-fit:cover;display:block}
 .pk small{font-size:11.5px;line-height:1.25;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-act .pic{background:repeating-linear-gradient(0deg,transparent 0 13px,color-mix(in srgb,var(--fg) 9%,transparent) 13px 14px),var(--surface,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--fg) 22%,transparent)}
+.pk-ico{font-size:30px;color:var(--fg);opacity:.75}
+.pk.sk .pic{background:#fff}
+.sk-box{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px}
+.sk-box form{display:flex;gap:8px}.sk-box input{flex:1;min-width:0;font:inherit;font-size:14px;padding:9px 12px;border-radius:10px;border:1px solid var(--hair);background:var(--glass);color:var(--fg)}
+.sk-prev{aspect-ratio:8/5;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--hair);overflow:hidden;display:grid;place-items:center;color:#8a8478;font-size:13px}
+.sk-prev img{width:100%;height:100%;object-fit:contain;display:block}
+.sk-row{display:flex;flex-wrap:wrap;gap:8px}
 .pk.any .pic{background:conic-gradient(from 30deg,#E8231F,#F08A1C,#F5D90A,#3FA34D,#4C8FE0,#8B4FB8,#E8231F);font-family:var(--script);font-size:30px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 #smode.home .sm-empty,#smode.home #art,#smode.home .sm-canvas::before{display:none!important}
 #smode.home .sm-strip{display:none}
@@ -1272,7 +1280,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
     <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
-    <div class="sm-pick" id="smPick" hidden><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
+    <div class="sm-pick" id="smPick" hidden><input type="file" id="skFile" accept="image/*" class="vh" aria-label="Choose a sketch"><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
   <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><div class="sm-words" id="smWords" hidden><ol id="smWordList"></ol></div><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>

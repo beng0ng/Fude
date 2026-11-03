@@ -34,8 +34,41 @@ function assign(field,bands){
 }
 function shadeTo(c,s,l=255){return s<0?c+s*c:c+s*(l-c)}
 // the field: for a painting, its blurred luminance; for a theme, a procedural landscape
+// a pencil drawing is colored in like a coloring book: the dark strokes are found against the paper around them,
+// every shape they enclose becomes one region, and the regions take the notes' colors in turn while the lines stay on top
+function sketchField(seed,L,W,H){
+  const N=W*H,tmp=new Float32Array(N),mean=new Float32Array(N),R=Math.max(6,Math.round(Math.max(W,H)/90));
+  for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R;x<W;x++){if(x+R<W){acc+=L[y*W+x+R];c++}if(x-R-1>=0){acc-=L[y*W+x-R-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
+  for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R;y<H;y++){if(y+R<H){acc+=tmp[(y+R)*W+x];c++}if(y-R-1>=0){acc-=tmp[(y-R-1)*W+x];c--}if(y>=0)mean[y*W+x]=acc/c}}
+  const hist=new Uint32Array(256);for(let i=0;i<N;i++)hist[Math.min(255,L[i]*255|0)]++;
+  let paper=1;for(let k=255,c=0;k>=0;k--){c+=hist[k];if(c>N*.05){paper=Math.max(.35,k/255);break}}
+  let line=new Uint8Array(N);for(let i=0;i<N;i++)line[i]=(L[i]<mean[i]-.07||L[i]<paper*.42)?1:0;
+  // close the small gaps a quick sketch leaves, so a shape with a broken outline still fills as one
+  const gap=Math.max(1,Math.round(Math.max(W,H)/700));
+  for(let g=0;g<gap;g++){const nx=line.slice();for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x;if(!line[i]&&(line[i-1]||line[i+1]||line[i-W]||line[i+W]))nx[i]=1}line=nx}
+  const lab=new Int32Array(N).fill(-1),stack=new Int32Array(N),area=[],edge=[];let n=0;
+  for(let s0=0;s0<N;s0++){if(line[s0]||lab[s0]>=0)continue;let sp=0,a=0,e=false;stack[sp++]=s0;lab[s0]=n;
+    while(sp){const i=stack[--sp],x=i%W,y=(i/W)|0;a++;if(x===0||y===0||x===W-1||y===H-1)e=true;
+      if(x>0&&!line[i-1]&&lab[i-1]<0){lab[i-1]=n;stack[sp++]=i-1}if(x<W-1&&!line[i+1]&&lab[i+1]<0){lab[i+1]=n;stack[sp++]=i+1}
+      if(y>0&&!line[i-W]&&lab[i-W]<0){lab[i-W]=n;stack[sp++]=i-W}if(y<H-1&&!line[i+W]&&lab[i+W]<0){lab[i+W]=n;stack[sp++]=i+W}}
+    area.push(a);edge.push(e);n++}
+  // the color flows in under the pencil lines from the shapes beside them
+  for(let pass=0;pass<gap*3+8;pass++){let left=0;
+    for(let i=0;i<N;i++)if(lab[i]<0){const x=i%W;const v=x>0&&lab[i-1]>=0?lab[i-1]:i>=W&&lab[i-W]>=0?lab[i-W]:-1;if(v>=0)lab[i]=v;else left++}
+    for(let i=N-1;i>=0;i--)if(lab[i]<0){const x=i%W;const v=x<W-1&&lab[i+1]>=0?lab[i+1]:i<N-W&&lab[i+W]>=0?lab[i+W]:-1;if(v>=0)lab[i]=v}
+    if(!left)break}
+  if(!n){n=1;area.push(N);edge.push(true)}
+  // each shape gets a place in the order at random; the open paper around the drawing comes last, so it takes the last notes
+  let bg=-1,big=0;for(let k=0;k<n;k++)if(edge[k]&&area[k]>big){big=area[k];bg=k}
+  const r=mulberry32(seed),ord=[...Array(n).keys()].filter(k=>k!==bg);for(let i=ord.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]]}
+  if(bg>=0)ord.push(bg);const rank=new Float32Array(n);ord.forEach((k,i)=>rank[k]=i);
+  const nz=makeNoise(seed+9),field=new Float32Array(N),step=1/(n+1);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,k=lab[i]<0?0:lab[i];field[i]=(rank[k]+.5+.45*nz.fbm(x/W*1.3,y/H*1.3,2))*step}
+  return{W,H,field,lumArr:L,lo:null,sketch:true,paper};
+}
 function genField(kind,id,seed,size,params,lumArr,W,H){
   const p=Object.assign({scale:1,warp:.5,focusX:.5,focusY:.5},params||{});let field;
+  if(kind==='painting'&&p.sketch)return sketchField(seed,lumArr,W,H);
   if(kind==='painting'){
     field=new Float32Array(W*H);const r=mulberry32(seed);
     // the regions follow the painting's own light, only a hair softened, so its shapes and edges stay crisp;
@@ -76,6 +109,11 @@ function shadePixels(m,F){
   const d=new Uint8ClampedArray(W*H*4),g=mulberry32(m.seed+11),bn=lumArr?makeNoise(m.seed+5):null;
   let meanL=null;
   if(lumArr){const sum=new Float64Array(bands.length);for(let i=0;i<W*H;i++)sum[band[i]]+=lumArr[i];meanL=[...sum].map((v,j)=>v/(counts[j]||1))}
+  if(F.sketch){
+    // watercolor washes under the pencil: each band's color, lifted a little toward the paper, with the drawing multiplied over it
+    for(let i=0;i<W*H;i++){const c=rgbs[band[i]],k=i*4,s=(t[i]-.5)*.1+(g()-.5)*.025,pen=Math.pow(Math.min(1,lumArr[i]/F.paper),1.35);
+      d[k]=(shadeTo(c[0],s,light[0])*.88+30)*pen;d[k+1]=(shadeTo(c[1],s,light[1])*.88+30)*pen;d[k+2]=(shadeTo(c[2],s,light[2])*.88+30)*pen;d[k+3]=255}
+    return{buf:d,counts,W,H}}
   for(let i=0;i<W*H;i++){
     const j=band[i],c=rgbs[j];let s=0;
     if(lumArr){s=(lumArr[i]-meanL[j])*1.15;

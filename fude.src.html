@@ -814,6 +814,14 @@ body.fx-aurora #swirl{--swa:.62;--sws:26s;filter:saturate(1.5)}
 .pk .pic{aspect-ratio:1;border-radius:9px;overflow:hidden;background:var(--line);display:grid;place-items:center}
 .pk img,.pk canvas{width:100%;height:100%;object-fit:cover;display:block}
 .pk small{font-size:11.5px;line-height:1.25;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-act .pic{background:repeating-linear-gradient(0deg,transparent 0 13px,color-mix(in srgb,var(--fg) 9%,transparent) 13px 14px),var(--surface,var(--glass));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--fg) 22%,transparent)}
+.pk-ico{font-size:30px;color:var(--fg);opacity:.75}
+.pk.sk .pic{background:#fff}
+.sk-box{display:flex;flex-direction:column;gap:10px;width:100%;max-width:400px}
+.sk-box form{display:flex;gap:8px}.sk-box input{flex:1;min-width:0;font:inherit;font-size:14px;padding:9px 12px;border-radius:10px;border:1px solid var(--hair);background:var(--glass);color:var(--fg)}
+.sk-prev{aspect-ratio:8/5;border-radius:10px;background:#fff;box-shadow:0 0 0 1px var(--hair);overflow:hidden;display:grid;place-items:center;color:#8a8478;font-size:13px}
+.sk-prev img{width:100%;height:100%;object-fit:contain;display:block}
+.sk-row{display:flex;flex-wrap:wrap;gap:8px}
 .pk.any .pic{background:conic-gradient(from 30deg,#E8231F,#F08A1C,#F5D90A,#3FA34D,#4C8FE0,#8B4FB8,#E8231F);font-family:var(--script);font-size:30px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
 #smode.home .sm-empty,#smode.home #art,#smode.home .sm-canvas::before{display:none!important}
 #smode.home .sm-strip{display:none}
@@ -1252,7 +1260,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
     <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
-    <div class="sm-pick" id="smPick" hidden><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
+    <div class="sm-pick" id="smPick" hidden><input type="file" id="skFile" accept="image/*" class="vh" aria-label="Choose a sketch"><div class="pk-grid" id="pkGrid" role="listbox" aria-label="Pictures"></div><div class="pk-colors" id="pkColors" hidden></div></div>
     <div class="sm-veil" id="smVeil" hidden><b>The cat is painting</b><span>You’ll see it when the song ends</span></div><div class="sm-stars" aria-hidden="true"></div></div>
   <div class="sm-live" id="smLive" hidden><b class="sm-tone" id="smTone">Listening</b><div class="sm-words" id="smWords" hidden><ol id="smWordList"></ol></div><div class="sm-lyric" id="smLyric" aria-hidden="true"></div><div class="sm-dist" id="smDist" aria-hidden="true"></div></div>
   <div class="sm-now"><b id="smTitle">Ready when the music is</b><span id="smSub">Each song gets its own picture</span></div>
@@ -1390,6 +1398,8 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 <script>/*ABCJS*/</script>
 <script>
 const PAINT_SRC = /*IMGS*/;
+const PAINT_THUMB = /*THUMBS*/; // small copies for the picture tiles, so a grid of tiles never decodes five full-size scans
+const thumbOf=id=>PAINT_THUMB[id]||PAINT_SRC[id];
 const SAMPLE_SRC = /*SAMPLES*/;
 const SCORES = /*SCORES*/;
 const scoreCache=new Map();
@@ -1404,7 +1414,7 @@ const MOBILE=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 // inside the browser extension: 'panel' is the side panel, 'full' the whole of Fude in a tab
 const MUSE_EXT=window.MUSE_EXT||'';
 let SIDEMODE=(()=>{try{const q=new URLSearchParams(location.search);return MUSE_EXT==='panel'||q.has('side')||/^muse-/.test(q.get('state')||'')||(!!window.Capacitor&&![...q.keys()].length&&location.hash.length<2)}catch(e){return false}})();
-const PAINT_MAX=MOBILE?1200:1600; // the longest side of a painting, in pixels
+const PAINT_MAX=MOBILE?1600:2400; // the longest side of a painting, in pixels
 
 /* ---------- color utils ---------- */
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -2693,8 +2703,41 @@ function assign(field,bands){
 }
 function shadeTo(c,s,l=255){return s<0?c+s*c:c+s*(l-c)}
 // the field: for a painting, its blurred luminance; for a theme, a procedural landscape
+// a pencil drawing is colored in like a coloring book: the dark strokes are found against the paper around them,
+// every shape they enclose becomes one region, and the regions take the notes' colors in turn while the lines stay on top
+function sketchField(seed,L,W,H){
+  const N=W*H,tmp=new Float32Array(N),mean=new Float32Array(N),R=Math.max(6,Math.round(Math.max(W,H)/90));
+  for(let y=0;y<H;y++){let acc=0,c=0;for(let x=-R;x<W;x++){if(x+R<W){acc+=L[y*W+x+R];c++}if(x-R-1>=0){acc-=L[y*W+x-R-1];c--}if(x>=0)tmp[y*W+x]=acc/c}}
+  for(let x=0;x<W;x++){let acc=0,c=0;for(let y=-R;y<H;y++){if(y+R<H){acc+=tmp[(y+R)*W+x];c++}if(y-R-1>=0){acc-=tmp[(y-R-1)*W+x];c--}if(y>=0)mean[y*W+x]=acc/c}}
+  const hist=new Uint32Array(256);for(let i=0;i<N;i++)hist[Math.min(255,L[i]*255|0)]++;
+  let paper=1;for(let k=255,c=0;k>=0;k--){c+=hist[k];if(c>N*.05){paper=Math.max(.35,k/255);break}}
+  let line=new Uint8Array(N);for(let i=0;i<N;i++)line[i]=(L[i]<mean[i]-.07||L[i]<paper*.42)?1:0;
+  // close the small gaps a quick sketch leaves, so a shape with a broken outline still fills as one
+  const gap=Math.max(1,Math.round(Math.max(W,H)/700));
+  for(let g=0;g<gap;g++){const nx=line.slice();for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const i=y*W+x;if(!line[i]&&(line[i-1]||line[i+1]||line[i-W]||line[i+W]))nx[i]=1}line=nx}
+  const lab=new Int32Array(N).fill(-1),stack=new Int32Array(N),area=[],edge=[];let n=0;
+  for(let s0=0;s0<N;s0++){if(line[s0]||lab[s0]>=0)continue;let sp=0,a=0,e=false;stack[sp++]=s0;lab[s0]=n;
+    while(sp){const i=stack[--sp],x=i%W,y=(i/W)|0;a++;if(x===0||y===0||x===W-1||y===H-1)e=true;
+      if(x>0&&!line[i-1]&&lab[i-1]<0){lab[i-1]=n;stack[sp++]=i-1}if(x<W-1&&!line[i+1]&&lab[i+1]<0){lab[i+1]=n;stack[sp++]=i+1}
+      if(y>0&&!line[i-W]&&lab[i-W]<0){lab[i-W]=n;stack[sp++]=i-W}if(y<H-1&&!line[i+W]&&lab[i+W]<0){lab[i+W]=n;stack[sp++]=i+W}}
+    area.push(a);edge.push(e);n++}
+  // the color flows in under the pencil lines from the shapes beside them
+  for(let pass=0;pass<gap*3+8;pass++){let left=0;
+    for(let i=0;i<N;i++)if(lab[i]<0){const x=i%W;const v=x>0&&lab[i-1]>=0?lab[i-1]:i>=W&&lab[i-W]>=0?lab[i-W]:-1;if(v>=0)lab[i]=v;else left++}
+    for(let i=N-1;i>=0;i--)if(lab[i]<0){const x=i%W;const v=x<W-1&&lab[i+1]>=0?lab[i+1]:i<N-W&&lab[i+W]>=0?lab[i+W]:-1;if(v>=0)lab[i]=v}
+    if(!left)break}
+  if(!n){n=1;area.push(N);edge.push(true)}
+  // each shape gets a place in the order at random; the open paper around the drawing comes last, so it takes the last notes
+  let bg=-1,big=0;for(let k=0;k<n;k++)if(edge[k]&&area[k]>big){big=area[k];bg=k}
+  const r=mulberry32(seed),ord=[...Array(n).keys()].filter(k=>k!==bg);for(let i=ord.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]]}
+  if(bg>=0)ord.push(bg);const rank=new Float32Array(n);ord.forEach((k,i)=>rank[k]=i);
+  const nz=makeNoise(seed+9),field=new Float32Array(N),step=1/(n+1);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,k=lab[i]<0?0:lab[i];field[i]=(rank[k]+.5+.45*nz.fbm(x/W*1.3,y/H*1.3,2))*step}
+  return{W,H,field,lumArr:L,lo:null,sketch:true,paper};
+}
 function genField(kind,id,seed,size,params,lumArr,W,H){
   const p=Object.assign({scale:1,warp:.5,focusX:.5,focusY:.5},params||{});let field;
+  if(kind==='painting'&&p.sketch)return sketchField(seed,lumArr,W,H);
   if(kind==='painting'){
     field=new Float32Array(W*H);const r=mulberry32(seed);
     // the regions follow the painting's own light, only a hair softened, so its shapes and edges stay crisp;
@@ -2735,6 +2778,11 @@ function shadePixels(m,F){
   const d=new Uint8ClampedArray(W*H*4),g=mulberry32(m.seed+11),bn=lumArr?makeNoise(m.seed+5):null;
   let meanL=null;
   if(lumArr){const sum=new Float64Array(bands.length);for(let i=0;i<W*H;i++)sum[band[i]]+=lumArr[i];meanL=[...sum].map((v,j)=>v/(counts[j]||1))}
+  if(F.sketch){
+    // watercolor washes under the pencil: each band's color, lifted a little toward the paper, with the drawing multiplied over it
+    for(let i=0;i<W*H;i++){const c=rgbs[band[i]],k=i*4,s=(t[i]-.5)*.1+(g()-.5)*.025,pen=Math.pow(Math.min(1,lumArr[i]/F.paper),1.35);
+      d[k]=(shadeTo(c[0],s,light[0])*.88+30)*pen;d[k+1]=(shadeTo(c[1],s,light[1])*.88+30)*pen;d[k+2]=(shadeTo(c[2],s,light[2])*.88+30)*pen;d[k+3]=255}
+    return{buf:d,counts,W,H}}
   for(let i=0;i<W*H;i++){
     const j=band[i],c=rgbs[j];let s=0;
     if(lumArr){s=(lumArr[i]-meanL[j])*1.15;
@@ -2857,7 +2905,7 @@ const paintingsEl=$('#paintings'),themesEl=$('#themes');
 function renderPaintings(){
   paintingsEl.innerHTML='';
   PAINTINGS.forEach(pt=>{const b=document.createElement('button');b.type='button';b.className='tile';b.dataset.id=pt.id;
-    b.innerHTML=`<div class="pic"><img alt="${esc(pt.title)}${pt.artist?', '+esc(pt.artist):''}" src="${PAINT_SRC[pt.id]}"></div><b>${esc(pt.title)}</b><small>${esc(pt.artist)}${pt.year?', '+esc(pt.year):''}</small>`;
+    b.innerHTML=`<div class="pic"><img alt="${esc(pt.title)}${pt.artist?', '+esc(pt.artist):''}" src="${thumbOf(pt.id)}"></div><b>${esc(pt.title)}</b><small>${esc(pt.artist)}${pt.year?', '+esc(pt.year):''}</small>`;
     b.onclick=()=>{pick.painting=pt.id;markTiles();updatePaintSummary();stepDone('paint')};paintingsEl.appendChild(b)});
   markTiles();
 }
@@ -3122,11 +3170,11 @@ async function paint(scroll=true,still=false){
   if(job!==liveJob)return;
   const keyOf=()=>{try{const ns=song.rec?(song.chroma||[]).map((v,pc)=>({pc,dur:v})).filter(n=>n.dur>0):song.notes;return ns&&ns.length?findKey(ns):null}catch(e){return null}};
   const light=()=>{const k=keyOf();if(!k)return null;const c=rgbOf(k.root);return c.map(v=>Math.round(255+(v-255)*.3))};
-  let base=known?{kind:'painting',id:pt.id,seed,light:light()}:{kind:'theme',id:th.id,seed,params,size:PAINT_MAX,light:light()};
+  let base=known?{kind:'painting',id:pt.id,seed,light:light(),params:pt.sketch?{sketch:1}:undefined}:{kind:'theme',id:th.id,seed,params,size:Math.min(PAINT_MAX,1600),light:light()};
   // a new picture chosen mid-song: the next strokes paint it, fading over what is there
   const swap=()=>{known=mode==='known';pt=known?(PAINTINGS.find(p=>p.id===pick.painting)||PAINTINGS[0]):null;th=known?null:THEMES.find(t=>t.id===pick.theme);stmt=null;
     if(known){title=pt.title+', in '+song.title;by=`After ${pt.artist}${pt.year?', '+pt.year:''} · recolored by ${song.title}`}else{params={};title=`${th.name} for ${song.title}`;by=`${th.name} · from ${song.title}`}
-    base=known?{kind:'painting',id:pt.id,seed,light:light()}:{kind:'theme',id:th.id,seed,params,size:PAINT_MAX,light:light()};
+    base=known?{kind:'painting',id:pt.id,seed,light:light(),params:pt.sketch?{sketch:1}:undefined}:{kind:'theme',id:th.id,seed,params,size:Math.min(PAINT_MAX,1600),light:light()};
     $('#artTitle').textContent=title;$('#artBy').textContent=by;$('#holdBtn').hidden=!known;painterSay(known?PAINT_LINES[pt.id]||'A new picture!':THEME_LINES[th.id]||'Something new!')};
   const focus=known?[.5,.5]:[params.focusX||.5,params.focusY||.5],blooms=[];let flow=null;
   $('#holdBtn').hidden=!known;$('#artTitle').textContent=title;$('#artBy').textContent=by;$('#staleNote').hidden=true;
@@ -3515,7 +3563,7 @@ function shareState(){
   if(!last||!song||song.rec||!last.dist)return null;
   const o={v:'1',c:colors.map((_,i)=>hexOf(i).slice(1)).join(''),s:song.id,a:arrStyle,i:globalInst,t:String(song.bpm),k:last.kind==='known'?'p':'t',w:String(last.id),d:String(last.seed||1)};
   if(last.params){const p=last.params;o.p=[p.scale==null?1:p.scale,p.warp==null?.5:p.warp,p.focusX==null?.5:p.focusX,p.focusY==null?.5:p.focusY].map(v=>Math.round(v*100)).join(',')}
-  if(last.kind==='known'&&!PAINT_SRC[last.id])return{err:'A painting you brought in cannot travel in a link, only the ones Fude comes with.'};
+  if(last.kind==='known'&&(!PAINT_SRC[last.id]||/^(up|sk)-/.test(last.id)))return{err:'A picture you brought in or sketched cannot travel in a link, only the ones Fude comes with.'};
   if(song.id==='mine'){const parts=song.parts||[];if(!parts.length||parts.some(p=>p.locked||p.text==null))return{err:'An uploaded score cannot travel in a link yet; typed music can.'};o.m=JSON.stringify({t:song.title,b:song.bpm,p:parts.map(p=>[p.name,p.inst,p.text])})}
   else if(!SONGS.find(x=>x.id===song.id))return{err:'Only library songs and your own typed music can travel in a link.'};
   return{code:new URLSearchParams(o).toString()};
@@ -4177,10 +4225,97 @@ setInterval(()=>{const box=$('#smWords');if(!SIDEMODE||document.hidden)return;if
 function smPickName(v){if(v==='any')return'A surprise';const[m,id]=v.split(':');return m==='known'?(PAINTINGS.find(p=>p.id===id)||{}).title:(THEMES.find(t=>t.id===id)||{}).name}
 function smPickBuild(){const g=$('#pkGrid');if(g.children.length)return;const pre=(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})();
   const add=(v,inner,name,cls)=>{const b=document.createElement('button');b.type='button';b.className='pk'+(cls?' '+cls:'');b.setAttribute('role','option');b.dataset.v=v;b.setAttribute('aria-selected',v===pre);b.innerHTML=`<span class="pic">${inner}</span><small>${esc(name)}</small>`;b.onclick=()=>smColorsStep(v);g.appendChild(b)};
-  PAINTINGS.slice(0,5).forEach(p=>add('known:'+p.id,`<img alt="" src="${PAINT_SRC[p.id]}" loading="lazy">`,p.title));
+  PAINTINGS.slice(0,5).forEach(p=>add('known:'+p.id,`<img alt="" src="${thumbOf(p.id)}" loading="lazy">`,p.title));
+  PAINTINGS.filter(p=>p.sketch).forEach(p=>add('known:'+p.id,`<img alt="" src="${PAINT_SRC[p.id]}" loading="lazy">`,p.title,'sk'));
+  const up=document.createElement('button');up.type='button';up.className='pk pk-act';up.innerHTML='<span class="pic"><span class="pk-ico" aria-hidden="true">✎</span></span><small>Your sketch</small>';up.onclick=()=>$('#skFile').click();g.appendChild(up);
+  const dr=document.createElement('button');dr.type='button';dr.className='pk pk-act';dr.innerHTML='<span class="pic"><span class="pk-ico" aria-hidden="true">✦</span></span><small>Sketch it for me</small>';dr.onclick=()=>skPrompt();g.appendChild(dr);
   THEMES.forEach(t=>add('new:'+t.id,'<canvas width="112" height="112" aria-hidden="true"></canvas>',t.name));
   add('any','?','Surprise me','any');
   (async()=>{const share=new Array(12).fill(1/12);for(const t of THEMES){try{const r=await render({kind:'theme',id:t.id,share,seed:42,size:112}),cv=g.querySelector(`[data-v="new:${t.id}"] canvas`);cv.getContext('2d').putImageData(r.img,0,0)}catch(e){}await new Promise(requestAnimationFrame)}})()}
+/* ---------- sketches: a pencil drawing of your own, or one drawn from a few words, colored in by the music ---------- */
+let skN=0;
+function skLoad(){try{return JSON.parse(localStorage.getItem('muse.sketches')||'[]').filter(x=>x&&/^data:image\/(jpeg|png);base64,/.test(x.src)).slice(0,4)}catch(e){return[]}}
+function skSave(){try{localStorage.setItem('muse.sketches',JSON.stringify(PAINTINGS.filter(p=>p.sketch).slice(-4).map(p=>({id:p.id,title:p.title,src:PAINT_SRC[p.id]}))))}catch(e){}}
+function skAdd(src,title,by){const id='sk-'+Date.now().toString(36)+(++skN);PAINT_SRC[id]=src;
+  PAINTINGS.push({id,title:String(title||'Your sketch').slice(0,60),artist:by||'Drawn by you',year:'',sketch:true});
+  const old=PAINTINGS.filter(p=>p.sketch);if(old.length>4){const gone=old[0].id;PAINTINGS=PAINTINGS.filter(p=>p.id!==gone);delete PAINT_SRC[gone]}
+  skSave();const g=$('#pkGrid');if(g)g.innerHTML='';if(typeof renderPaintings==='function')try{renderPaintings()}catch(e){}return id}
+skLoad().forEach(x=>{const id=/^sk-[a-z0-9]+$/.test(x.id)?x.id:'sk-'+(++skN);PAINT_SRC[id]=x.src;PAINTINGS.push({id,title:String(x.title||'Your sketch').slice(0,60),artist:'Drawn by you',year:'',sketch:true})});
+// any picture becomes a plain white sheet no bigger than the painting, kept small enough to remember
+function skFromImage(im,max=1600){const k=Math.min(1,max/Math.max(im.naturalWidth||im.width,im.naturalHeight||im.height)),W=Math.max(1,Math.round((im.naturalWidth||im.width)*k)),H=Math.max(1,Math.round((im.naturalHeight||im.height)*k));
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.imageSmoothingQuality='high';x.drawImage(im,0,0,W,H);return c.toDataURL('image/jpeg',.88)}
+function skFile(f){if(!f||!/^image\//.test(f.type))return toast('That file is not an image.');const u=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const id=skAdd(skFromImage(im),(f.name||'Your sketch').replace(/\.[^.]+$/,''));URL.revokeObjectURL(u);smPickBuild();smColorsStep('known:'+id)};im.onerror=()=>{URL.revokeObjectURL(u);toast('That image could not be read.')};im.src=u}
+$('#skFile').addEventListener('change',e=>{skFile(e.target.files[0]);e.target.value=''});
+const SK_IDEAS=['A cat on a boat under the moon','Mountains and a sunrise','A little house in the forest','Flowers by the sea','A city at night'];
+function skPrompt(){const box=$('#pkColors');$('#pkGrid').hidden=true;box.hidden=false;$('#smPick').scrollTop=0;
+  $('#smTitle').textContent='What should I sketch?';$('#smSub').textContent='Describe a scene. Fude draws it in pencil, then the music colors it in.';
+  box.innerHTML=`<button type="button" class="pc-back" id="skBack">← Pictures</button><div class="sk-box">
+    <form id="skForm"><input id="skIn" type="text" maxlength="100" placeholder="e.g. a cat on a boat under the moon" aria-label="Describe a scene" autocomplete="off"><button class="btn small" type="submit">Sketch</button></form>
+    <div class="pc-chips">${SK_IDEAS.map(x=>`<button type="button" class="chip" data-sk="${x}">${x}</button>`).join('')}</div>
+    <div class="sk-prev" id="skPrev">Your sketch appears here</div>
+    <div class="sk-row" id="skRow" hidden><button type="button" class="btn small" id="skUse">Color this sketch</button><button type="button" class="btn ghost small" id="skAgain">Draw it again</button></div></div>`;
+  let cur=null,txt='',tries=0;
+  const go=async(t,again)=>{txt=t.trim();if(!txt)return;$('#skPrev').textContent=sample?'Claude is sketching…':'Sketching…';$('#skRow').hidden=true;
+    const svg=await skDraw(txt,again?++tries:0);const im=new Image();
+    im.onload=()=>{cur=skFromImage(im);$('#skPrev').innerHTML=`<img alt="${esc('A pencil sketch of '+txt)}" src="${cur}">`;$('#skRow').hidden=false};
+    im.onerror=()=>{$('#skPrev').textContent='That sketch did not come out. Try different words.'};
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)};
+  $('#skForm').onsubmit=e=>{e.preventDefault();go($('#skIn').value)};
+  box.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{$('#skIn').value=b.dataset.sk;go(b.dataset.sk)});
+  $('#skAgain').onclick=()=>go(txt,true);
+  $('#skUse').onclick=()=>{if(!cur)return;const id=skAdd(cur,txt.charAt(0).toUpperCase()+txt.slice(1),'Sketched by Fude');smPickBuild();smColorsStep('known:'+id)};
+  $('#skBack').onclick=()=>smHomeShow(true);$('#skIn').focus()}
+// Claude draws it where Claude is at hand; otherwise Fude composes it from the things it recognises in the words
+async function skDraw(txt,again){
+  if(sample){try{const j=await sample.json(`Draw a coloring-book page for Fude, an app that colors pencil drawings with music. Subject: "${txt.slice(0,100)}". Make a clean black line drawing on white: closed shapes with clear outlines (so each shape can be filled with one color), a few large shapes and some smaller details, no shading, no text, no fills other than white. Use an SVG with viewBox "0 0 1600 1000", only path, circle, ellipse, rect, line, polyline and polygon elements, stroke "#222", stroke-width between 4 and 8, fill "none" or "#fff", stroke-linecap and stroke-linejoin "round".${again?' Make a fresh composition, different from the obvious one.':''} Reply with only a JSON object: {"svg": the complete SVG markup}`);
+    const clean=skClean(String(j.svg||''));if(clean)return clean}catch(e){if(e&&e.code==='not_granted')sample=null}}
+  return skCompose(txt,again)}
+// only plain shapes survive from a drawing that came back as text
+function skClean(src){try{const doc=new DOMParser().parseFromString(src,'image/svg+xml'),root=doc.documentElement;if(!root||root.nodeName!=='svg'||doc.querySelector('parsererror'))return null;
+  const okEl=new Set(['svg','g','path','circle','ellipse','rect','line','polyline','polygon']),okAt=new Set(['viewBox','d','cx','cy','r','rx','ry','x','y','width','height','x1','y1','x2','y2','points','fill','stroke','stroke-width','stroke-linecap','stroke-linejoin','transform']);
+  let n=0;const walk=el=>{[...el.children].forEach(c=>{if(!okEl.has(c.nodeName)){c.remove();return}n++;walk(c)});[...el.attributes].forEach(a=>{if(!okAt.has(a.name)||/url\(|javascript:/i.test(a.value))el.removeAttribute(a.name)})};walk(root);
+  if(n<3)return null;root.setAttribute('xmlns','http://www.w3.org/2000/svg');if(!root.getAttribute('viewBox'))root.setAttribute('viewBox','0 0 1600 1000');root.setAttribute('width','1600');root.setAttribute('height','1000');
+  return new XMLSerializer().serializeToString(root).replace('>','><rect width="100%" height="100%" fill="#fff"/>')}catch(e){return null}}
+function skCompose(txt,again){
+  const t=' '+txt.toLowerCase()+' ',has=(...w)=>w.some(x=>t.includes(x));let h=0;for(const ch of t)h=(h*31+ch.charCodeAt(0))|0;const r=mulberry32(h+again*7919),R=(a,b)=>a+r()*(b-a);
+  const W=1600,H=1000,out=[],S='fill="#fff" stroke="#222" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"',P=d=>out.push(`<path d="${d}" ${S}/>`),C=(x,y,rr)=>out.push(`<circle cx="${x|0}" cy="${y|0}" r="${rr|0}" ${S}/>`),SL=S.replace('fill="#fff"','fill="none"'),L=(x1,y1,x2,y2)=>out.push(`<path d="M${x1|0} ${y1|0}L${x2|0} ${y2|0}" ${SL}/>`);
+  const night=has('night','moon','star','dark','midnight'),water=has('sea','ocean','beach','lake','river','boat','ship','sail','wave','fish','island','water'),city=has('city','town','street','building','skyline'),
+    mount=has('mountain','peak','alps','hill','valley','snow'),forest=has('forest','tree','wood','park','jungle','pine'),flowers=has('flower','garden','rose','tulip','bloom','spring','meadow'),
+    house=has('house','home','cabin','cottage','hut'),cat=has(' cat','kitten','kitty'),boat=has('boat','ship','sail'),birds=has('bird','sky','fly','seagull'),heart=has('heart','love'),fish=has('fish');
+  const hz=water?H*R(.55,.62):H*R(.62,.7);
+  // sky
+  if(night){const mx=R(W*.6,W*.85),my=R(140,240),mr=R(70,95);P(`M${mx|0} ${my-mr|0}A${mr|0} ${mr|0} 0 0 0 ${mx|0} ${my+mr|0}A${mr*.55|0} ${mr|0} 0 0 1 ${mx|0} ${my-mr|0}Z`);
+    for(let i=0;i<9;i++){const x=R(60,W-60),y=R(50,hz-180);if(Math.abs(x-mx)<160&&y<my+140)continue;const s=R(14,24);let d='';for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,q=k%2?s*.45:s;d+=(k?'L':'M')+(x+Math.cos(a)*q|0)+' '+(y+Math.sin(a)*q|0)}P(d+'Z')}}
+  else{const sx=R(W*.62,W*.86),sy=R(150,230),sr=R(70,95);for(let k=0;k<12;k++){const a=k*Math.PI/6;L(sx+Math.cos(a)*(sr+18),sy+Math.sin(a)*(sr+18),sx+Math.cos(a)*(sr+52),sy+Math.sin(a)*(sr+52))}C(sx,sy,sr)}
+  const cloud=(x,y,s)=>{let d=`M${x|0} ${y|0}`;const n=4+(r()*2|0);for(let k=0;k<n;k++){const w=s*R(.55,.8);d+=`a${w/2|0} ${w/2.2|0} 0 0 1 ${w|0} 0`}P(d+`a${s*.3|0} ${s*.25|0} 0 0 1 ${-s*.1|0} ${s*.32|0}H${x|0}a${s*.25|0} ${s*.2|0} 0 0 1 0 ${-s*.32|0}Z`)};
+  for(let i=0,k=night?1:2+(r()*2|0);i<k;i++)cloud(R(60,W*.5),R(80,hz-260),R(90,130));
+  if(birds)for(let i=0;i<4;i++){const x=R(200,W-200),y=R(120,hz-200),s=R(18,30);out.push(`<path d="M${x-s|0} ${y|0}q${s/2|0} ${-s*.7|0} ${s|0} 0q${s/2|0} ${-s*.7|0} ${s|0} 0" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/>`)}
+  // land and water
+  if(mount){let d=`M0 ${hz|0}`,x=0;while(x<W){const w=R(220,420),pk=hz-R(220,420);d+=`L${x+w/2|0} ${pk|0}L${Math.min(W,x+w)|0} ${hz-R(40,90)|0}`;
+      out.push(`<path d="M${x+w/2-w*.14|0} ${pk+w*.2|0}L${x+w/2|0} ${pk|0}L${x+w/2+w*.14|0} ${pk+w*.2|0}l${-w*.07|0} ${w*.05|0}l${-w*.07|0} ${-w*.04|0}l${-w*.07|0} ${w*.05|0}Z" ${S}/>`);x+=w*.8}
+    out.unshift(`<path d="${d}L${W} ${hz|0}Z" ${S}/>`)}
+  if(water){P(`M0 ${hz|0}H${W}V${H}H0Z`);for(let row=0;row<4;row++){const y=hz+60+row*((H-hz-60)/4);let d=`M${R(-80,0)|0} ${y|0}`;for(let x=0;x<W+100;x+=120)d+=`q30 -22 60 0t60 0`;out.push(`<path d="${d}" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/>`)}}
+  else{P(`M0 ${hz|0}C${W*.3|0} ${hz-R(40,90)|0} ${W*.55|0} ${hz+R(20,60)|0} ${W} ${hz-R(10,50)|0}V${H}H0Z`);P(`M0 ${hz+R(120,180)|0}C${W*.35|0} ${hz+R(60,110)|0} ${W*.6|0} ${hz+R(170,230)|0} ${W} ${hz+R(100,150)|0}V${H}H0Z`)}
+  // things on the ground
+  const tree=(x,y,s)=>{if(r()<.5){P(`M${x-s*.08|0} ${y|0}V${y-s*.5|0}H${x+s*.08|0}V${y|0}Z`);P(`M${x|0} ${y-s*1.25|0}L${x+s*.42|0} ${y-s*.5|0}H${x-s*.42|0}Z`);P(`M${x|0} ${y-s*1.55|0}L${x+s*.32|0} ${y-s*.95|0}H${x-s*.32|0}Z`)}
+    else{P(`M${x-s*.08|0} ${y|0}V${y-s*.55|0}H${x+s*.08|0}V${y|0}Z`);C(x,y-s*.85,s*.38);C(x-s*.25,y-s*.7,s*.24);C(x+s*.26,y-s*.68,s*.24)}};
+  const home=(x,y,s)=>{P(`M${x-s/2|0} ${y|0}V${y-s*.6|0}H${x+s/2|0}V${y|0}Z`);P(`M${x-s*.62|0} ${y-s*.6|0}L${x|0} ${y-s*1.08|0}L${x+s*.62|0} ${y-s*.6|0}Z`);P(`M${x-s*.1|0} ${y|0}V${y-s*.32|0}H${x+s*.1|0}V${y|0}Z`);P(`M${x+s*.2|0} ${y-s*.42|0}h${s*.18|0}v${s*.16|0}h${-s*.18|0}Z`)};
+  const flower=(x,y,s)=>{L(x,y,x,y-s);const cx=x,cy=y-s,pr=s*.16;for(let k=0;k<6;k++){const a=k*Math.PI/3;C(cx+Math.cos(a)*pr*1.5,cy+Math.sin(a)*pr*1.5,pr)}C(cx,cy,pr*.9);P(`M${x|0} ${y-s*.45|0}q${s*.25|0} ${-s*.15|0} ${s*.3|0} ${s*.05|0}q${-s*.15|0} ${s*.12|0} ${-s*.3|0} ${-s*.05|0}Z`)};
+  if(city){let x=R(20,80);while(x<W-60){const w=R(110,190),bh=R(200,hz-160);P(`M${x|0} ${hz|0}V${hz-bh|0}H${x+w|0}V${hz|0}Z`);for(let wy=hz-bh+30;wy<hz-50;wy+=70)for(let wx=x+20;wx<x+w-40;wx+=50)P(`M${wx|0} ${wy|0}h28v34h-28Z`);x+=w+R(10,30)}}
+  if(forest)for(let i=0;i<6;i++)tree(R(80,W-80),hz+R(40,200),R(150,240));
+  if(house||(!city&&!water&&!forest&&!mount&&!flowers&&!cat&&!heart))home(R(W*.2,W*.45),hz+R(90,140),R(220,280));
+  if(!forest&&!city&&!water)tree(R(W*.62,W*.9),hz+R(80,150),R(190,240));
+  if(flowers)for(let i=0;i<7;i++)flower(R(80,W-80),H-R(30,120),R(90,150));
+  let deck=null;if(boat){const x=R(W*.25,W*.6),y=hz+R(70,120),s=R(260,330);deck=[x-s*.24,y];P(`M${x-s/2|0} ${y|0}H${x+s/2|0}L${x+s*.36|0} ${y+s*.22|0}H${x-s*.36|0}Z`);L(x,y,x,y-s*.95);P(`M${x+8|0} ${y-s*.9|0}L${x+s*.42|0} ${y-s*.12|0}H${x+8|0}Z`);if(!cat)P(`M${x-8|0} ${y-s*.75|0}L${x-s*.32|0} ${y-s*.12|0}H${x-8|0}Z`)}
+  if(fish)for(let i=0;i<3;i++){const x=R(200,W-200),y=R(hz+120,H-60),s=R(60,90);P(`M${x|0} ${y|0}q${s*.6|0} ${-s*.5|0} ${s*1.2|0} 0q${-s*.6|0} ${s*.5|0} ${-s*1.2|0} 0Z`);P(`M${x|0} ${y|0}l${-s*.4|0} ${-s*.3|0}v${s*.6|0}Z`)}
+  if(heart){const x=R(W*.4,W*.6),y=R(hz*.45,hz*.7),s=R(90,130);P(`M${x|0} ${y+s*.9|0}C${x-s*1.6|0} ${y|0} ${x-s*.7|0} ${y-s*.9|0} ${x|0} ${y-s*.2|0}C${x+s*.7|0} ${y-s*.9|0} ${x+s*1.6|0} ${y|0} ${x|0} ${y+s*.9|0}Z`)}
+  if(cat){const x=deck?deck[0]:R(W*.45,W*.7),y=deck?deck[1]:H-R(80,140),s=deck?R(110,130):R(150,190);
+    P(`M${x+s*.3|0} ${y-s*.2|0}c${s*.5|0} ${-s*.1|0} ${s*.6|0} ${-s*.6|0} ${s*.35|0} ${-s*.75|0}c${s*.1|0} ${s*.2|0} ${0} ${s*.6|0} ${-s*.3|0} ${s*.65|0}Z`);
+    out.push(`<ellipse cx="${x|0}" cy="${y-s*.35|0}" rx="${s*.42|0}" ry="${s*.36|0}" ${S}/>`);
+    P(`M${x-s*.3|0} ${y-s*.92|0}L${x-s*.26|0} ${y-s*1.25|0}L${x-s*.08|0} ${y-s*1.02|0}Z`);P(`M${x+s*.3|0} ${y-s*.92|0}L${x+s*.26|0} ${y-s*1.25|0}L${x+s*.08|0} ${y-s*1.02|0}Z`);
+    C(x,y-s*.82,s*.3);C(x-s*.11,y-s*.86,s*.045);C(x+s*.11,y-s*.86,s*.045);P(`M${x-s*.04|0} ${y-s*.76|0}h${s*.08|0}l${-s*.04|0} ${s*.05|0}Z`)}
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#fff"/>${out.join('')}</svg>`}
 function smHomeShow(on){tuneBack();const box=$('#smode');box.classList.toggle('home',on);$('#smPick').hidden=!on;$('#pkColors').hidden=true;$('#pkGrid').hidden=false;$('#smChange').hidden=on||!sm.choice;
   if(on){smPickBuild();$('#pkGrid').querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===(sm.choice||(()=>{try{return localStorage.getItem('muse.smpick')}catch(e){return null}})())));
     if(!sm.err){$('#smTitle').textContent='What should the cat paint?';$('#smSub').textContent=sm.state==='paint'?'Your pick starts with the next song':'Pick a picture. The music gives it its colors.'}}}
@@ -4278,7 +4413,7 @@ try{sp.id=SPOTIFY_CLIENT_ID||localStorage.getItem('muse.spotify.id')||'';sp.tok=
 // in the iPhone and Android app, Spotify's sign-in opens in the system browser and comes back through the app's own address
 const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.fude.paint://spotify';
 const capPlugin=n=>{const C=window.Capacitor;if(!C)return null;try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};
-const MUSE_VERSION='1.1.0';  // build_ext.py reads the extension's version from here
+const MUSE_VERSION='1.2.0';  // build_ext.py reads the extension's version from here
 // in the phone app, the status bar's clock and battery stay readable against Fude's light or dark
 function sysBars(){const S=NATIVE&&capPlugin('SystemBars');if(!S||!S.setStyle)return;const r=document.documentElement,
   dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);

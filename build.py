@@ -1,6 +1,6 @@
 import json
 s=open('fude.src.html').read()
-full=s.replace('/*IMGS*/',json.dumps(json.load(open('imgs.json')))).replace('/*SAMPLES*/',json.dumps(json.load(open('samples.json'))))
+full=s.replace('/*IMGS*/',json.dumps(json.load(open('imgs.json')))).replace('/*THUMBS*/',json.dumps(json.load(open('thumbs.json')))).replace('/*SAMPLES*/',json.dumps(json.load(open('samples.json'))))
 abcjs=open('vendor/abcjs/abcjs-basic-min.js').read().replace('/*! For license information please see abcjs_basic.LICENSE */','/*! abcjs is MIT licensed: https://github.com/paulrosen/abcjs/blob/main/LICENSE.md */')
 assert '</script' not in abcjs.lower()
 full=full.replace('/*SCORES*/',open('scores/library-scores.json').read().strip()).replace('<script>/*ABCJS*/</script>','<script>'+abcjs+'</script>')

@@ -107,6 +107,8 @@ nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{col
 .scene:nth-child(even) .shot{order:2}
 .shot{position:relative;justify-self:center;width:min(380px,100%)}
 .shot::before{content:"";position:absolute;inset:-12% -18%;background:radial-gradient(closest-side,var(--glow),transparent);opacity:.35;filter:blur(30px);z-index:-1}
+.shot.wide{width:min(560px,100%)}
+.shot img{display:block;width:100%;height:auto;border-radius:16px;box-shadow:0 60px 120px -50px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.07)}
 .shot video{display:block;width:100%;aspect-ratio:25/36;object-fit:cover;border-radius:16px;box-shadow:0 60px 120px -50px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.07)}
 .num{font-family:var(--display);font-size:clamp(64px,9vw,128px);line-height:.9;color:transparent;-webkit-text-stroke:1px rgba(239,232,218,.35)}
 .scene h3{font-size:clamp(28px,3.4vw,44px);margin:14px 0 14px}
@@ -254,7 +256,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
   <section class="scenes" id="scenes" aria-labelledby="scenesHead">
     <div class="wrap">
       <p class="eyebrow">In the side panel</p>
-      <h2 id="scenesHead">One song, four scenes</h2>
+      <h2 id="scenesHead">One song, five scenes</h2>
       <div>
         <article class="scene rise">
           <div class="shot" style="--glow:#4A90E2"><video muted loop playsinline preload="metadata" poster="media/pick.jpg" aria-label="Choosing The Starry Night and the Sunset colors"><source src="media/pick.webm" type="video/webm"><source src="media/pick.mp4" type="video/mp4"></video></div>
@@ -271,6 +273,10 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
         <article class="scene rise">
           <div class="shot" style="--glow:#3E9B4F"><video muted loop playsinline preload="metadata" poster="media/pets.jpg" aria-label="Opening Pets and effects and choosing Midnight"><source src="media/pets.webm" type="video/webm"><source src="media/pets.mp4" type="video/mp4"></video></div>
           <div><div class="num" aria-hidden="true">04</div><h3>Earn new painters</h3><p>The more you listen and paint, the more you unlock: new pets, note sparks, a gold frame. Every painting is kept in your gallery with its song.</p></div>
+        </article>
+        <article class="scene rise">
+          <div class="shot wide" style="--glow:#4A90E2"><img src="media/sketch.jpg" alt="A pencil sketch of a cat on a boat under the moon, half of it colored in by a song" loading="lazy" width="1600" height="1000"></div>
+          <div><div class="num" aria-hidden="true">05</div><h3>Color your own sketch</h3><p>Upload a pencil drawing, or describe a scene and Fude sketches it for you. Then the music colors it in, shape by shape, like a coloring book.</p></div>
         </article>
       </div>
     </div>
@@ -295,7 +301,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
         <li><b>Click the Fude button</b><span>Or press <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>F</kbd>. The side panel opens beside the music and starts listening.</span></li>
       </ol>
       <div class="get">
-        <a class="btn" href="downloads/fude-for-chrome.zip"><span class="mark" aria-hidden="true"></span>Download Fude 1.1</a>
+        <a class="btn" href="downloads/fude-for-chrome.zip"><span class="mark" aria-hidden="true"></span>Download Fude 1.2</a>
         <p>Coming soon to the Chrome Web Store. Until then, unzip the download, open <code>chrome://extensions</code>, turn on Developer mode and choose Load unpacked. Works in Chrome and Edge.</p>
       </div>
     </div>
@@ -310,7 +316,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
   </section>
 </main>
 
-<footer><div class="wrap"><span>Fude 1.1 for Chrome and Edge</span><a href="privacy.html">Privacy</a></div></footer>
+<footer><div class="wrap"><span>Fude 1.2 for Chrome and Edge</span><a href="privacy.html">Privacy</a></div></footer>
 
 <script>
 (()=>{
