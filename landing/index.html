@@ -38,6 +38,53 @@ p{margin:0}
 .btn.small{padding:9px 16px;font-size:14px}
 .mark{width:12px;height:12px;border-radius:50%;flex:none;background:conic-gradient(#E8231F,#F08A1C,#F5D90A,#3FA34D,#4C8FE0,#8B4FB8,#E8231F)}
 
+/* the one action that matters: Add to Chrome. Gold, lit, and everywhere you look */
+.add{position:relative;display:inline-flex;align-items:center;gap:12px;padding:12px 22px 12px 12px;border-radius:999px;text-decoration:none;white-space:nowrap;cursor:pointer;border:0;
+  font:700 16px/1 var(--body);color:#1E1606;background:linear-gradient(180deg,#FFE7A1 0,#F2C75C 48%,#DDA33A 100%);
+  box-shadow:0 14px 36px -10px rgba(237,190,79,.75),0 0 0 1px rgba(255,236,170,.5),inset 0 1px 0 rgba(255,255,255,.7);overflow:hidden;isolation:isolate;transition:transform .18s,box-shadow .18s}
+.add::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.75) 50%,transparent 65%);transform:translateX(-120%);animation:shine 4.5s ease-in-out 1.2s infinite}
+@keyframes shine{0%,62%{transform:translateX(-120%)}82%,100%{transform:translateX(120%)}}
+.add:hover{transform:translateY(-2px);box-shadow:0 20px 44px -10px rgba(237,190,79,.9),0 0 0 1px rgba(255,236,170,.8),inset 0 1px 0 rgba(255,255,255,.8)}
+.add:active{transform:translateY(0)}
+.add .chr{width:28px;height:28px;flex:none;padding:2px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.add small{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:999px;background:rgba(30,22,6,.12)}
+.add.xl{font-size:19px;padding:14px 26px 14px 14px;gap:14px}
+.add.xl .chr{width:34px;height:34px}
+.add.sm{font-size:14px;padding:7px 14px 7px 7px;gap:9px;box-shadow:0 8px 20px -8px rgba(237,190,79,.7),inset 0 1px 0 rgba(255,255,255,.7)}
+.add.sm .chr{width:22px;height:22px}
+.add.sm small{display:none}
+.halo{position:relative;display:inline-block}
+.halo::before{content:"";position:absolute;inset:-8px;border-radius:999px;border:2px solid rgba(237,190,79,.55);animation:halo 2.4s ease-out infinite;pointer-events:none}
+@keyframes halo{from{opacity:.9;transform:scale(.96)}to{opacity:0;transform:scale(1.18,1.5)}}
+.trust{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;font:12px var(--mono);letter-spacing:.06em;color:rgba(239,232,218,.72);text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.trust span::before{content:"✓ ";color:var(--gold)}
+
+/* the dock: Add to Chrome follows you down the page */
+.dock{position:fixed;z-index:25;left:50%;bottom:max(16px,env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);display:flex;align-items:center;gap:16px;padding:8px 8px 8px 18px;border-radius:999px;
+  background:rgba(24,22,31,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 20px 50px -12px rgba(0,0,0,.8),inset 0 0 0 1px rgba(239,232,218,.14);transition:transform .45s cubic-bezier(.2,.9,.3,1.2);max-width:calc(100% - 24px)}
+.dock.on{transform:translate(-50%,0)}
+.dock p{font-size:14px;color:var(--bone);white-space:nowrap;display:flex;align-items:center;gap:10px}
+.dock p b{font-weight:600}
+.dock p span{color:var(--dust)}
+@media (max-width:560px){.dock{left:12px;right:12px;transform:translateY(140%);justify-content:space-between}.dock.on{transform:none}.dock p span{display:none}}
+
+/* install guide */
+dialog.guide{border:0;padding:0;border-radius:22px;background:var(--velvet);color:var(--bone);width:min(560px,calc(100% - 24px));box-shadow:0 40px 120px -20px rgba(0,0,0,.9),inset 0 0 0 1px rgba(239,232,218,.12)}
+dialog.guide::backdrop{background:rgba(7,6,11,.72);backdrop-filter:blur(4px)}
+.guide .gh{padding:26px 28px 6px;display:flex;gap:16px;align-items:center}
+.guide .gh .chr{width:46px;height:46px;flex:none}
+.guide h2{font-size:28px;line-height:1.1}
+.guide .gh p{color:var(--dust);font-size:14px;margin-top:4px}
+.guide ol{list-style:none;margin:14px 0 0;padding:0 28px;counter-reset:g}
+.guide li{counter-increment:g;display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;padding:14px 0;border-top:1px solid var(--line)}
+.guide li::before{content:counter(g);grid-row:span 2;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:var(--night);font:700 15px var(--body)}
+.guide li b{font-weight:600}
+.guide li span{color:var(--dust);font-size:15px}
+.copy{grid-column:2;display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:6px 6px 6px 12px;border-radius:10px;background:var(--night);box-shadow:inset 0 0 0 1px var(--line);font:13px var(--mono);color:var(--bone);border:0;cursor:pointer;width:max-content;max-width:100%}
+.copy em{font:600 12px var(--body);font-style:normal;padding:4px 9px;border-radius:7px;background:var(--bone);color:var(--night)}
+.guide .gf{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 28px 24px;flex-wrap:wrap}
+.guide .gf p{font-size:13px;color:var(--dust);max-width:26em}
+
 /* header floats over the first scene */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--night)}
 header{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:20;transition:background .4s}
@@ -45,7 +92,7 @@ header.solid{background:rgba(14,13,18,.82);backdrop-filter:blur(10px);-webkit-ba
 header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:16px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:24px;text-decoration:none}
 nav{display:flex;align-items:center;gap:22px;font-size:15px}
-nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{color:var(--bone)}
+nav a:not(.btn):not(.add){text-decoration:none;color:var(--dust)}nav a:not(.btn):not(.add):hover{color:var(--bone)}
 @media (max-width:700px){nav .hide-s{display:none}}
 
 /* scene 1: the painting, pinned while you scroll */
@@ -72,6 +119,9 @@ nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{col
 .ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 .lyric{font-family:var(--display);font-style:italic;font-size:clamp(17px,1.6vw,22px);color:var(--bone);text-align:right;max-width:20em;min-height:3em;opacity:.9;transition:opacity .4s}
 .lyric small{display:block;font:12px var(--mono);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--dust);margin-bottom:6px}
+.stage{cursor:crosshair}
+.brushhint{position:absolute;z-index:4;right:22px;top:calc(82px + env(safe-area-inset-top,0px));font:12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--bone);padding:8px 12px;border-radius:999px;background:rgba(14,13,18,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none;transition:opacity .5s}
+@media (pointer:coarse),(max-width:900px){.brushhint{display:none}}
 .cue{position:absolute;z-index:4;left:50%;bottom:14px;transform:translateX(-50%);font:11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dust);transition:opacity .4s}
 @media (max-width:760px){.stage::after{background:linear-gradient(180deg,rgba(7,6,11,.55) 0,transparent 18%,transparent 28%,rgba(7,6,11,.8) 52%,rgba(7,6,11,.95) 100%)}.title .wrap{grid-template-columns:minmax(0,1fr)}.lyric{text-align:left}.cue{display:none}.opening{height:280vh}}
 
@@ -88,10 +138,31 @@ nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{col
 .keys h2{font-size:clamp(32px,4.4vw,56px)}
 .keys .head p{color:var(--dust);max-width:28em}
 .easel{position:relative;margin-top:36px;border-radius:18px;overflow:hidden;background:#F3EEE3;box-shadow:0 50px 100px -50px rgba(0,0,0,.9),inset 0 0 0 1px rgba(255,255,255,.06)}
-.easel canvas{display:block;width:100%;height:clamp(220px,32vw,380px)}
-.easel .hint{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--script);font-size:clamp(24px,3vw,36px);color:#8b8274;pointer-events:none;transition:opacity .5s}
-.easel .tools{position:absolute;right:14px;top:14px;display:flex;gap:8px}
-.easel .tools button{font:13px var(--body);padding:7px 12px;border-radius:999px;border:0;background:rgba(14,13,18,.72);color:var(--bone);cursor:pointer}
+.easel{background:#1a1820;touch-action:none;cursor:crosshair}
+.easel canvas{display:block;width:100%;height:clamp(280px,40vw,500px)}
+.easel .hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--script);font-size:clamp(26px,3.2vw,40px);color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.8);pointer-events:none;transition:opacity .5s;padding:0 20px}
+.easel .tools{position:absolute;left:14px;right:14px;top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;pointer-events:none}
+.easel .tools>div{display:flex;flex-wrap:wrap;gap:8px;pointer-events:auto}
+.easel .tools button{font:600 13px var(--body);padding:8px 13px;border-radius:999px;border:0;background:rgba(14,13,18,.78);color:var(--bone);cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:7px}
+.easel .tools button:hover{background:rgba(14,13,18,.92)}
+.easel .tools button[aria-pressed="true"]{background:var(--bone);color:var(--night)}
+.easel .tools button.mic[aria-pressed="true"]{background:#E8231F;color:#fff}
+.easel .tools button.mic[aria-pressed="true"] i{animation:rec 1s infinite}
+.easel .tools i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.meter{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;border-radius:999px;background:rgba(14,13,18,.78);font:600 13px var(--mono);color:var(--bone);pointer-events:none;transition:opacity .3s}
+.meter svg{width:22px;height:22px;transform:rotate(-90deg)}
+.meter circle{fill:none;stroke-width:3.5}
+.heard{position:absolute;right:14px;bottom:14px;font:600 13px var(--mono);padding:7px 14px;border-radius:999px;background:rgba(14,13,18,.78);color:var(--bone);opacity:0;transition:opacity .3s;pointer-events:none}
+.heard.on{opacity:1}
+.done{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:radial-gradient(closest-side,rgba(14,13,18,.82),rgba(14,13,18,.35));opacity:0;pointer-events:none;transition:opacity .8s;padding:20px}
+.done.on{opacity:1;pointer-events:auto}
+.done h3{font-size:clamp(26px,3.4vw,44px)}
+.done h3 em{font-family:var(--script);font-style:normal;color:var(--gold)}
+.done p{color:var(--bone);opacity:.85;margin:10px auto 22px;max-width:26em}
+.done .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.nudge{margin-top:34px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 28px;padding:22px 24px 22px 28px;border-radius:20px;background:linear-gradient(100deg,#231B12,#1B1722 60%);box-shadow:inset 0 0 0 1px rgba(237,190,79,.25)}
+.nudge p{font-family:var(--display);font-size:clamp(20px,2.2vw,26px);max-width:24em}
+.nudge p span{color:var(--dust)}
 .piano{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;margin-top:14px}
 .piano button{position:relative;height:clamp(84px,11vw,140px);border:0;border-radius:10px 10px 14px 14px;background:var(--c);cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;padding-bottom:10px;color:rgba(255,255,255,.95);font:600 15px var(--mono);text-shadow:0 1px 3px rgba(0,0,0,.4);transform-origin:top;transition:transform .12s,filter .12s;box-shadow:inset 0 -10px 0 rgba(0,0,0,.18)}
 .piano button kbd{font:11px var(--mono);opacity:.75}
@@ -122,6 +193,14 @@ nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{col
 .frames figure{margin:0;display:flex;flex-direction:column;gap:16px}
 .gilt{padding:clamp(8px,1.1vw,14px);background:linear-gradient(135deg,#B8862B,#F1D27A 30%,#A8741E 55%,#E9C463 80%,#8F5F18);border-radius:4px;box-shadow:0 50px 90px -40px rgba(0,0,0,.95)}
 .gilt img{display:block;width:100%;height:auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.3)}
+.ba{position:relative;overflow:hidden;--x:50%;touch-action:pan-y}
+.ba img.after{position:absolute;inset:0;height:100%;object-fit:cover;clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.ba .bar{position:absolute;top:0;bottom:0;left:var(--x);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.6);pointer-events:none}
+.ba .bar::after{content:"◂ ▸";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;color:var(--night);display:grid;place-items:center;font-size:13px;letter-spacing:-.05em;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.ba input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
+.ba .tag{position:absolute;bottom:10px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:999px;background:rgba(14,13,18,.7);color:var(--bone);pointer-events:none}
+.ba .tag.l{left:10px}.ba .tag.r{right:10px}
+.ba:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:4px}
 .frames figcaption{font-family:var(--display);font-size:20px}
 .frames figcaption span{display:block;font:13px var(--body);color:var(--dust);margin-top:4px}
 .sites{display:flex;flex-wrap:wrap;gap:10px;margin-top:56px;align-items:center}
@@ -140,7 +219,7 @@ nav a:not(.btn){text-decoration:none;color:var(--dust)}nav a:not(.btn):hover{col
 .steps span{color:var(--dust);font-size:15px}
 kbd{font:12px var(--mono);padding:2px 6px;border-radius:5px;box-shadow:inset 0 0 0 1px var(--line);background:var(--night)}
 @media (max-width:760px){.steps{grid-template-columns:minmax(0,1fr)}}
-.get{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.get{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:18px}
 .get p{color:var(--dust);font-size:14px;max-width:34em}
 .get code{font-family:var(--mono);font-size:13px;color:var(--bone)}
 
@@ -158,20 +237,21 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
 }
 @media (prefers-reduced-motion:reduce){
   .opening{height:auto}.stage{position:relative}
-  .rise{animation:none!important}.cat .pt-arm,.hud i{animation:none}.cue{display:none}
+  .rise{animation:none!important}.add::after,.halo::before{animation:none}.cat .pt-arm,.hud i{animation:none}.cue{display:none}
 }
 </style>
 <!--/head-->
 </head>
 <body>
 <!--body-->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="chr" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 24 4.95 13A22 22 0 0 1 43.05 13Z"/><path fill="#FBBC04" d="M24 24 43.05 13A22 22 0 0 1 24 46Z"/><path fill="#34A853" d="M24 24 24 46A22 22 0 0 1 4.95 13Z"/><circle cx="24" cy="24" r="10.5" fill="#fff"/><circle cx="24" cy="24" r="8.2" fill="#4285F4"/></symbol></svg>
 <header id="hdr"><div class="wrap">
   <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span>Fude</a>
   <nav aria-label="Main">
     <a class="hide-s" href="#play">Play the colors</a>
     <a class="hide-s" href="#scenes">See it</a>
     <a href="privacy.html">Privacy</a>
-    <a class="btn small" href="#begin">Add to Chrome</a>
+    <a class="add sm" href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a>
   </nav>
 </div></header>
 
@@ -186,10 +266,12 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
         <div>
           <h1>Every song becomes a <em>painting</em></h1>
           <p class="lede">Fude listens to the music in your browser tab and paints it, note by note, in Chrome’s side panel. A little cat does the brushwork.</p>
-          <div class="ctas"><a class="btn" href="#begin"><span class="mark" aria-hidden="true"></span>Add Fude to Chrome</a><a class="btn ghost" href="#scenes">Watch it work</a></div>
+          <div class="ctas"><span class="halo"><a class="add xl" href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a></span><a class="btn ghost" href="#play">Try it here first</a></div>
+          <p class="trust"><span>Free</span><span>No account</span><span>Nothing recorded</span><span>Chrome and Edge</span></p>
         </div>
         <p class="lyric" id="lyric" aria-hidden="true"><small>Lyrics, in time</small><span id="lyricLine">The light comes low across the water</span></p>
       </div></div>
+      <div class="brushhint" id="brushhint" aria-hidden="true">Move to paint · scroll to finish</div>
       <div class="cue" id="cue" aria-hidden="true">Scroll to paint</div>
     </div>
   </section>
@@ -201,12 +283,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
   <section class="wrap keys" id="play" aria-labelledby="playHead">
     <div class="head rise">
       <div><p class="eyebrow">Twelve notes, twelve colors</p><h2 id="playHead">Play the colors</h2></div>
-      <p>This is how Fude hears. Tap a key, or use your keyboard from A to J, and each note lays down its own color. In the extension you can keep these, pick a preset, spin a color wheel or describe a mood.</p>
+      <p>This is how Fude hears. Play the keys (or A to J on your keyboard), drag across the canvas, or sing to it. Every note uncovers The Starry Night in its own color. Can you finish it?</p>
     </div>
-    <div class="easel rise">
-      <canvas id="easel" aria-label="A canvas that fills with color as notes are played"></canvas>
-      <div class="hint" id="hint">Play a note</div>
-      <div class="tools"><button type="button" id="tune">Play a tune</button><button type="button" id="wipe">Clear</button></div>
+    <div class="easel rise" id="easelBox">
+      <canvas id="easel" aria-label="The Starry Night, uncovered in color as notes are played"></canvas>
+      <div class="hint" id="hint">Play a key, drag here, or sing</div>
+      <div class="tools">
+        <div role="group" aria-label="Canvas"><button type="button" data-mode="starry" aria-pressed="true">Starry Night</button><button type="button" data-mode="blank" aria-pressed="false">Blank canvas</button></div>
+        <div><button type="button" class="mic" id="mic" aria-pressed="false"><i></i>Sing to it</button><button type="button" id="tune">Play a tune</button><button type="button" id="wipe">Start over</button></div>
+      </div>
+      <div class="meter" id="meter"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="rgba(239,232,218,.2)"/><circle id="ring" cx="12" cy="12" r="9" stroke="#EDBE4F" stroke-dasharray="56.5" stroke-dashoffset="56.5" stroke-linecap="round"/></svg><span id="pct">0% painted</span></div>
+      <div class="heard" id="heard" aria-live="polite"></div>
+      <div class="done" id="done"><div><h3>You painted <em>The Starry Night</em></h3><p>Now imagine it with your favorite song. Fude listens to any tab and paints the whole thing, with a cat doing the brushwork.</p><div class="row"><a class="add " href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a><button type="button" class="btn ghost" id="again">Paint it again</button></div></div></div>
     </div>
     <div class="piano" id="piano" role="group" aria-label="Notes"></div>
   </section>
@@ -237,15 +325,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
           <div><div class="num" aria-hidden="true">05</div><h3>Color your own sketch</h3><p>Upload a pencil drawing, or describe a scene and Fude sketches it for you. Then the music colors it in, shape by shape, like a coloring book.</p></div>
         </article>
       </div>
+      <div class="nudge rise"><p>That was one song. <span>Fude paints every song you play, on Spotify, YouTube and anywhere else.</span></p><a class="add " href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a></div>
     </div>
   </section>
 
   <section class="wrap wall" aria-labelledby="wallHead">
     <p class="eyebrow">From the gallery</p>
-    <h2 id="wallHead">Hung on the wall</h2>
+    <h2 id="wallHead">Before the song, and after</h2>
     <div class="frames">
-      <figure class="rise"><div class="gilt"><img src="media/starry-color.jpg" alt="The Starry Night, repainted in red, yellow and green by a song" loading="lazy" width="1600" height="1000"></div><figcaption>The Starry Night, in Sakura Sakura<span>Painted by Fude</span></figcaption></figure>
-      <figure class="rise"><div class="gilt"><img src="media/wave-color.jpg" alt="The Great Wave off Kanagawa, repainted in red, blue and yellow by a song" loading="lazy" width="1600" height="886"></div><figcaption>The Great Wave, in Sakura Sakura<span>Painted by Fude</span></figcaption></figure>
+      <figure class="rise"><div class="gilt"><div class="ba"><img src="media/starry-gray.jpg" alt="The Starry Night in pencil gray, before the song" loading="lazy" width="2400" height="1500"><img class="after" src="media/starry-color.jpg" alt="The Starry Night, repainted in red, yellow and green by a song" loading="lazy" width="2400" height="1500"><span class="tag l">After</span><span class="tag r">Before</span><span class="bar"></span><input type="range" min="0" max="100" value="50" aria-label="Compare The Starry Night before and after the song"></div></div><figcaption>The Starry Night, in Sakura Sakura<span>Drag to compare. Painted by Fude</span></figcaption></figure>
+      <figure class="rise"><div class="gilt"><div class="ba"><img src="media/wave-gray.jpg" alt="The Great Wave in pencil gray, before the song" loading="lazy" width="2400" height="1329"><img class="after" src="media/wave-color.jpg" alt="The Great Wave off Kanagawa, repainted in red, blue and yellow by a song" loading="lazy" width="2400" height="1329"><span class="tag l">After</span><span class="tag r">Before</span><span class="bar"></span><input type="range" min="0" max="100" value="50" aria-label="Compare The Great Wave before and after the song"></div></div><figcaption>The Great Wave, in Sakura Sakura<span>Drag to compare. Painted by Fude</span></figcaption></figure>
     </div>
     <div class="sites"><b>Works with music on</b><span>Spotify</span><span>YouTube</span><span>YouTube Music</span><span>Apple Music</span><span>SoundCloud</span><span>Deezer</span><span>Tidal</span><span>Bandcamp</span><span>any site that plays sound</span></div>
   </section>
@@ -259,8 +348,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
         <li><b>Click the Fude button</b><span>Or press <kbd>Alt</kbd> <kbd>Shift</kbd> <kbd>F</kbd>. The side panel opens beside the music and starts listening.</span></li>
       </ol>
       <div class="get">
-        <a class="btn" href="downloads/fude-for-chrome.zip"><span class="mark" aria-hidden="true"></span>Download Fude 1.2</a>
-        <p>Coming soon to the Chrome Web Store. Until then, unzip the download, open <code>chrome://extensions</code>, turn on Developer mode and choose Load unpacked. Works in Chrome and Edge.</p>
+        <span class="halo"><a class="add xl" href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a></span>
+        <p>Version 1.2 for Chrome and Edge. Clicking downloads Fude and shows the three quick steps to switch it on. One-click install is coming with the Chrome Web Store listing.</p>
       </div>
     </div>
   </section>
@@ -270,48 +359,99 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;
     <div>
       <p>Fude turns the sound into notes on your computer. Nothing it hears is recorded, saved or sent anywhere, and it only listens to a tab after you click its button there.</p>
       <p>There are no accounts, ads or tracking. To show lyrics, Fude asks the open library LRCLIB for a song’s words using its title and artist, and you can turn that off. <a href="privacy.html">Read the privacy policy</a>.</p>
+      <p>On this page, Sing to it hears your voice inside your browser only, to pick out the notes. Nothing is recorded or sent, and the microphone switches off when you stop.</p>
     </div>
   </section>
 </main>
 
 <footer><div class="wrap"><span>Fude 1.2 for Chrome and Edge</span><a href="privacy.html">Privacy</a></div></footer>
 
+<div class="dock" id="dock"><p><span class="mark" aria-hidden="true"></span><b>Fude</b><span>Paints the music in your tab</span></p><a class="add sm" href="downloads/fude-for-chrome.zip" download data-add><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><span data-label>Add to Chrome</span><small>Free</small></a></div>
+
+<dialog class="guide" id="guide" aria-labelledby="gTitle">
+  <div class="gh"><svg class="chr" viewBox="0 0 48 48" aria-hidden="true"><use href="#chr"/></svg><div><h2 id="gTitle">Fude is downloading</h2><p id="gSub">Three quick steps and it’s in your <span data-browser>Chrome</span>.</p></div></div>
+  <ol id="gSteps">
+    <li><b>Unzip the download</b><span>Open <code>fude-for-chrome.zip</code> from your downloads. You’ll get a folder called fude-for-chrome.</span></li>
+    <li><b>Open the extensions page</b><span>Paste this in the address bar, then switch on Developer mode in the corner.</span><button type="button" class="copy" data-copy="chrome://extensions"><span data-ext>chrome://extensions</span><em>Copy</em></button></li>
+    <li><b>Click Load unpacked</b><span>Choose the fude-for-chrome folder. Pin Fude from the puzzle piece, play a song, and click it.</span></li>
+  </ol>
+  <div class="gf"><p id="gNote">Didn’t start? <a href="downloads/fude-for-chrome.zip" download>Download again</a>.</p><button type="button" class="btn small" id="gClose">Got it</button></div>
+</dialog>
+
 <script>
 (()=>{
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NOTES=[['C','#E8231F','A',261.63],['C♯','#8E44AD','W',277.18],['D','#F2C40C','S',293.66],['D♯','#6A7FA8','E',311.13],['E','#A8D8F0','D',329.63],['F','#9B1B30','F',349.23],['F♯','#3557C8','T',369.99],['G','#F0861A','G',392.00],['G♯','#9B59B6','Y',415.30],['A','#3E9B4F','H',440.00],['A♯','#7F8C9A','U',466.16],['B','#4A90E2','J',493.88]];
 const hdr=document.getElementById('hdr');
+const ua=navigator.userAgent,EDGE=/Edg\//.test(ua),PHONE=/Android|iPhone|iPad|iPod|Mobile/i.test(ua)||(navigator.maxTouchPoints>1&&/Macintosh/.test(ua));
+const BROWSER=EDGE?'Edge':'Chrome';
 
-/* ---- scene 1: scroll paints the screen ---- */
-const op=document.getElementById('opening'),cv=document.getElementById('paint'),cx=cv.getContext('2d'),cat=document.getElementById('cat');
-const clock=document.getElementById('clock'),line=document.getElementById('lyricLine'),cue=document.getElementById('cue');
+/* ---- Add to Chrome: names the right browser, downloads, then shows the three steps ---- */
+const guide=document.getElementById('guide');
+document.querySelectorAll('[data-label]').forEach(l=>l.textContent=PHONE?`Get it for ${BROWSER}`:`Add to ${BROWSER}`);
+document.querySelectorAll('[data-browser]').forEach(l=>l.textContent=BROWSER);
+document.querySelectorAll('[data-ext]').forEach(l=>{l.textContent=EDGE?'edge://extensions':'chrome://extensions';l.parentNode.dataset.copy=l.textContent});
+function phoneGuide(){
+  document.getElementById('gTitle').textContent='Fude lives on your computer';
+  document.getElementById('gSub').textContent='Browser extensions run in Chrome and Edge on a Mac, Windows PC or Chromebook.';
+  document.getElementById('gSteps').innerHTML=`<li><b>Send yourself this page</b><span>Open it on your computer and press Add to Chrome there.</span><button type="button" class="copy" data-copy="${location.href.split('#')[0]}"><span>Copy the link</span><em>Copy</em></button></li><li><b>Put on a song in a tab</b><span>Spotify, YouTube, anything. Then click the Fude button and watch the cat paint.</span></li>`;
+  document.getElementById('gNote').textContent='Meanwhile, try painting with the keys on this page.';
+  if(navigator.share){const b=document.createElement('button');b.type='button';b.className='copy';b.innerHTML='<span>Share to my computer</span><em>Share</em>';b.onclick=()=>navigator.share({title:'Fude for Chrome',url:location.href.split('#')[0]}).catch(()=>{});document.querySelector('#gSteps li span').after(b)}
+  bindCopy();
+}
+function bindCopy(){guide.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const t=b.dataset.copy,em=b.querySelector('em');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{em.textContent='Copied'},()=>{em.textContent='Select it'});setTimeout(()=>em.textContent='Copy',1800)})}
+if(PHONE)phoneGuide();else bindCopy();
+document.querySelectorAll('[data-add]').forEach(a=>a.addEventListener('click',e=>{if(PHONE)e.preventDefault();if(guide.showModal&&!guide.open){setTimeout(()=>guide.showModal(),PHONE?0:250)}}));
+document.getElementById('gClose').onclick=()=>guide.close();
+guide.addEventListener('click',e=>{if(e.target===guide)guide.close()});
+
+/* ---- the dock follows you once the opening scene is behind you ---- */
+const dock=document.getElementById('dock'),begin=document.getElementById('begin'),seen=new Set();let beginSeen=false;
+// it steps aside where the page already offers the button, and while you're playing the keys
+new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?seen.add(e.target):seen.delete(e.target));beginSeen=seen.size>0;dockCheck()},{threshold:.15}).observe(begin);
+new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?seen.add(e.target):seen.delete(e.target));beginSeen=seen.size>0;dockCheck()},{threshold:0}).observe(document.getElementById('piano'));
+new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?seen.add(e.target):seen.delete(e.target));beginSeen=seen.size>0;dockCheck()},{threshold:.5}).observe(document.querySelector('.nudge'));
+function dockCheck(){const past=document.getElementById('opening').getBoundingClientRect().bottom<innerHeight*.6;dock.classList.toggle('on',past&&!beginSeen)}
+addEventListener('scroll',dockCheck,{passive:true});
+
+/* ---- scene 1: scroll paints the screen, and so does your cursor ---- */
+const op=document.getElementById('opening'),stage=op.querySelector('.stage'),cv=document.getElementById('paint'),cx=cv.getContext('2d'),cat=document.getElementById('cat');
+const clock=document.getElementById('clock'),line=document.getElementById('lyricLine'),cue=document.getElementById('cue'),bh=document.getElementById('brushhint');
 const LYRICS=['The light comes low across the water','We walk until the street lamps hum','Your hand is warm, the day is shorter','And every window turns to gold','Hold on, the sky is painting slow','The river knows the way we go','So stay a while in golden hour','Before the blue begins to fall'];
-const SONG=222; // seconds in the song the scroll stands for
+const SONG=222;
 const color=new Image(),gray=new Image();let ready=0,W=0,H=0,dpr=1,prog=0,shown=-1,t0=performance.now(),lastNote=0,lastP=0;
+const brush=document.createElement('canvas'),bx=brush.getContext('2d'),brushCol=document.createElement('canvas'),bcx=brushCol.getContext('2d');let brushDirty=false,brushUsed=false,last=null,lastSpark=0;
 color.src='media/starry-color.jpg';gray.src='media/starry-gray.jpg';
 [color,gray].forEach(im=>im.decode?im.decode().then(()=>{ready++;size()}).catch(()=>{}):im.onload=()=>{ready++;size()});
-function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);frame()}
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  brush.width=brushCol.width=Math.max(1,Math.round(W));brush.height=brushCol.height=Math.max(1,Math.round(H));brushDirty=brushUsed;frame()}
 function cover(im){const s=Math.max(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;return[(W-w)/2,(H-h)/2,w,h]}
 const reveal=()=>still?1:.16+.84*prog;
 function edge(x,t){const r=reveal();return H*(1-r)+Math.sin(x*.011+t*1.4)*16+Math.sin(x*.027-t*2.1)*9+Math.sin(x*.063+t)*4}
+function dab(x,y,r){const g=bx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');bx.fillStyle=g;bx.beginPath();bx.arc(x,y,r,0,7);bx.fill()}
+stage.addEventListener('pointermove',e=>{if(still||ready<2)return;const b=stage.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top,r=Math.max(38,Math.min(W,H)*.06);
+  if(last){const d=Math.hypot(x-last[0],y-last[1]),n=Math.ceil(d/(r*.3));for(let k=1;k<=n;k++)dab(last[0]+(x-last[0])*k/n,last[1]+(y-last[1])*k/n,r*(.85+Math.random()*.3))}else dab(x,y,r);
+  last=[x,y];brushDirty=brushUsed=true;bh.style.opacity=0;
+  const now=performance.now();if(now-lastSpark>120){spawn(x+10,y-20);lastSpark=now}});
+stage.addEventListener('pointerleave',()=>last=null);
 function frame(){
   if(ready<2||!W)return;const t=(performance.now()-t0)/1000,r=reveal();
   cx.setTransform(dpr,0,0,dpr,0,0);
   const [gx,gy,gw,gh]=cover(gray);cx.drawImage(gray,gx,gy,gw,gh);
+  if(brushUsed&&r<1){if(brushDirty){bcx.globalCompositeOperation='copy';bcx.drawImage(brush,0,0);bcx.globalCompositeOperation='source-in';const [x,y,w,h]=cover(color);bcx.drawImage(color,x,y,w,h);brushDirty=false}cx.drawImage(brushCol,0,0,W,H)}
   if(r>0){cx.save();cx.beginPath();cx.moveTo(0,H);for(let x=0;x<=W+8;x+=8)cx.lineTo(x,r>=1?0:edge(x,t));cx.lineTo(W,H);cx.closePath();cx.clip();
     const [x,y,w,h]=cover(color);cx.drawImage(color,x,y,w,h);cx.restore();
     if(r<1){cx.save();cx.globalCompositeOperation='lighter';cx.strokeStyle='rgba(237,190,79,.35)';cx.lineWidth=3;cx.shadowColor='rgba(237,190,79,.9)';cx.shadowBlur=18;cx.beginPath();for(let x=0;x<=W+8;x+=8){const y=edge(x,t);x?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke();cx.restore()}}
-  // the cat sweeps back and forth along the wet edge, like the extension's painter
   const sweep=(Math.sin(prog*Math.PI*9+t*.35)+1)/2,cw=cat.offsetWidth,catX=24+sweep*(W-cw-48),y=r>=1?H*.42:edge(catX+cw/2,t);
   cat.style.transform=`translate(${catX}px,${Math.max(90,Math.min(H-cw*1.6,y-cw*.78))}px)`;
   cat.style.opacity=r>=1?0:1;cat.style.transition='opacity .6s';
   return [catX+cw*.85,y-cw*.55];
 }
-function spawn(x,y){if(still)return;const n=NOTES[Math.floor(Math.random()*12)],s=document.createElement('span');s.className='flying';s.textContent=n[0];s.style.color=n[1];s.style.left=x+'px';s.style.top=y+'px';s.style.setProperty('--dx',(Math.random()*80-40)+'px');op.querySelector('.stage').appendChild(s);setTimeout(()=>s.remove(),1900)}
+function spawn(x,y){if(still)return;const n=NOTES[Math.floor(Math.random()*12)],s=document.createElement('span');s.className='flying';s.textContent=n[0];s.style.color=n[1];s.style.left=x+'px';s.style.top=y+'px';s.style.setProperty('--dx',(Math.random()*80-40)+'px');stage.appendChild(s);setTimeout(()=>s.remove(),1900)}
 function measure(){const r=op.getBoundingClientRect(),run=op.offsetHeight-innerHeight;prog=run>0?Math.min(1,Math.max(0,-r.top/run)):1;
   const sec=Math.round(prog*SONG);clock.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
   const i=Math.min(LYRICS.length-1,Math.floor(prog*LYRICS.length));if(i!==shown){shown=i;line.textContent=LYRICS[i]}
-  cue.style.opacity=prog>.04?0:1;hdr.classList.toggle('solid',r.bottom<innerHeight*.2)}
+  cue.style.opacity=prog>.04?0:1;if(prog>.04)bh.style.opacity=0;hdr.classList.toggle('solid',r.bottom<innerHeight*.2)}
 let onScreen=true;new IntersectionObserver(e=>{onScreen=e[0].isIntersecting}).observe(op);
 function loop(){if(onScreen&&ready>=2){measure();const at=frame();const now=performance.now();if(at&&Math.abs(prog-lastP)>.002&&now-lastNote>140&&prog<1){spawn(at[0],at[1]);lastNote=now}lastP=prog}
   else measure();requestAnimationFrame(loop)}
@@ -322,30 +462,86 @@ const words=[...document.querySelectorAll('#thesis span')];
 function light(){const mid=innerHeight*.62;words.forEach(w=>w.classList.toggle('lit',still||w.getBoundingClientRect().top<mid))}
 addEventListener('scroll',light,{passive:true});light();
 
-/* ---- scene 3: a keyboard that paints ---- */
-const piano=document.getElementById('piano'),ez=document.getElementById('easel'),ex=ez.getContext('2d'),hint=document.getElementById('hint');
-let ac=null;
+/* ---- scene 3: notes uncover The Starry Night; play keys, drag, or sing ---- */
+const piano=document.getElementById('piano'),box=document.getElementById('easelBox'),ez=document.getElementById('easel'),ex=ez.getContext('2d'),hint=document.getElementById('hint');
+const pct=document.getElementById('pct'),ring=document.getElementById('ring'),meter=document.getElementById('meter'),heard=document.getElementById('heard'),done=document.getElementById('done');
+const layer=()=>{const c=document.createElement('canvas');return[c,c.getContext('2d')]};
+const [mask,mx]=layer(),[tint,tx]=layer(),[free,fx]=layer(),[col,cx2]=layer();
+let mode='starry',ac=null,GX=36,GY=20,cells=new Uint8Array(GX*GY),covered=0,finished=false,eW=0,eH=0,ed=1;
 function sound(f){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const now=ac.currentTime,g=ac.createGain(),o=ac.createOscillator(),o2=ac.createOscillator(),g2=ac.createGain();
   o.type='triangle';o.frequency.value=f;o2.type='sine';o2.frequency.value=f*2;g2.gain.value=.18;o.connect(g);o2.connect(g2).connect(g);g.connect(ac.destination);
-  g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(.22,now+.012);g.gain.exponentialRampToValueAtTime(.001,now+1.6);o.start(now);o2.start(now);o.stop(now+1.7);o2.stop(now+1.7)}catch(e){}}
-function ezSize(){const d=Math.min(devicePixelRatio||1,2),img=ez.width?ex.getImageData(0,0,ez.width,ez.height):null;ez.width=Math.round(ez.clientWidth*d);ez.height=Math.round(ez.clientHeight*d);if(img)ex.putImageData(img,0,0)}
-function stroke(i){const W=ez.width,H=ez.height,c=NOTES[i][1],x0=W*(.06+.88*(i/11))+(Math.random()-.5)*W*.12,y0=H*(.15+Math.random()*.7),len=W*(.08+Math.random()*.14),ang=(Math.random()-.5)*1.2,wid=H*(.05+Math.random()*.07);
-  ex.save();ex.translate(x0,y0);ex.rotate(ang);ex.lineCap='round';
-  for(let b=0;b<14;b++){const off=(b/13-.5)*wid;ex.strokeStyle=c;ex.globalAlpha=.25+Math.random()*.5;ex.lineWidth=wid/9*(.6+Math.random());ex.beginPath();ex.moveTo(-len/2,off);ex.bezierCurveTo(-len/6,off-wid*.5*Math.random(),len/6,off+wid*.5*Math.random(),len/2*(.8+Math.random()*.25),off+(Math.random()-.5)*4);ex.stroke()}
-  ex.restore();hint.style.opacity=0}
-function press(i){const b=piano.children[i];b.classList.add('on');setTimeout(()=>b.classList.remove('on'),160);sound(NOTES[i][3]);stroke(i)}
+  g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(.2,now+.012);g.gain.exponentialRampToValueAtTime(.001,now+1.6);o.start(now);o2.start(now);o.stop(now+1.7);o2.stop(now+1.7)}catch(e){}}
+function ezSize(){ed=Math.min(devicePixelRatio||1,2);const w=Math.round(ez.clientWidth*ed),h=Math.round(ez.clientHeight*ed);if(w===eW&&h===eH)return;
+  [mask,tint,free,col].forEach(c=>{const old=c.width?c:null;let snap=null;if(old&&c.width){snap=document.createElement('canvas');snap.width=c.width;snap.height=c.height;snap.getContext('2d').drawImage(c,0,0)}c.width=w;c.height=h;if(snap)c.getContext('2d').drawImage(snap,0,0,w,h)});
+  ez.width=eW=w;ez.height=eH=h;render()}
+function coverE(im){const s=Math.max(eW/im.naturalWidth,eH/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;return[(eW-w)/2,(eH-h)/2,w,h]}
+function render(){if(!eW)return;ex.globalCompositeOperation='source-over';
+  if(mode==='blank'){ex.fillStyle='#F3EEE3';ex.fillRect(0,0,eW,eH);ex.drawImage(free,0,0);return}
+  if(ready<2){ex.fillStyle='#2a2730';ex.fillRect(0,0,eW,eH);return}
+  ex.drawImage(gray,...coverE(gray));
+  cx2.globalCompositeOperation='copy';cx2.drawImage(mask,0,0);cx2.globalCompositeOperation='source-in';cx2.drawImage(color,...coverE(color));
+  ex.drawImage(col,0,0);ex.globalAlpha=.9;ex.drawImage(tint,0,0);ex.globalAlpha=1}
+function mark(x,y,rad){const cw=eW/GX,ch=eH/GY;for(let gy=Math.max(0,Math.floor((y-rad)/ch));gy<=Math.min(GY-1,Math.floor((y+rad)/ch));gy++)for(let gx=Math.max(0,Math.floor((x-rad)/cw));gx<=Math.min(GX-1,Math.floor((x+rad)/cw));gx++){
+  const cxx=(gx+.5)*cw,cyy=(gy+.5)*ch;if(Math.hypot(cxx-x,cyy-y)<rad*.9&&!cells[gy*GX+gx]){cells[gy*GX+gx]=1;covered++}}}
+function progress(){if(mode!=='starry')return;const p=covered/cells.length,shownP=Math.min(100,Math.round(p*100/.92));pct.textContent=shownP+'% painted';ring.style.strokeDashoffset=56.5*(1-Math.min(1,p/.92));
+  if(p>=.92&&!finished){finished=true;mx.fillStyle='#000';mx.fillRect(0,0,eW,eH);render();celebrate()}}
+function celebrate(){stopTune();done.classList.add('on');if(!still){const b=box.getBoundingClientRect();for(let k=0;k<26;k++)setTimeout(()=>{const n=NOTES[k%12],s=document.createElement('span');s.className='flying';s.textContent=n[0];s.style.color=n[1];s.style.left=(Math.random()*b.width)+'px';s.style.top=(b.height*.6+Math.random()*b.height*.3)+'px';s.style.setProperty('--dx',(Math.random()*120-60)+'px');box.appendChild(s);setTimeout(()=>s.remove(),1900)},k*60)}}
+function pickSpot(i){ // usually aim at a part still in gray, so the painting gets finished
+  if(mode==='starry'&&Math.random()<.8){const open=[];for(let k=0;k<cells.length;k++)if(!cells[k])open.push(k);if(open.length){const k=open[Math.floor(Math.random()*open.length)];return[(k%GX+.5)*eW/GX,(Math.floor(k/GX)+.5)*eH/GY]}}
+  return[eW*(.06+.88*(i/11))+(Math.random()-.5)*eW*.12,eH*(.15+Math.random()*.7)]}
+function stroke(i,at){const big=mode==='starry',c=NOTES[i][1],[x0,y0]=at||pickSpot(i),len=eW*(big?.12+Math.random()*.14:.08+Math.random()*.14),ang=(Math.random()-.5)*1.2,wid=eH*(big?.12+Math.random()*.08:.05+Math.random()*.07);
+  const ctxs=big?[[mx,'#000',1],[tx,c,.16]]:[[fx,c,1]];
+  for(const [g,fill,a] of ctxs){g.save();g.translate(x0,y0);g.rotate(ang);g.lineCap='round';
+    for(let b=0;b<14;b++){const off=(b/13-.5)*wid;g.strokeStyle=fill;g.globalAlpha=a*(big&&g===mx?.55+Math.random()*.45:.25+Math.random()*.5);g.lineWidth=wid/(big?6:9)*(.6+Math.random());g.beginPath();g.moveTo(-len/2,off);g.bezierCurveTo(-len/6,off-wid*.5*Math.random(),len/6,off+wid*.5*Math.random(),len/2*(.8+Math.random()*.25),off+(Math.random()-.5)*4);g.stroke()}
+    g.restore()}
+  if(big)for(let t=0;t<=1;t+=.1)mark(x0+Math.cos(ang)*(t-.5)*len,y0+Math.sin(ang)*(t-.5)*len,wid*.55);
+  hint.style.opacity=0;render();progress()}
+function flash(i){const b=piano.children[i];b.classList.add('on');setTimeout(()=>b.classList.remove('on'),160)}
+function press(i,quiet){flash(i);if(!quiet)sound(NOTES[i][3]);stroke(i)}
 NOTES.forEach((n,i)=>{const b=document.createElement('button');b.type='button';b.style.setProperty('--c',n[1]);if(n[0].includes('♯'))b.className='sharp';b.innerHTML=`<span>${n[0]}</span><kbd>${n[2]}</kbd>`;b.setAttribute('aria-label','Play '+n[0].replace('♯',' sharp'));b.onpointerdown=e=>{e.preventDefault();press(i)};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();press(i)}};piano.appendChild(b)});
-addEventListener('keydown',e=>{if(e.repeat||e.metaKey||e.ctrlKey||e.altKey||/input|textarea/i.test(e.target.tagName))return;const i=NOTES.findIndex(n=>n[2]===e.key.toUpperCase());if(i>=0){const r=piano.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0)press(i)}});
-// an original little tune: notes, then beats until the next note
-const TUNE=[[0,1],[4,1],[7,1],[11,2],[9,1],[7,1],[4,2],[5,1],[9,1],[7,2],[2,1],[4,1],[0,3]];let playing=null;
-document.getElementById('tune').onclick=()=>{if(playing){clearTimeout(playing);playing=null;return}let k=0;const step=()=>{if(k>=TUNE.length){playing=null;return}const [n,beats]=TUNE[k++];press(n);playing=setTimeout(step,beats*260)};step()};
-document.getElementById('wipe').onclick=()=>{ex.clearRect(0,0,ez.width,ez.height);hint.style.opacity=1};
-ezSize();addEventListener('resize',ezSize);
+addEventListener('keydown',e=>{if(e.repeat||e.metaKey||e.ctrlKey||e.altKey||/input|textarea/i.test(e.target.tagName)||guide.open)return;const i=NOTES.findIndex(n=>n[2]===e.key.toUpperCase());if(i>=0){const r=piano.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0)press(i)}});
+// drag across the canvas: left to right runs up the scale, like a harp
+let drag=null;
+ez.addEventListener('pointerdown',e=>{drag={col:-1,t:0};ez.setPointerCapture(e.pointerId);dragAt(e)});
+ez.addEventListener('pointermove',e=>{if(drag)dragAt(e)});
+['pointerup','pointercancel'].forEach(k=>ez.addEventListener(k,()=>drag=null));
+function dragAt(e){const b=ez.getBoundingClientRect(),x=(e.clientX-b.left)*ed,y=(e.clientY-b.top)*ed,i=Math.max(0,Math.min(11,Math.floor(x/eW*12))),now=performance.now();
+  if(i!==drag.col||now-drag.t>160){drag.col=i;drag.t=now;flash(i);sound(NOTES[i][3]);stroke(i,[x,y])}}
+const TUNE=[[0,1],[4,1],[7,1],[11,2],[9,1],[7,1],[4,2],[5,1],[9,1],[7,2],[2,1],[4,1],[0,3]];let playing=null;const tuneBtn=document.getElementById('tune');
+function stopTune(){if(playing){clearTimeout(playing);playing=null;tuneBtn.setAttribute('aria-pressed','false')}}
+tuneBtn.onclick=()=>{if(playing)return stopTune();let k=0;tuneBtn.setAttribute('aria-pressed','true');const step=()=>{if(finished&&mode==='starry')return stopTune();if(k>=TUNE.length)k=0;const [n,beats]=TUNE[k++];press(n);playing=setTimeout(step,beats*240)};step()};
+function wipe(){if(mode==='blank'){fx.clearRect(0,0,eW,eH)}else{mx.clearRect(0,0,eW,eH);tx.clearRect(0,0,eW,eH);cells.fill(0);covered=0;finished=false;done.classList.remove('on');progress()}hint.style.opacity=1;render()}
+document.getElementById('wipe').onclick=wipe;document.getElementById('again').onclick=wipe;
+box.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;box.querySelectorAll('[data-mode]').forEach(o=>o.setAttribute('aria-pressed',o===b));meter.style.opacity=mode==='starry'?1:0;done.classList.toggle('on',mode==='starry'&&finished);render()});
+// sing to it: hear the pitch from the microphone, entirely in this page, and paint each new note
+const micBtn=document.getElementById('mic');let mic=null;
+micBtn.onclick=async()=>{if(mic)return stopMic();
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();await ac.resume();const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:false,autoGainControl:false}});
+    const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=2048;src.connect(an);mic={stream,an,buf:new Float32Array(2048),last:-1,lastT:0,cand:-1,candN:0,raf:0};
+    micBtn.setAttribute('aria-pressed','true');micBtn.lastChild.textContent='Listening…';hint.textContent='Sing, hum or whistle';hint.style.opacity=covered?0:1;listen()}
+  catch(e){micBtn.lastChild.textContent='Mic not allowed';setTimeout(()=>micBtn.lastChild.textContent='Sing to it',2200)}};
+function stopMic(){cancelAnimationFrame(mic.raf);mic.stream.getTracks().forEach(t=>t.stop());mic=null;micBtn.setAttribute('aria-pressed','false');micBtn.lastChild.textContent='Sing to it';heard.classList.remove('on')}
+function pitch(b,rate){let rms=0;for(const v of b)rms+=v*v;rms=Math.sqrt(rms/b.length);if(rms<.012)return -1;
+  const n=b.length,minL=Math.floor(rate/1100),maxL=Math.floor(rate/70);let best=-1,bv=0;const c=new Float32Array(maxL+2);
+  for(let l=minL;l<=maxL+1;l++){let s=0,e1=0,e2=0;for(let i=0;i<n-l;i++){s+=b[i]*b[i+l];e1+=b[i]*b[i];e2+=b[i+l]*b[i+l]}c[l]=s/Math.sqrt(e1*e2+1e-9)}
+  for(let l=minL+1;l<=maxL;l++)if(c[l]>.86&&c[l]>=c[l-1]&&c[l]>=c[l+1]){best=l;bv=c[l];break}
+  if(best<0)return -1;const a=c[best-1],m=c[best],z=c[best+1],sh=(a-z)/(2*(a-2*m+z)||1);return rate/(best+sh)}
+function listen(){if(!mic)return;mic.raf=requestAnimationFrame(listen);mic.an.getFloatTimeDomainData(mic.buf);const f=pitch(mic.buf,ac.sampleRate);
+  if(f<0){mic.cand=-1;mic.candN=0;if(performance.now()-mic.lastT>500)mic.last=-1;return}
+  const pc=((Math.round(12*Math.log2(f/440)+69)%12)+12)%12;if(pc===mic.cand)mic.candN++;else{mic.cand=pc;mic.candN=1}
+  const now=performance.now();if(mic.candN>=3&&(pc!==mic.last||now-mic.lastT>420)){mic.last=pc;mic.lastT=now;press(pc,true);heard.textContent='Heard '+NOTES[pc][0];heard.style.color=NOTES[pc][1];heard.classList.add('on')}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&mic)stopMic()});
+ezSize();addEventListener('resize',ezSize);[color,gray].forEach(im=>im.decode&&im.decode().then(render).catch(()=>{}));
 
 /* ---- scene 4: only the clips on screen play ---- */
 const vids=[...document.querySelectorAll('.scene video')];
 if(!still){const io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.play().catch(()=>{})}else v.pause()}),{threshold:.35});vids.forEach(v=>io.observe(v))}
 else vids.forEach(v=>v.controls=true);
+
+/* ---- scene 5: before and after, by dragging ---- */
+document.querySelectorAll('.ba').forEach(ba=>{const r=ba.querySelector('input');const set=v=>ba.style.setProperty('--x',v+'%');r.oninput=()=>set(r.value);
+  if(!still)new IntersectionObserver((es,o)=>{if(!es[0].isIntersecting)return;o.disconnect();if(r.dataset.moved)return;const t0=performance.now();const go=()=>{const k=(performance.now()-t0)/1600;if(k>=1||r.dataset.moved){if(!r.dataset.moved){r.value=50;set(50)}return}const v=50+Math.sin(k*Math.PI*2)*32;r.value=v;set(v);requestAnimationFrame(go)};go()},{threshold:.6}).observe(ba);
+  r.addEventListener('pointerdown',()=>r.dataset.moved=1);r.addEventListener('keydown',()=>r.dataset.moved=1)});
 })();
 </script>
 <!--/body-->
