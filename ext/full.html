@@ -896,6 +896,32 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 .jr-chip.big{width:52px;height:52px;font-size:20px}
 .jr-bar{display:block;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
 .jr-bar>i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#F08A1C,#E8231F,#8B4FB8);transition:width .9s var(--ease)}
+/* the bar charges while a song plays: a striped, glowing segment grows ahead of the XP already earned */
+.sm-jr .jr-bar{position:relative;height:7px;overflow:visible;border-radius:4px}
+.sm-jr .jr-bar>i{border-radius:4px;position:relative}
+.sm-jr .jr-bar>#smJrBar{transition:none}
+.jr-ghost{position:absolute!important;top:0;height:100%!important;width:0;left:0;border-radius:0 4px 4px 0!important;opacity:0;transition:opacity .4s,width .8s linear!important;
+  background:repeating-linear-gradient(-45deg,rgba(237,190,79,.95) 0 5px,rgba(240,138,28,.55) 5px 10px)!important;background-size:14px 14px!important;animation:jrcharge .6s linear infinite;box-shadow:0 0 10px rgba(237,190,79,.7)}
+.sm-jr.charging .jr-ghost{opacity:1}
+@keyframes jrcharge{to{background-position:14px 0}}
+.sm-jr.charging .jr-chip{animation:jrhum 1.6s ease-in-out infinite}
+@keyframes jrhum{50%{box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),0 0 0 3px rgba(237,190,79,.35),0 0 14px rgba(237,190,79,.6)}}
+.jr-plus{font-weight:700;color:#D9A23A}
+.sm-jr.zap .jr-bar{animation:jrzap .35s ease-out}
+@keyframes jrzap{40%{box-shadow:0 0 0 2px rgba(237,190,79,.55),0 0 12px rgba(237,190,79,.8)}}
+.sm-jr.filling #smJrBar::after{content:"";position:absolute;right:-3px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#fff;box-shadow:0 0 8px 3px #F5D90A,0 0 18px 6px rgba(240,138,28,.7)}
+.sm-jr.lvup{animation:jrlv 1.2s var(--ease)}
+@keyframes jrlv{20%{box-shadow:0 0 0 2px #EDBE4F,0 0 40px rgba(237,190,79,.9);transform:scale(1.03)}}
+.sm-jr.lvup .jr-chip{animation:jgpop .8s var(--ease)}
+.jr-drop{position:fixed;left:0;top:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;z-index:97;pointer-events:none;box-shadow:0 0 8px 2px currentColor;background:currentColor}
+.jr-burst{position:fixed;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;z-index:97;pointer-events:none;background:currentColor}
+.jr-wheel{display:flex;align-items:center;gap:14px}
+.jr-wheel svg{width:132px;height:132px;flex:none}
+.jr-wheel>div{flex:1;min-width:0}
+.jr-wheel p{font-size:13px;margin:0 0 6px}
+.jr-tiers{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:var(--muted)}
+.jr-tiers b{color:var(--fg);font-weight:600}
+@media (prefers-reduced-motion:reduce){.jr-ghost,.sm-jr.charging .jr-chip,.sm-jr.zap .jr-bar,.sm-jr.lvup,.sm-jr.lvup .jr-chip{animation:none}}
 .sm-jr{all:unset;box-sizing:border-box;flex:none;display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:12px;cursor:pointer;background:color-mix(in srgb,var(--surface) 70%,transparent);box-shadow:0 0 0 1px var(--hair)}
 .sm-jr:hover{background:color-mix(in srgb,var(--surface) 92%,transparent)}
 .sm-jr:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
@@ -1328,7 +1354,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <a role="menuitem" id="smFull" href="./?full=1">All of Fude</a>
     <button type="button" role="menuitem" id="smAbout">About and privacy</button>
   </div>
-  <button type="button" class="sm-jr" id="smJr" aria-label="Your journey"><span class="jr-chip" id="smJrLv">1</span><span class="jr-txt"><b id="smJrRank">Apprentice</b><i class="jr-bar"><i id="smJrBar"></i></i></span><span class="jr-meta"><span id="smJrStreak" hidden></span><span id="smJrGoals"></span></span></button>
+  <button type="button" class="sm-jr" id="smJr" aria-label="Your journey"><span class="jr-chip" id="smJrLv">1</span><span class="jr-txt"><b id="smJrRank">Apprentice</b><i class="jr-bar" id="smJrTrack"><i id="smJrBar"></i><i class="jr-ghost" id="smJrGhost"></i></i></span><span class="jr-meta"><span id="smJrStreak" hidden></span><span id="smJrGoals"></span><span class="jr-plus" id="smJrPlus" hidden></span></span></button>
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
     <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
@@ -1359,6 +1385,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <div class="pj-next" id="pjNext"><span id="pjNextT"></span><i><i id="pjNextBar"></i></i></div>
   <h4>Pets</h4><div class="pj-pets" id="pjPets"></div>
   <h4>Effects</h4><div class="pj-fx" id="pjFx"></div>
+  <h4>Your colors</h4><div class="jr-wheel"><svg id="jrWheel" viewBox="-100 -100 200 200" role="img" aria-label="How much of each note you have heard"></svg><div><p id="jrWheelT"></p><ul class="jr-tiers" id="jrTiers"></ul></div></div>
   <h4>Milestones <span id="jrBadgeN"></span></h4><div class="jr-badges" id="jrBadges"></div>
   <button class="btn small" id="pjClose" type="button">Done</button>
 </div>

@@ -2593,7 +2593,7 @@ setInterval(()=>{if(document.hidden)return;let sum=0;for(let i=0;i<12;i++){WASH.
   // the swirl behind the companion view turns in the same colours
   if(SIDEMODE){const sw=$('#swirl');for(let i=0;i<4;i++){const pc=top.length?top[i%top.length]:-1;pc>=0?sw.style.setProperty('--sw'+i,hexOf(pc)):sw.style.removeProperty('--sw'+i)}}},1500);
 function bgNote(pc,midi=60,dur=1){
-  WASH.h[pc]+=Math.min(dur,2)+.3;if(SIDEMODE&&sm.state==='paint'&&!document.hidden)smLyric(pc);
+  try{jrNote(pc,dur)}catch(e){}WASH.h[pc]+=Math.min(dur,2)+.3;if(SIDEMODE&&sm.state==='paint'&&!document.hidden)smLyric(pc);
   if(REDUCED||!BG.w)return;
   const x=((pc+.5)/12+(bgRand()-.5)*.06)*BG.w,y=clamp(1-(midi-36)/56,.1,.92)*BG.h;
   BG.notes.push(bgNoteGlyph(x,y,pc,{life:1,s:.9+Math.min(dur,2)*.2,vy:-30,glow:1}));
@@ -2751,14 +2751,15 @@ const EFFECTS=[
 const JR=(()=>{let j={};try{j=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{}}catch(e){}j=Object.assign({sec:0,pics:0,pet:'ginger',fx:{},seen:[]},j);
   // a journey begun before levels: start at the level its paintings and music have already earned
   if(j.xp==null)j.xp=j.pics*50+Math.floor(j.sec/30);
-  return Object.assign({streak:0,best:0,lastDay:'',badges:[],painted:{},sketches:0,owl:0,today:null},j)})();
+  j=Object.assign({streak:0,best:0,lastDay:'',badges:[],painted:{},sketches:0,owl:0,today:null},j);if(!Array.isArray(j.notes)||j.notes.length!==12)j.notes=Array(12).fill(0);if(!Array.isArray(j.ntier)||j.ntier.length!==12)j.ntier=Array(12).fill(0);return j})();
 // more than one Fude window can count at once, so each adds what it counted to what is stored rather than overwriting it
-const JRD={sec:0,pics:0,xp:0,tsec:0,tpics:0};
+const JRD={sec:0,pics:0,xp:0,tsec:0,tpics:0,notes:Array(12).fill(0)};
 const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 function jrSave(){try{const o=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{},ot=o.today&&JR.today&&o.today.day===JR.today.day?o.today:null;
   JR.sec=(o.sec||0)+JRD.sec;JR.pics=(o.pics||0)+JRD.pics;if(o.xp!=null)JR.xp=o.xp+JRD.xp;
   if(ot&&JR.today){JR.today.sec=(ot.sec||0)+JRD.tsec;JR.today.pics=(ot.pics||0)+JRD.tpics;JR.today.done=[...new Set([...(ot.done||[]),...JR.today.done])];JR.today.ids=[...new Set([...(ot.ids||[]),...JR.today.ids])]}
-  JRD.sec=JRD.pics=JRD.xp=JRD.tsec=JRD.tpics=0;
+  if(Array.isArray(o.notes)&&o.notes.length===12)JR.notes=o.notes.map((v,i)=>v+JRD.notes[i]);if(Array.isArray(o.ntier)&&o.ntier.length===12)JR.ntier=JR.ntier.map((v,i)=>Math.max(v,o.ntier[i]));
+  JRD.sec=JRD.pics=JRD.xp=JRD.tsec=JRD.tpics=0;JRD.notes.fill(0);
   JR.seen=[...new Set([...(o.seen||[]),...JR.seen])];JR.badges=[...new Set([...(o.badges||[]),...JR.badges])];localStorage.setItem('muse.journey',JSON.stringify(JR))}catch(e){}}
 /* levels: each one asks a little more than the last, and every few levels the painter earns a new title */
 const lvlAt=n=>100*(n-1)+25*(n-1)*(n-2); // the XP that reaches level n
@@ -2800,16 +2801,60 @@ const BADGES=[
  {id:'sketch',name:'Coloring book',sub:'Color a sketch',i:'✎',c:'#2F9C8F',ok:()=>JR.sketches>=1},
  {id:'owl',name:'Night owl',sub:'Paint after midnight',i:'☾',c:'#4A4FA0',ok:()=>JR.owl>=1},
  {id:'l10',name:'Level 10',i:'★',c:'#D9A92A',ok:()=>lvlOf(JR.xp)>=10},
- {id:'l20',name:'Level 20',i:'✸',c:'#B23A2E',ok:()=>lvlOf(JR.xp)>=20}];
+ {id:'l20',name:'Level 20',i:'✸',c:'#B23A2E',ok:()=>lvlOf(JR.xp)>=20},
+ {id:'spectrum',name:'Full spectrum',sub:'Every note to Glimmer',i:'◐',c:'#E85D9A',ok:()=>JR.ntier.every(t=>t>=1)},
+ {id:'prism',name:'Prism',sub:'Every note to Glaze',i:'◈',c:'#3557C8',ok:()=>JR.ntier.every(t=>t>=3)}];
+/* color mastery: each of the twelve notes has its own color, and the more of a note Fude hears, the deeper that color gets */
+const TIERS=[60,300,900,2400,6000],TIER_NAMES=['Unseen','Glimmer','Wash','Glaze','Radiant','Pure'];
+const tierOf=sec=>TIERS.filter(t=>sec>=t).length;
+const HUE_WORDS=['Crimson','Violet','Golden','Slate','Sky','Wine','Cobalt','Amber','Amethyst','Jade','Silver','Azure'];
+// your title takes the color you have heard most, once you have heard enough to have one
+function titleOf(n){const top=JR.notes.indexOf(Math.max(...JR.notes));return(JR.notes[top]>=TIERS[0]?HUE_WORDS[top]+' ':'')+rankOf(n)}
+function jrChipPaint(){const order=[...JR.notes.keys()].sort((a,b)=>JR.notes[b]-JR.notes[a]).filter(i=>JR.notes[i]>=TIERS[0]).slice(0,4);if(order.length<2)return;
+  const g=`conic-gradient(from 200deg,${[...order,order[0]].map(hexOf).join(',')})`;document.querySelectorAll('.jr-chip').forEach(c=>c.style.background=g)}
+/* the charge: while a song is painting, the XP it will pay builds up ahead of the bar, and notes fly into it */
+const CH={sec:0,lastDrop:0,anim:0};
+const chargeXp=()=>Math.min(50,Math.round(CH.sec/3));
+function jrNote(pc,dur){if(!(playing&&!playing.stopped&&playing.live))return;const d=Math.min(dur||0,2);JR.notes[pc]+=d;JRD.notes[pc]+=d;
+  if(!SIDEMODE||REDUCED||document.hidden)return;const now=performance.now();if(now-CH.lastDrop<650)return;CH.lastDrop=now;jrDrop(pc)}
+function jrDrop(pc){const from=$('#smCanvas'),to=$('#smJrGhost')||$('#smJrBar');if(!from||!to||$('#smJr').offsetParent===null)return;
+  const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();if(!a.width||!b.width&&!b.left)return;
+  const x0=a.left+a.width*(.25+Math.random()*.5),y0=a.top+a.height*(.35+Math.random()*.4),x1=b.right-3,y1=b.top+b.height/2,mx=(x0+x1)/2+(Math.random()-.5)*80,my=Math.min(y0,y1)-40;
+  const d=document.createElement('i');d.className='jr-drop';d.style.color=hexOf(pc);document.body.appendChild(d);
+  const an=d.animate([{transform:`translate(${x0}px,${y0}px) scale(.4)`,opacity:0},{transform:`translate(${x0}px,${y0-18}px) scale(1.2)`,opacity:1,offset:.15},{transform:`translate(${mx}px,${my}px) scale(1)`,opacity:1,offset:.6},{transform:`translate(${x1}px,${y1}px) scale(.5)`,opacity:.9}],{duration:900,easing:'cubic-bezier(.4,0,.6,1)'});
+  an.onfinish=()=>{d.remove();const sj=$('#smJr');sj.classList.remove('zap');void sj.offsetWidth;sj.classList.add('zap')}}
+function jrChargeShow(){const sj=$('#smJr');if(!sj||CH.anim)return;const on=CH.sec>0&&playing&&!playing.stopped&&playing.live,L=jrLevelBar(),c=chargeXp();
+  sj.classList.toggle('charging',!!on&&c>0);const g=$('#smJrGhost'),pl=$('#smJrPlus');
+  if(on&&c>0){g.style.left=(L.f*100).toFixed(2)+'%';g.style.width=Math.min(100-L.f*100,c/L.need*100).toFixed(2)+'%';pl.hidden=false;pl.textContent='+'+c}
+  else{g.style.width='0';pl.hidden=true}}
+// after a painting: the charge pours into the bar, filling it from where it was; a level up fills it, flashes, and starts again
+function jrFill(from,to){const sj=$('#smJr');if(!sj||REDUCED||sj.offsetParent===null){jrApply();return}
+  cancelAnimationFrame(CH.anim);sj.classList.remove('charging');$('#smJrGhost').style.width='0';$('#smJrPlus').hidden=true;sj.classList.add('filling');
+  const t0=performance.now(),dur=Math.min(2600,900+(to-from)*6),startLv=lvlOf(from);let lv=startLv;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3),xp=from+(to-from)*e,n=lvlOf(xp),a=lvlAt(n),b=lvlAt(n+1);
+    $('#smJrBar').style.width=((xp-a)/(b-a)*100).toFixed(2)+'%';$('#smJrLv').textContent=n;$('#smJrRank').textContent=`${titleOf(n)} · ${Math.round(xp-a)} / ${b-a} XP`;
+    if(n>lv){lv=n;sj.classList.remove('lvup');void sj.offsetWidth;sj.classList.add('lvup');jrBurst()}
+    if(k<1)CH.anim=requestAnimationFrame(step);else{CH.anim=0;sj.classList.remove('filling');jrApply()}};
+  CH.anim=requestAnimationFrame(step)}
+function jrBurst(){const c=$('#smJrLv');if(!c||REDUCED)return;const r=c.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  for(let i=0;i<18;i++){const d=document.createElement('i');d.className='jr-burst';d.style.color=hexOf(i%12);document.body.appendChild(d);const a=i/18*Math.PI*2,R=40+Math.random()*40;
+    d.animate([{transform:`translate(${x}px,${y}px) scale(1)`,opacity:1},{transform:`translate(${x+Math.cos(a)*R}px,${y+Math.sin(a)*R}px) scale(.3)`,opacity:0}],{duration:700+Math.random()*300,easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish=()=>d.remove()}}
+function wheelSvg(){let out='';const R0=22,R1=96,band=(R1-R0)/5;
+  for(let pc=0;pc<12;pc++){const a0=(pc/12-.25)*Math.PI*2+.03,a1=((pc+1)/12-.25)*Math.PI*2-.03,s=JR.notes[pc],t=tierOf(s),c=hexOf(pc);
+    const arc=(r0,r1,op)=>{const p=(r,a)=>`${(Math.cos(a)*r).toFixed(1)} ${(Math.sin(a)*r).toFixed(1)}`;return `<path d="M${p(r0,a0)}L${p(r1,a0)}A${r1} ${r1} 0 0 1 ${p(r1,a1)}L${p(r0,a1)}A${r0} ${r0} 0 0 0 ${p(r0,a0)}Z" fill="${c}" opacity="${op}"/>`};
+    out+=arc(R0,R1,.12);const part=t<5?(s-(t?TIERS[t-1]:0))/(TIERS[t]-(t?TIERS[t-1]:0)):0;out+=arc(R0,R0+band*(t+part),1);
+    for(let k=1;k<5;k++)out+=`<path d="M${(Math.cos(a0)*(R0+band*k)).toFixed(1)} ${(Math.sin(a0)*(R0+band*k)).toFixed(1)}A${R0+band*k} ${R0+band*k} 0 0 1 ${(Math.cos(a1)*(R0+band*k)).toFixed(1)} ${(Math.sin(a1)*(R0+band*k)).toFixed(1)}" fill="none" stroke="var(--surface)" stroke-width="1.2" opacity=".7"/>`;
+    const am=(a0+a1)/2;out+=`<text x="${(Math.cos(am)*(R1+0)).toFixed(1)}" y="${(Math.sin(am)*(R1+0)).toFixed(1)}" font-size="0"><title>${NOTE_NAMES[pc]}: ${TIER_NAMES[t]}</title></text>`}
+  return out+`<circle r="${R0-3}" fill="var(--surface)"/>`}
 {let css='';PETS.forEach(p=>{if(!p.coat)return;p.coat.forEach((c,i)=>{const o=PET_KEYS[i];for(const sc of[`body.pet-${p.id} :is(#painter,#mascot)`,`.pj-pet.pet-${p.id}`])css+=`${sc} [fill="${o}"]{fill:${c}}${sc} [stroke="${o}"]{stroke:${c}}${sc} [stop-color="${o}"]{stop-color:${c}}`})});
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st)}
 function jrLevelBar(){const xp=JR.xp,n=lvlOf(xp),a=lvlAt(n),b=lvlAt(n+1);return{n,into:xp-a,need:b-a,f:(xp-a)/(b-a)}}
 function jrApply(){const b=document.body;PETS.forEach(p=>b.classList.toggle('pet-'+p.id,p.id===JR.pet&&!!p.coat&&jrHas(p)));EFFECTS.forEach(f=>b.classList.toggle('fx-'+f.id,fxOn(f.id)));
   const L=jrLevelBar(),T=jrToday(),done=T.goals.filter(g=>T.done.includes(g)).length,live=jrStreakNow();
   const sub=$('#smPetsSub');if(sub)sub.textContent=`Level ${L.n} ${rankOf(L.n)} · ${done} of 3 goals today`;
-  if($('#smJr')){$('#smJrLv').textContent=L.n;$('#smJrRank').textContent=`${rankOf(L.n)} · ${L.into} / ${L.need} XP`;$('#smJrBar').style.width=(L.f*100).toFixed(1)+'%';
+  jrChipPaint();if($('#smJr')){if(!CH.anim){$('#smJrLv').textContent=L.n;$('#smJrRank').textContent=`${titleOf(L.n)} · ${L.into} / ${L.need} XP`;$('#smJrBar').style.width=(L.f*100).toFixed(1)+'%'}jrChargeShow();
     const st=$('#smJrStreak');st.hidden=!live;st.textContent=`🔥 ${live}`;st.title=`${live}-day streak`;$('#smJrGoals').textContent=`◎ ${done}/3`;$('#smJrGoals').title=`${done} of today’s 3 goals done`;
-    $('#smJr').setAttribute('aria-label',`Your journey: level ${L.n}, ${rankOf(L.n)}. ${done} of 3 goals done today${live?`, ${live}-day streak`:''}`)}}
+    $('#smJr').setAttribute('aria-label',`Your journey: level ${L.n}, ${titleOf(L.n)}. ${done} of 3 goals done today${live?`, ${live}-day streak`:''}`)}}
 // a streak counts days with a finished painting; it is still alive today if yesterday counted
 function jrStreakNow(){if(!JR.lastDay)return 0;const y=new Date();y.setDate(y.getDate()-1);return JR.lastDay===dayKey()||JR.lastDay===dayKey(y)?JR.streak:0}
 function jrXp(n){JR.xp+=n;JRD.xp+=n}
@@ -2817,6 +2862,7 @@ function jrXp(n){JR.xp+=n;JRD.xp+=n}
 function jrCheck(gains){gains=gains||[];const before=lvlOf(JR.xp-gains.reduce((a,g)=>a+g.xp,0)),T=jrToday();
   T.goals.forEach(id=>{const g=GOALS[id];if(!T.done.includes(id)&&g.v(T)>=g.n){T.done.push(id);jrXp(g.xp);gains.push({t:'Goal done: '+g.t,xp:g.xp})}});
   if(T.goals.every(id=>T.done.includes(id))&&!T.done.includes('all')){T.done.push('all');jrXp(50);gains.push({t:'All of today’s goals',xp:50})}
+  JR.notes.forEach((v,pc)=>{const t=tierOf(v);if(t>JR.ntier[pc]){JR.ntier[pc]=t;const xp=15*t;jrXp(xp);gains.push({t:`${NOTE_NAMES[pc]} deepens to ${TIER_NAMES[t]}`,xp,c:hexOf(pc)})}});
   BADGES.forEach(b=>{if(!JR.badges.includes(b.id)&&b.ok()){JR.badges.push(b.id);jrXp(75);gains.push({t:'Milestone: '+b.name,xp:75})}});
   const fresh=[...PETS,...EFFECTS].filter(u=>u.id!=='ginger'&&jrHas(u)&&!JR.seen.includes(u.id));
   fresh.forEach(u=>{JR.seen.push(u.id);if(EFFECTS.includes(u))JR.fx[u.id]=true;gains.push({t:PETS.includes(u)?`New pet: ${u.name}. Choose it in Your journey`:`New effect: ${u.name}`,unlock:1})});
@@ -2827,14 +2873,14 @@ function jrPic(info){info=info||{};const T=jrToday(),day=dayKey(),y=new Date();y
   const id=info.id||'';if(id&&!T.ids.includes(id))T.ids.push(id);if(id)JR.painted[id]=(JR.painted[id]||0)+1;
   if(info.sketch||/^(up|sk)-/.test(id)){T.sketch++;JR.sketches++}else if(info.kind==='theme')T.theme++;else if(info.kind==='painting')T.famous++;
   if(new Date().getHours()<5)JR.owl++;
-  const r=jrCheck(gains);jrShowGain(r.gains,r.before)}
-setInterval(()=>{if(playing&&!playing.stopped&&playing.live){JR.sec++;JRD.sec++;const T=jrToday();T.sec++;JRD.tsec++;if(JR.sec%30===0)jrXp(1);if(JR.sec%15===0){const r=jrCheck();if(r.gains.length)jrShowGain(r.gains,r.before)}}},1000);
+  const from=JR.xp-gains.reduce((a,g)=>a+(g.xp||0),0);CH.sec=0;const r=jrCheck(gains);jrShowGain(r.gains,r.before);jrFill(from-0,JR.xp)}
+setInterval(()=>{const liveNow=playing&&!playing.stopped&&playing.live;if(!liveNow&&CH.sec){CH.sec=0;jrChargeShow()}if(liveNow){CH.sec++;jrChargeShow();JR.sec++;JRD.sec++;const T=jrToday();T.sec++;JRD.tsec++;if(JR.sec%30===0)jrXp(1);if(JR.sec%15===0){const x0=JR.xp,r=jrCheck();if(r.gains.length){jrShowGain(r.gains,r.before);jrFill(x0,JR.xp)}}}},1000);
 addEventListener('pagehide',jrSave);
 // after a painting: what it earned, the level filling up, and what comes next
 let jgT=0;
 function jrShowGain(gains,before){const el=$('#jrGain');if(!el||!gains.length)return;const L=jrLevelBar(),up=L.n>before,xp=gains.reduce((a,g)=>a+(g.xp||0),0);
   el.classList.toggle('up',up);$('#jgLv').textContent=L.n;const newRank=up&&rankOf(L.n)!==rankOf(before);$('#jgHead').textContent=newRank?`Level ${L.n}! You’re now ${/^[AEIOU]/.test(rankOf(L.n))?'an':'a'} ${rankOf(L.n)}`:up?`Level ${L.n}! +${xp} XP`:`+${xp} XP`;
-  $('#jgList').innerHTML=gains.map(g=>`<li>${esc(g.t)}${g.xp?` <b>+${g.xp}</b>`:''}</li>`).join('');
+  const ord=[...gains].sort((a,b)=>(b.unlock?1e4:b.xp||0)-(a.unlock?1e4:a.xp||0)),shown=gains.length>4?ord.slice(0,3):gains,more=gains.length-shown.length;$('#jgList').innerHTML=(more?[...shown,{t:`and ${more} more in Your journey`}]:shown).map(g=>`<li>${g.c?`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:${g.c}"></i>`:''}${esc(g.t)}${g.xp?` <b>+${g.xp}</b>`:''}</li>`).join('');
   const nx=jrNext();$('#jgNext').textContent=nx?`Next: ${nx.u.name} at ${needTxt(nx.u)}`:'';
   const bar=$('#jgBar');bar.style.transition='none';bar.style.width=(up?0:Math.max(0,(L.into-xp)/L.need)*100)+'%';void bar.offsetWidth;bar.style.transition='';requestAnimationFrame(()=>bar.style.width=(L.f*100).toFixed(1)+'%');
   el.hidden=false;const sj=$('#smJr');if(sj){sj.classList.remove('lit');void sj.offsetWidth;sj.classList.add('lit')}
@@ -2843,7 +2889,7 @@ function jrShowGain(gains,before){const el=$('#jrGain');if(!el||!gains.length)re
 function jrNext(){const lv=jrLevelBar();return[...PETS,...EFFECTS].filter(u=>u.id!=='ginger'&&!jrHas(u)).map(u=>({u,f:Math.max(u.pics?JR.pics/u.pics:0,u.hrs?JR.sec/(u.hrs*3600):0,u.lvl?(lv.n-1+lv.f)/(u.lvl-1):0)})).sort((a,b)=>b.f-a.f)[0]}
 function pjRender(){
   const L=jrLevelBar(),T=jrToday(),live=jrStreakNow();
-  $('#jrLv').textContent=L.n;$('#jrRank').textContent=rankOf(L.n);$('#jrXp').textContent=`Level ${L.n} · ${L.into} / ${L.need} XP to level ${L.n+1}`;$('#jrBar').style.width=(L.f*100).toFixed(1)+'%';
+  $('#jrLv').textContent=L.n;$('#jrRank').textContent=titleOf(L.n);$('#jrXp').textContent=`Level ${L.n} · ${L.into} / ${L.need} XP to level ${L.n+1}`;$('#jrBar').style.width=(L.f*100).toFixed(1)+'%';
   $('#jrStreak').textContent=live?`🔥 ${live}-day streak`:'';
   $('#pjStats').textContent=`${JR.pics} painting${JR.pics===1?'':'s'} made · ${listenTxt(JR.sec)} of music · best streak ${JR.best} day${JR.best===1?'':'s'}`;
   $('#jrGoals').innerHTML=T.goals.map(id=>{const g=GOALS[id],v=Math.min(g.n,g.v(T)),done=T.done.includes(id),p=g.min?`${Math.floor(v/60)} / ${g.n/60} min`:`${v} / ${g.n}`;
@@ -2860,6 +2906,10 @@ function pjRender(){
   EFFECTS.forEach(f=>{const b=document.createElement('button'),ok=jrHas(f);b.type='button';b.className='pj-f';b.setAttribute('role','switch');b.disabled=!ok;b.setAttribute('aria-checked',fxOn(f.id));
     b.innerHTML=`<span>${f.name}<small>${f.note}</small></span>${ok?'<i class="sw" aria-hidden="true"></i>':`<span class="lk">Level ${f.lvl}</span>`}`;
     b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)});
+  $('#jrWheel').innerHTML=wheelSvg();
+  {const heard=JR.notes.reduce((a,b)=>a+b,0),nx=JR.notes.map((v,pc)=>({pc,t:tierOf(v),left:tierOf(v)<5?TIERS[tierOf(v)]-v:Infinity})).sort((a,b)=>a.left-b.left)[0];
+   $('#jrWheelT').textContent=heard<30?'Each note has its own color. The more of a note Fude hears, the deeper its color grows here.':nx.left<Infinity?`Next: ${NOTE_NAMES[nx.pc]} deepens to ${TIER_NAMES[nx.t+1]} in ${listenTxt(Math.max(60,nx.left))}`:'Every color is pure. A true master.';
+   $('#jrTiers').innerHTML=TIER_NAMES.slice(1).map((n,i)=>`<li><b>${JR.ntier.filter(t=>t>=i+1).length}</b> ${n}</li>`).join('')}
   $('#jrBadgeN').textContent=`· ${JR.badges.length} of ${BADGES.length}`;
   $('#jrBadges').innerHTML=BADGES.map(b=>{const on=JR.badges.includes(b.id);return `<div class="jr-badge${on?'':' off'}" style="--b:${b.c}"><i aria-hidden="true">${b.i}</i><b>${b.name}</b>${b.sub?`<small>${b.sub}</small>`:''}<span class="vh">${on?'earned':'not yet'}</span></div>`}).join('')}
 function glOpen(){const l=$('#glList');l.innerHTML=gallery.length?'':'<p class="muted">Paintings you make appear here, each with the song it heard.</p>';
