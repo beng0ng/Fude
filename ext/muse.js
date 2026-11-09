@@ -1783,7 +1783,7 @@ async function paint(scroll=true,still=false){
   const finish=async dist=>{
     if(!dist.share.some(v=>v>0)){$('#artStmt').textContent='Fude heard no clear notes, so there is nothing to paint yet.';return}
     const r=await render({...base,share:dist.share});if(flow)await flow.end(r,blooms);drawToArt(r,1,focus,blooms);const img=blooms.length?art.getContext('2d').getImageData(0,0,r.W,r.H):r.img;last={...r,img,kind:mode,id:base.id,seed,params,dist};renderChords(song);
-    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd(!still&&!shared&&song?{song:song.title,by:song.by||'',ms:live&&paintT0?Math.round(performance.now()-paintT0):0}:null);if(!still&&!shared)jrPic();
+    $('#artStmt').textContent=captionFor(dist,stmt);drawChart(dist,r.canvasShare);if(!still){stepDone('paint');stepDone('behold')}art.setAttribute('aria-label',`${title}. ${captionFor(dist,stmt)}`);if(!still||shared)galleryAdd(!still&&!shared&&song?{song:song.title,by:song.by||'',ms:live&&paintT0?Math.round(performance.now()-paintT0):0}:null);if(!still&&!shared)jrPic({kind:base.kind,id:base.id,sketch:!!(base.params&&base.params.sketch)});
   };
   try{
     if(!live){art.classList.add('busy');await finish(fullDist);return}
@@ -2593,7 +2593,7 @@ setInterval(()=>{if(document.hidden)return;let sum=0;for(let i=0;i<12;i++){WASH.
   // the swirl behind the companion view turns in the same colours
   if(SIDEMODE){const sw=$('#swirl');for(let i=0;i<4;i++){const pc=top.length?top[i%top.length]:-1;pc>=0?sw.style.setProperty('--sw'+i,hexOf(pc)):sw.style.removeProperty('--sw'+i)}}},1500);
 function bgNote(pc,midi=60,dur=1){
-  WASH.h[pc]+=Math.min(dur,2)+.3;if(SIDEMODE&&sm.state==='paint'&&!document.hidden)smLyric(pc);
+  try{jrNote(pc,dur)}catch(e){}WASH.h[pc]+=Math.min(dur,2)+.3;if(SIDEMODE&&sm.state==='paint'&&!document.hidden)smLyric(pc);
   if(REDUCED||!BG.w)return;
   const x=((pc+.5)/12+(bgRand()-.5)*.06)*BG.w,y=clamp(1-(midi-36)/56,.1,.92)*BG.h;
   BG.notes.push(bgNoteGlyph(x,y,pc,{life:1,s:.9+Math.min(dur,2)*.2,vy:-30,glow:1}));
@@ -2737,49 +2737,181 @@ async function extInvoked(){try{const v=(await chrome.storage.session.get('fudeT
 const PET_KEYS=['#FFDCA8','#F7BB74','#EC9F58','#F4B26A','#F2AD62','#FFEBCF','#FFF3E2','#FFD9A6','#E79A55','#E8934B','#C9483A','#E06A57','#4FA38A','#3F8E77','#5A3B2A'];
 const PETS=[
  {id:'ginger',name:'Ginger',pics:0,hrs:0},
- {id:'midnight',name:'Midnight',pics:5,hrs:1,coat:['#6B6478','#4A4456','#36303F','#4F4859','#463F50','#8E86A0','#8C849C','#5D566A','#2E2936','#2E2936','#E2B33C','#F2CC5E','#6C5FC7','#5A4EB0','#D9A521']},
- {id:'snow',name:'Snow',pics:15,hrs:3,coat:['#FFFFFF','#F1F0F4','#DAD8E2','#E9E7EF','#DCD9E4','#FFFFFF','#FFFFFF','#F7F6FA','#C9C6D4','#CFCBD9','#2F4A7A','#41629C','#9FD3E8','#7FBFD9','#3B7FB8']},
- {id:'sakura',name:'Sakura',pics:40,hrs:8,coat:['#FFE3EC','#F9B9CC','#EE97B0','#F6AFC3','#F3A7BD','#FFF0F5','#FFF4F7','#FFD3DF','#E0869F','#E58AA4','#8E5BB5','#A774CC','#7FC4A0','#69AD8A','#7A3E5A']},
- {id:'golden',name:'Golden',pics:100,hrs:20,coat:['#FFF1B8','#F4CF5A','#D9A92A','#EDC24B','#E9BE46','#FFF7D6','#FFF8E0','#FBE08A','#C69420','#C99A25','#1F1A14','#3A322A','#C9483A','#B23A2E','#6A4A10']}];
+ {id:'midnight',name:'Midnight',lvl:3,pics:5,hrs:1,coat:['#6B6478','#4A4456','#36303F','#4F4859','#463F50','#8E86A0','#8C849C','#5D566A','#2E2936','#2E2936','#E2B33C','#F2CC5E','#6C5FC7','#5A4EB0','#D9A521']},
+ {id:'snow',name:'Snow',lvl:6,pics:15,hrs:3,coat:['#FFFFFF','#F1F0F4','#DAD8E2','#E9E7EF','#DCD9E4','#FFFFFF','#FFFFFF','#F7F6FA','#C9C6D4','#CFCBD9','#2F4A7A','#41629C','#9FD3E8','#7FBFD9','#3B7FB8']},
+ {id:'sakura',name:'Sakura',lvl:10,pics:40,hrs:8,coat:['#FFE3EC','#F9B9CC','#EE97B0','#F6AFC3','#F3A7BD','#FFF0F5','#FFF4F7','#FFD3DF','#E0869F','#E58AA4','#8E5BB5','#A774CC','#7FC4A0','#69AD8A','#7A3E5A']},
+ {id:'mocha',name:'Mocha',lvl:13,pics:0,hrs:0,coat:['#E9D3BC','#C9A381','#A97F5C','#BC9370','#B58C69','#F3E5D6','#F7EDE2','#DCC0A4','#8E6646','#93694A','#2F6E5E','#3F8A75','#E7B44C','#D29E35','#3A2618']},
+ {id:'golden',name:'Golden',lvl:17,pics:100,hrs:20,coat:['#FFF1B8','#F4CF5A','#D9A92A','#EDC24B','#E9BE46','#FFF7D6','#FFF8E0','#FBE08A','#C69420','#C99A25','#1F1A14','#3A322A','#C9483A','#B23A2E','#6A4A10']},
+ {id:'starlight',name:'Starlight',lvl:22,pics:0,hrs:0,coat:['#4A4FA0','#3A3D86','#2A2C6A','#373A80','#33367A','#6A6FC0','#7A7FCC','#4A4E98','#20225A','#20225A','#F2CC5E','#FFE08A','#E85D9A','#D24A86','#F2CC5E']}];
 const EFFECTS=[
- {id:'sparks',name:'Note sparks',note:'Stars fly off the brush in each note’s color',pics:3,hrs:.5},
- {id:'frame',name:'Gold frame',note:'Every painting hangs in gold',pics:10,hrs:2},
- {id:'aurora',name:'Aurora swirl',note:'A brighter, faster swirl behind the music',pics:25,hrs:5},
- {id:'stars',name:'Constellation',note:'Stars twinkle over the painting',pics:60,hrs:12}];
-const JR=(()=>{let j={};try{j=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{}}catch(e){}return Object.assign({sec:0,pics:0,pet:'ginger',fx:{},seen:[]},j)})();
+ {id:'sparks',name:'Note sparks',lvl:2,note:'Stars fly off the brush in each note’s color',pics:3,hrs:.5},
+ {id:'frame',name:'Gold frame',lvl:4,note:'Every painting hangs in gold',pics:10,hrs:2},
+ {id:'aurora',name:'Aurora swirl',lvl:8,note:'A brighter, faster swirl behind the music',pics:25,hrs:5},
+ {id:'stars',name:'Constellation',lvl:12,note:'Stars twinkle over the painting',pics:60,hrs:12}];
+const JR=(()=>{let j={};try{j=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{}}catch(e){}j=Object.assign({sec:0,pics:0,pet:'ginger',fx:{},seen:[]},j);
+  // a journey begun before levels: start at the level its paintings and music have already earned
+  if(j.xp==null)j.xp=j.pics*50+Math.floor(j.sec/30);
+  j=Object.assign({streak:0,best:0,lastDay:'',badges:[],painted:{},sketches:0,owl:0,today:null},j);if(!Array.isArray(j.notes)||j.notes.length!==12)j.notes=Array(12).fill(0);if(!Array.isArray(j.ntier)||j.ntier.length!==12)j.ntier=Array(12).fill(0);return j})();
 // more than one Fude window can count at once, so each adds what it counted to what is stored rather than overwriting it
-const JRD={sec:0,pics:0};
-function jrSave(){try{const o=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{};JR.sec=(o.sec||0)+JRD.sec;JR.pics=(o.pics||0)+JRD.pics;JRD.sec=JRD.pics=0;
-  JR.seen=[...new Set([...(o.seen||[]),...JR.seen])];localStorage.setItem('muse.journey',JSON.stringify(JR))}catch(e){}}
-const jrHas=u=>!!u&&(JR.pics>=u.pics||JR.sec>=u.hrs*3600);
+const JRD={sec:0,pics:0,xp:0,tsec:0,tpics:0,notes:Array(12).fill(0)};
+const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+function jrSave(){try{const o=JSON.parse(localStorage.getItem('muse.journey')||'{}')||{},ot=o.today&&JR.today&&o.today.day===JR.today.day?o.today:null;
+  JR.sec=(o.sec||0)+JRD.sec;JR.pics=(o.pics||0)+JRD.pics;if(o.xp!=null)JR.xp=o.xp+JRD.xp;
+  if(ot&&JR.today){JR.today.sec=(ot.sec||0)+JRD.tsec;JR.today.pics=(ot.pics||0)+JRD.tpics;JR.today.done=[...new Set([...(ot.done||[]),...JR.today.done])];JR.today.ids=[...new Set([...(ot.ids||[]),...JR.today.ids])]}
+  if(Array.isArray(o.notes)&&o.notes.length===12)JR.notes=o.notes.map((v,i)=>v+JRD.notes[i]);if(Array.isArray(o.ntier)&&o.ntier.length===12)JR.ntier=JR.ntier.map((v,i)=>Math.max(v,o.ntier[i]));
+  JRD.sec=JRD.pics=JRD.xp=JRD.tsec=JRD.tpics=0;JRD.notes.fill(0);
+  JR.seen=[...new Set([...(o.seen||[]),...JR.seen])];JR.badges=[...new Set([...(o.badges||[]),...JR.badges])];localStorage.setItem('muse.journey',JSON.stringify(JR))}catch(e){}}
+/* levels: each one asks a little more than the last, and every few levels the painter earns a new title */
+const lvlAt=n=>100*(n-1)+25*(n-1)*(n-2); // the XP that reaches level n
+const lvlOf=xp=>{let n=1;while(lvlAt(n+1)<=xp)n++;return n};
+const RANKS=[[1,'Apprentice'],[3,'Sketcher'],[5,'Colorist'],[8,'Painter'],[12,'Artist'],[16,'Virtuoso'],[20,'Master'],[25,'Legend']];
+const rankOf=n=>RANKS.filter(r=>r[0]<=n).pop()[1];
+const jrHas=u=>!!u&&(JR.pics>=u.pics&&u.pics>0||u.hrs>0&&JR.sec>=u.hrs*3600||!!u.lvl&&lvlOf(JR.xp)>=u.lvl||!u.lvl&&!u.pics&&!u.hrs);
 const hrsTxt=h=>h<1?Math.round(h*60)+' min':h===1?'1 hour':h+' hours';
 const listenTxt=sec=>{const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h} h ${m} min`:`${m} min`};
+const needTxt=u=>[u.lvl?'level '+u.lvl:'',u.pics?u.pics+' paintings':'',u.hrs?hrsTxt(u.hrs)+' of music':''].filter(Boolean).join(' or ');
 function fxOn(id){return !!JR.fx[id]&&jrHas(EFFECTS.find(f=>f.id===id))}
+/* three goals a day, the same all day, chosen from the date */
+const GOALS={
+ paint1:{t:'Finish a painting',n:1,xp:40,v:d=>d.pics},
+ paint3:{t:'Finish 3 paintings',n:3,xp:90,v:d=>d.pics},
+ listen15:{t:'Listen for 15 minutes',n:900,xp:40,v:d=>d.sec,min:1},
+ listen45:{t:'Listen for 45 minutes',n:2700,xp:100,v:d=>d.sec,min:1},
+ two:{t:'Paint 2 different pictures',n:2,xp:60,v:d=>d.ids.length},
+ sketch:{t:'Color a sketch',n:1,xp:60,v:d=>d.sketch||0},
+ theme:{t:'Paint an abstract canvas',n:1,xp:50,v:d=>d.theme||0},
+ famous:{t:'Repaint a famous painting',n:1,xp:40,v:d=>d.famous||0}};
+function jrToday(){const day=dayKey();if(JR.today&&JR.today.day===day)return JR.today;
+  let h=0;for(const c of day)h=(h*31+c.charCodeAt(0))|0;const r=k=>Math.abs((h*(k+7)*2654435761)|0)%1000/1000,lv=lvlOf(JR.xp);
+  const pick=[lv>=4&&r(1)<.5?'paint3':'paint1',lv>=6&&r(2)<.5?'listen45':'listen15',['two','sketch','theme','famous'][Math.floor(r(3)*4)]];
+  JR.today={day,goals:pick,done:[],pics:0,sec:0,ids:[],sketch:0,theme:0,famous:0};return JR.today}
+/* milestones, earned once */
+const famousIds=()=>PAINTINGS.filter(p=>!p.sketch&&!/^(up|sk)-/.test(p.id)).map(p=>p.id);
+const BADGES=[
+ {id:'first',name:'First painting',i:'✦',c:'#F08A1C',ok:()=>JR.pics>=1},
+ {id:'p10',name:'Ten canvases',i:'10',c:'#E8231F',ok:()=>JR.pics>=10},
+ {id:'p50',name:'Fifty canvases',i:'50',c:'#8B4FB8',ok:()=>JR.pics>=50},
+ {id:'p100',name:'A hundred canvases',i:'100',c:'#C69420',ok:()=>JR.pics>=100},
+ {id:'s3',name:'3 days running',i:'3',c:'#F08A1C',ok:()=>JR.best>=3},
+ {id:'s7',name:'A week of color',i:'7',c:'#E8231F',ok:()=>JR.best>=7},
+ {id:'s30',name:'A month of color',i:'30',c:'#8B4FB8',ok:()=>JR.best>=30},
+ {id:'h1',name:'An hour of music',i:'♪',c:'#4C8FE0',ok:()=>JR.sec>=3600},
+ {id:'h10',name:'Ten hours of music',i:'♫',c:'#3557C8',ok:()=>JR.sec>=36000},
+ {id:'museum',name:'The whole museum',sub:'Every famous painting',i:'▣',c:'#3FA34D',ok:()=>famousIds().every(id=>JR.painted[id])},
+ {id:'sketch',name:'Coloring book',sub:'Color a sketch',i:'✎',c:'#2F9C8F',ok:()=>JR.sketches>=1},
+ {id:'owl',name:'Night owl',sub:'Paint after midnight',i:'☾',c:'#4A4FA0',ok:()=>JR.owl>=1},
+ {id:'l10',name:'Level 10',i:'★',c:'#D9A92A',ok:()=>lvlOf(JR.xp)>=10},
+ {id:'l20',name:'Level 20',i:'✸',c:'#B23A2E',ok:()=>lvlOf(JR.xp)>=20},
+ {id:'spectrum',name:'Full spectrum',sub:'Every note to Glimmer',i:'◐',c:'#E85D9A',ok:()=>JR.ntier.every(t=>t>=1)},
+ {id:'prism',name:'Prism',sub:'Every note to Glaze',i:'◈',c:'#3557C8',ok:()=>JR.ntier.every(t=>t>=3)}];
+/* color mastery: each of the twelve notes has its own color, and the more of a note Fude hears, the deeper that color gets */
+const TIERS=[60,300,900,2400,6000],TIER_NAMES=['Unseen','Glimmer','Wash','Glaze','Radiant','Pure'];
+const tierOf=sec=>TIERS.filter(t=>sec>=t).length;
+const HUE_WORDS=['Crimson','Violet','Golden','Slate','Sky','Wine','Cobalt','Amber','Amethyst','Jade','Silver','Azure'];
+// your title takes the color you have heard most, once you have heard enough to have one
+function titleOf(n){const top=JR.notes.indexOf(Math.max(...JR.notes));return(JR.notes[top]>=TIERS[0]?HUE_WORDS[top]+' ':'')+rankOf(n)}
+function jrChipPaint(){const order=[...JR.notes.keys()].sort((a,b)=>JR.notes[b]-JR.notes[a]).filter(i=>JR.notes[i]>=TIERS[0]).slice(0,4);if(order.length<2)return;
+  const g=`conic-gradient(from 200deg,${[...order,order[0]].map(hexOf).join(',')})`;document.querySelectorAll('.jr-chip').forEach(c=>c.style.background=g)}
+/* the charge: while a song is painting, the XP it will pay builds up ahead of the bar, and notes fly into it */
+const CH={sec:0,lastDrop:0,anim:0};
+const chargeXp=()=>Math.min(50,Math.round(CH.sec/3));
+function jrNote(pc,dur){if(!(playing&&!playing.stopped&&playing.live))return;const d=Math.min(dur||0,2);JR.notes[pc]+=d;JRD.notes[pc]+=d;
+  if(!SIDEMODE||REDUCED||document.hidden)return;const now=performance.now();if(now-CH.lastDrop<650)return;CH.lastDrop=now;jrDrop(pc)}
+function jrDrop(pc){const from=$('#smCanvas'),to=$('#smJrGhost')||$('#smJrBar');if(!from||!to||$('#smJr').offsetParent===null)return;
+  const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();if(!a.width||!b.width&&!b.left)return;
+  const x0=a.left+a.width*(.25+Math.random()*.5),y0=a.top+a.height*(.35+Math.random()*.4),x1=b.right-3,y1=b.top+b.height/2,mx=(x0+x1)/2+(Math.random()-.5)*80,my=Math.min(y0,y1)-40;
+  const d=document.createElement('i');d.className='jr-drop';d.style.color=hexOf(pc);document.body.appendChild(d);
+  const an=d.animate([{transform:`translate(${x0}px,${y0}px) scale(.4)`,opacity:0},{transform:`translate(${x0}px,${y0-18}px) scale(1.2)`,opacity:1,offset:.15},{transform:`translate(${mx}px,${my}px) scale(1)`,opacity:1,offset:.6},{transform:`translate(${x1}px,${y1}px) scale(.5)`,opacity:.9}],{duration:900,easing:'cubic-bezier(.4,0,.6,1)'});
+  an.onfinish=()=>{d.remove();const sj=$('#smJr');sj.classList.remove('zap');void sj.offsetWidth;sj.classList.add('zap')}}
+function jrChargeShow(){const sj=$('#smJr');if(!sj||CH.anim)return;const on=CH.sec>0&&playing&&!playing.stopped&&playing.live,L=jrLevelBar(),c=chargeXp();
+  sj.classList.toggle('charging',!!on&&c>0);const g=$('#smJrGhost'),pl=$('#smJrPlus');
+  if(on&&c>0){g.style.left=(L.f*100).toFixed(2)+'%';g.style.width=Math.min(100-L.f*100,c/L.need*100).toFixed(2)+'%';pl.hidden=false;pl.textContent='+'+c}
+  else{g.style.width='0';pl.hidden=true}}
+// after a painting: the charge pours into the bar, filling it from where it was; a level up fills it, flashes, and starts again
+function jrFill(from,to){const sj=$('#smJr');if(!sj||REDUCED||sj.offsetParent===null){jrApply();return}
+  cancelAnimationFrame(CH.anim);sj.classList.remove('charging');$('#smJrGhost').style.width='0';$('#smJrPlus').hidden=true;sj.classList.add('filling');
+  const t0=performance.now(),dur=Math.min(2600,900+(to-from)*6),startLv=lvlOf(from);let lv=startLv;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3),xp=from+(to-from)*e,n=lvlOf(xp),a=lvlAt(n),b=lvlAt(n+1);
+    $('#smJrBar').style.width=((xp-a)/(b-a)*100).toFixed(2)+'%';$('#smJrLv').textContent=n;$('#smJrRank').textContent=`${titleOf(n)} · ${Math.round(xp-a)} / ${b-a} XP`;
+    if(n>lv){lv=n;sj.classList.remove('lvup');void sj.offsetWidth;sj.classList.add('lvup');jrBurst()}
+    if(k<1)CH.anim=requestAnimationFrame(step);else{CH.anim=0;sj.classList.remove('filling');jrApply()}};
+  CH.anim=requestAnimationFrame(step)}
+function jrBurst(){const c=$('#smJrLv');if(!c||REDUCED)return;const r=c.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  for(let i=0;i<18;i++){const d=document.createElement('i');d.className='jr-burst';d.style.color=hexOf(i%12);document.body.appendChild(d);const a=i/18*Math.PI*2,R=40+Math.random()*40;
+    d.animate([{transform:`translate(${x}px,${y}px) scale(1)`,opacity:1},{transform:`translate(${x+Math.cos(a)*R}px,${y+Math.sin(a)*R}px) scale(.3)`,opacity:0}],{duration:700+Math.random()*300,easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish=()=>d.remove()}}
+function wheelSvg(){let out='';const R0=22,R1=96,band=(R1-R0)/5;
+  for(let pc=0;pc<12;pc++){const a0=(pc/12-.25)*Math.PI*2+.03,a1=((pc+1)/12-.25)*Math.PI*2-.03,s=JR.notes[pc],t=tierOf(s),c=hexOf(pc);
+    const arc=(r0,r1,op)=>{const p=(r,a)=>`${(Math.cos(a)*r).toFixed(1)} ${(Math.sin(a)*r).toFixed(1)}`;return `<path d="M${p(r0,a0)}L${p(r1,a0)}A${r1} ${r1} 0 0 1 ${p(r1,a1)}L${p(r0,a1)}A${r0} ${r0} 0 0 0 ${p(r0,a0)}Z" fill="${c}" opacity="${op}"/>`};
+    out+=arc(R0,R1,.12);const part=t<5?(s-(t?TIERS[t-1]:0))/(TIERS[t]-(t?TIERS[t-1]:0)):0;out+=arc(R0,R0+band*(t+part),1);
+    for(let k=1;k<5;k++)out+=`<path d="M${(Math.cos(a0)*(R0+band*k)).toFixed(1)} ${(Math.sin(a0)*(R0+band*k)).toFixed(1)}A${R0+band*k} ${R0+band*k} 0 0 1 ${(Math.cos(a1)*(R0+band*k)).toFixed(1)} ${(Math.sin(a1)*(R0+band*k)).toFixed(1)}" fill="none" stroke="var(--surface)" stroke-width="1.2" opacity=".7"/>`;
+    const am=(a0+a1)/2;out+=`<text x="${(Math.cos(am)*(R1+0)).toFixed(1)}" y="${(Math.sin(am)*(R1+0)).toFixed(1)}" font-size="0"><title>${NOTE_NAMES[pc]}: ${TIER_NAMES[t]}</title></text>`}
+  return out+`<circle r="${R0-3}" fill="var(--surface)"/>`}
 {let css='';PETS.forEach(p=>{if(!p.coat)return;p.coat.forEach((c,i)=>{const o=PET_KEYS[i];for(const sc of[`body.pet-${p.id} :is(#painter,#mascot)`,`.pj-pet.pet-${p.id}`])css+=`${sc} [fill="${o}"]{fill:${c}}${sc} [stroke="${o}"]{stroke:${c}}${sc} [stop-color="${o}"]{stop-color:${c}}`})});
   const st=document.createElement('style');st.textContent=css;document.head.appendChild(st)}
+function jrLevelBar(){const xp=JR.xp,n=lvlOf(xp),a=lvlAt(n),b=lvlAt(n+1);return{n,into:xp-a,need:b-a,f:(xp-a)/(b-a)}}
 function jrApply(){const b=document.body;PETS.forEach(p=>b.classList.toggle('pet-'+p.id,p.id===JR.pet&&!!p.coat&&jrHas(p)));EFFECTS.forEach(f=>b.classList.toggle('fx-'+f.id,fxOn(f.id)));
-  const sub=$('#smPetsSub');if(sub)sub.textContent=`${JR.pics} painting${JR.pics===1?'':'s'} · ${listenTxt(JR.sec)} of music`}
-// something new comes in: effects switch on by themselves, a new pet waits to be chosen
-function jrCheck(){const fresh=[...PETS,...EFFECTS].filter(u=>u.pics&&jrHas(u)&&!JR.seen.includes(u.id));if(!fresh.length)return;
-  fresh.forEach(u=>{JR.seen.push(u.id);if(EFFECTS.includes(u))JR.fx[u.id]=true});jrSave();jrApply();const u=fresh[fresh.length-1];
-  toast(PETS.includes(u)?`New pet: ${u.name}. Choose it in Pets and effects`:`New effect: ${u.name}`);if(!$('#petSheet').hidden)pjRender()}
-function jrPic(){JR.pics++;JRD.pics++;jrSave();jrCheck();jrApply()}
-setInterval(()=>{if(playing&&!playing.stopped&&playing.live){JR.sec++;JRD.sec++;if(JR.sec%15===0){jrSave();jrCheck();jrApply()}}},1000);
+  const L=jrLevelBar(),T=jrToday(),done=T.goals.filter(g=>T.done.includes(g)).length,live=jrStreakNow();
+  const sub=$('#smPetsSub');if(sub)sub.textContent=`Level ${L.n} ${rankOf(L.n)} · ${done} of 3 goals today`;
+  jrChipPaint();if($('#smJr')){if(!CH.anim){$('#smJrLv').textContent=L.n;$('#smJrRank').textContent=`${titleOf(L.n)} · ${L.into} / ${L.need} XP`;$('#smJrBar').style.width=(L.f*100).toFixed(1)+'%'}jrChargeShow();
+    const st=$('#smJrStreak');st.hidden=!live;st.textContent=`🔥 ${live}`;st.title=`${live}-day streak`;$('#smJrGoals').textContent=`◎ ${done}/3`;$('#smJrGoals').title=`${done} of today’s 3 goals done`;
+    $('#smJr').setAttribute('aria-label',`Your journey: level ${L.n}, ${titleOf(L.n)}. ${done} of 3 goals done today${live?`, ${live}-day streak`:''}`)}}
+// a streak counts days with a finished painting; it is still alive today if yesterday counted
+function jrStreakNow(){if(!JR.lastDay)return 0;const y=new Date();y.setDate(y.getDate()-1);return JR.lastDay===dayKey()||JR.lastDay===dayKey(y)?JR.streak:0}
+function jrXp(n){JR.xp+=n;JRD.xp+=n}
+// anything new: effects switch on by themselves, a new pet waits to be chosen, a goal or milestone pays its XP
+function jrCheck(gains){gains=gains||[];const before=lvlOf(JR.xp-gains.reduce((a,g)=>a+g.xp,0)),T=jrToday();
+  T.goals.forEach(id=>{const g=GOALS[id];if(!T.done.includes(id)&&g.v(T)>=g.n){T.done.push(id);jrXp(g.xp);gains.push({t:'Goal done: '+g.t,xp:g.xp})}});
+  if(T.goals.every(id=>T.done.includes(id))&&!T.done.includes('all')){T.done.push('all');jrXp(50);gains.push({t:'All of today’s goals',xp:50})}
+  JR.notes.forEach((v,pc)=>{const t=tierOf(v);if(t>JR.ntier[pc]){JR.ntier[pc]=t;const xp=15*t;jrXp(xp);gains.push({t:`${NOTE_NAMES[pc]} deepens to ${TIER_NAMES[t]}`,xp,c:hexOf(pc)})}});
+  BADGES.forEach(b=>{if(!JR.badges.includes(b.id)&&b.ok()){JR.badges.push(b.id);jrXp(75);gains.push({t:'Milestone: '+b.name,xp:75})}});
+  const fresh=[...PETS,...EFFECTS].filter(u=>u.id!=='ginger'&&jrHas(u)&&!JR.seen.includes(u.id));
+  fresh.forEach(u=>{JR.seen.push(u.id);if(EFFECTS.includes(u))JR.fx[u.id]=true;gains.push({t:PETS.includes(u)?`New pet: ${u.name}. Choose it in Your journey`:`New effect: ${u.name}`,unlock:1})});
+  jrSave();jrApply();if(!$('#petSheet').hidden)pjRender();return{gains,before}}
+function jrPic(info){info=info||{};const T=jrToday(),day=dayKey(),y=new Date();y.setDate(y.getDate()-1);const gains=[];
+  JR.pics++;JRD.pics++;T.pics++;JRD.tpics++;jrXp(50);gains.push({t:'Painting finished',xp:50});
+  if(JR.lastDay!==day){JR.streak=JR.lastDay===dayKey(y)?JR.streak+1:1;JR.lastDay=day;JR.best=Math.max(JR.best,JR.streak);const bonus=10*Math.min(JR.streak,7);jrXp(bonus);gains.push({t:JR.streak>1?`${JR.streak}-day streak`:'First painting today',xp:bonus})}
+  const id=info.id||'';if(id&&!T.ids.includes(id))T.ids.push(id);if(id)JR.painted[id]=(JR.painted[id]||0)+1;
+  if(info.sketch||/^(up|sk)-/.test(id)){T.sketch++;JR.sketches++}else if(info.kind==='theme')T.theme++;else if(info.kind==='painting')T.famous++;
+  if(new Date().getHours()<5)JR.owl++;
+  const from=JR.xp-gains.reduce((a,g)=>a+(g.xp||0),0);CH.sec=0;const r=jrCheck(gains);jrShowGain(r.gains,r.before);jrFill(from-0,JR.xp)}
+setInterval(()=>{const liveNow=playing&&!playing.stopped&&playing.live;if(!liveNow&&CH.sec){CH.sec=0;jrChargeShow()}if(liveNow){CH.sec++;jrChargeShow();JR.sec++;JRD.sec++;const T=jrToday();T.sec++;JRD.tsec++;if(JR.sec%30===0)jrXp(1);if(JR.sec%15===0){const x0=JR.xp,r=jrCheck();if(r.gains.length){jrShowGain(r.gains,r.before);jrFill(x0,JR.xp)}}}},1000);
 addEventListener('pagehide',jrSave);
+// after a painting: what it earned, the level filling up, and what comes next
+let jgT=0;
+function jrShowGain(gains,before){const el=$('#jrGain');if(!el||!gains.length)return;const L=jrLevelBar(),up=L.n>before,xp=gains.reduce((a,g)=>a+(g.xp||0),0);
+  el.classList.toggle('up',up);$('#jgLv').textContent=L.n;const newRank=up&&rankOf(L.n)!==rankOf(before);$('#jgHead').textContent=newRank?`Level ${L.n}! You’re now ${/^[AEIOU]/.test(rankOf(L.n))?'an':'a'} ${rankOf(L.n)}`:up?`Level ${L.n}! +${xp} XP`:`+${xp} XP`;
+  const ord=[...gains].sort((a,b)=>(b.unlock?1e4:b.xp||0)-(a.unlock?1e4:a.xp||0)),shown=gains.length>4?ord.slice(0,3):gains,more=gains.length-shown.length;$('#jgList').innerHTML=(more?[...shown,{t:`and ${more} more in Your journey`}]:shown).map(g=>`<li>${g.c?`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:${g.c}"></i>`:''}${esc(g.t)}${g.xp?` <b>+${g.xp}</b>`:''}</li>`).join('');
+  const nx=jrNext();$('#jgNext').textContent=nx?`Next: ${nx.u.name} at ${needTxt(nx.u)}`:'';
+  const bar=$('#jgBar');bar.style.transition='none';bar.style.width=(up?0:Math.max(0,(L.into-xp)/L.need)*100)+'%';void bar.offsetWidth;bar.style.transition='';requestAnimationFrame(()=>bar.style.width=(L.f*100).toFixed(1)+'%');
+  el.hidden=false;const sj=$('#smJr');if(sj){sj.classList.remove('lit');void sj.offsetWidth;sj.classList.add('lit')}
+  clearTimeout(jgT);jgT=setTimeout(()=>el.hidden=true,up?7000:5000)}
+// the next unlock: whichever of pets and effects is nearest, by level, paintings or music
+function jrNext(){const lv=jrLevelBar();return[...PETS,...EFFECTS].filter(u=>u.id!=='ginger'&&!jrHas(u)).map(u=>({u,f:Math.max(u.pics?JR.pics/u.pics:0,u.hrs?JR.sec/(u.hrs*3600):0,u.lvl?(lv.n-1+lv.f)/(u.lvl-1):0)})).sort((a,b)=>b.f-a.f)[0]}
 function pjRender(){
-  $('#pjStats').textContent=`${JR.pics} painting${JR.pics===1?'':'s'} made · ${listenTxt(JR.sec)} of music`;
-  const next=[...PETS,...EFFECTS].filter(u=>u.pics&&!jrHas(u)).map(u=>({u,f:Math.max(JR.pics/u.pics,JR.sec/(u.hrs*3600))})).sort((a,b)=>b.f-a.f)[0];
-  $('#pjNextT').textContent=next?`Next: ${next.u.name}, at ${next.u.pics} paintings or ${hrsTxt(next.u.hrs)} of music`:'Everything is unlocked. The cat is proud of you.';
+  const L=jrLevelBar(),T=jrToday(),live=jrStreakNow();
+  $('#jrLv').textContent=L.n;$('#jrRank').textContent=titleOf(L.n);$('#jrXp').textContent=`Level ${L.n} · ${L.into} / ${L.need} XP to level ${L.n+1}`;$('#jrBar').style.width=(L.f*100).toFixed(1)+'%';
+  $('#jrStreak').textContent=live?`🔥 ${live}-day streak`:'';
+  $('#pjStats').textContent=`${JR.pics} painting${JR.pics===1?'':'s'} made · ${listenTxt(JR.sec)} of music · best streak ${JR.best} day${JR.best===1?'':'s'}`;
+  $('#jrGoals').innerHTML=T.goals.map(id=>{const g=GOALS[id],v=Math.min(g.n,g.v(T)),done=T.done.includes(id),p=g.min?`${Math.floor(v/60)} / ${g.n/60} min`:`${v} / ${g.n}`;
+    return `<li class="${done?'done':''}"><span>${g.t}</span><em>${done?'Done':'+'+g.xp+' XP'}</em><i class="jr-bar" aria-hidden="true"><i style="width:${(v/g.n*100).toFixed(1)}%"></i></i><span class="vh">${done?'done':p}</span></li>`}).join('');
+  const next=jrNext();
+  $('#pjNextT').textContent=next?`Next unlock: ${next.u.name}, at ${needTxt(next.u)}`:'Everything is unlocked. The cat is proud of you.';
   $('#pjNextBar').style.width=(next?Math.min(100,next.f*100):100).toFixed(1)+'%';
   const pets=$('#pjPets');pets.innerHTML='';
   PETS.forEach(p=>{const b=document.createElement('button'),ok=jrHas(p),on=ok&&(JR.pet===p.id||(!jrHas(PETS.find(x=>x.id===JR.pet))&&p.id==='ginger'));b.type='button';b.className='pj-pet pet-'+p.id;b.disabled=!ok;b.setAttribute('aria-pressed',on);
-    b.innerHTML=helperSvg.outerHTML.replace(/id="([\w-]+)"/g,`id="$1-pk${p.id}"`).replace(/url\(#([\w-]+)\)/g,`url(#$1-pk${p.id})`).replace(/style="[^"]*"/,'')+`<b>${p.name}</b><small>${ok?(on?'Painting now':'Choose'):`${p.pics} paintings or ${hrsTxt(p.hrs)}`}</small>`;
-    b.setAttribute('aria-label',p.name+(ok?'':`, unlocks at ${p.pics} paintings or ${hrsTxt(p.hrs)} of music`));
+    b.innerHTML=helperSvg.outerHTML.replace(/id="([\w-]+)"/g,`id="$1-pk${p.id}"`).replace(/url\(#([\w-]+)\)/g,`url(#$1-pk${p.id})`).replace(/style="[^"]*"/,'')+`<b>${p.name}</b><small>${ok?(on?'Painting now':'Choose'):'Level '+p.lvl}</small>`;
+    b.setAttribute('aria-label',p.name+(ok?'':`, unlocks at ${needTxt(p)}`));
     b.onclick=()=>{JR.pet=p.id;jrSave();jrApply();pjRender()};pets.appendChild(b)});
   const fx=$('#pjFx');fx.innerHTML='';
   EFFECTS.forEach(f=>{const b=document.createElement('button'),ok=jrHas(f);b.type='button';b.className='pj-f';b.setAttribute('role','switch');b.disabled=!ok;b.setAttribute('aria-checked',fxOn(f.id));
-    b.innerHTML=`<span>${f.name}<small>${f.note}</small></span>${ok?'<i class="sw" aria-hidden="true"></i>':`<span class="lk">${f.pics} paintings or ${hrsTxt(f.hrs)}</span>`}`;
-    b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)})}
+    b.innerHTML=`<span>${f.name}<small>${f.note}</small></span>${ok?'<i class="sw" aria-hidden="true"></i>':`<span class="lk">Level ${f.lvl}</span>`}`;
+    b.onclick=()=>{JR.fx[f.id]=!fxOn(f.id);jrSave();jrApply();pjRender()};fx.appendChild(b)});
+  $('#jrWheel').innerHTML=wheelSvg();
+  {const heard=JR.notes.reduce((a,b)=>a+b,0),nx=JR.notes.map((v,pc)=>({pc,t:tierOf(v),left:tierOf(v)<5?TIERS[tierOf(v)]-v:Infinity})).sort((a,b)=>a.left-b.left)[0];
+   $('#jrWheelT').textContent=heard<30?'Each note has its own color. The more of a note Fude hears, the deeper its color grows here.':nx.left<Infinity?`Next: ${NOTE_NAMES[nx.pc]} deepens to ${TIER_NAMES[nx.t+1]} in ${listenTxt(Math.max(60,nx.left))}`:'Every color is pure. A true master.';
+   $('#jrTiers').innerHTML=TIER_NAMES.slice(1).map((n,i)=>`<li><b>${JR.ntier.filter(t=>t>=i+1).length}</b> ${n}</li>`).join('')}
+  $('#jrBadgeN').textContent=`· ${JR.badges.length} of ${BADGES.length}`;
+  $('#jrBadges').innerHTML=BADGES.map(b=>{const on=JR.badges.includes(b.id);return `<div class="jr-badge${on?'':' off'}" style="--b:${b.c}"><i aria-hidden="true">${b.i}</i><b>${b.name}</b>${b.sub?`<small>${b.sub}</small>`:''}<span class="vh">${on?'earned':'not yet'}</span></div>`}).join('')}
 function glOpen(){const l=$('#glList');l.innerHTML=gallery.length?'':'<p class="muted">Paintings you make appear here, each with the song it heard.</p>';
   gallery.forEach(g=>{const b=document.createElement('button');b.type='button';b.className='gl-item';
     b.innerHTML=`<img src="${/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(String(g.thumb||''))?g.thumb:''}" alt=""><span><b>${esc(g.title)}</b>${g.song?`<small class="gl-song">♪ ${esc(g.song)}${g.by?' · '+esc(g.by):''}</small>`:''}<small>${[g.ms?'Painted in '+fmtTime(g.ms/1000):'',new Date(g.t).toLocaleDateString([],{month:'short',day:'numeric'})].filter(Boolean).join(' · ')}</small></span>`;
@@ -3015,7 +3147,7 @@ try{sp.id=SPOTIFY_CLIENT_ID||localStorage.getItem('muse.spotify.id')||'';sp.tok=
 // in the iPhone and Android app, Spotify's sign-in opens in the system browser and comes back through the app's own address
 const NATIVE=!!(window.Capacitor&&(!Capacitor.isNativePlatform||Capacitor.isNativePlatform())),SP_APP_REDIRECT='app.fude.paint://spotify';
 const capPlugin=n=>{const C=window.Capacitor;if(!C)return null;try{return(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){return null}};
-const MUSE_VERSION='1.2.0';  // build_ext.py reads the extension's version from here
+const MUSE_VERSION='1.3.0';  // build_ext.py reads the extension's version from here
 // in the phone app, the status bar's clock and battery stay readable against Fude's light or dark
 function sysBars(){const S=NATIVE&&capPlugin('SystemBars');if(!S||!S.setStyle)return;const r=document.documentElement,
   dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
@@ -3237,7 +3369,7 @@ function smInit(){smBox=$('#smode');
     chrome.runtime.onMessage.addListener(m=>{if(m&&m.fude==='tab')go(m);else if(m&&m.fude==='mic'&&sm.src==='mic'&&!sm.stream)smStart()});
     extInvoked().then(go)}}
   addEventListener('pointerdown',()=>{try{audio().resume()}catch(e){}},{once:true});
-  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);if(EXT_TAB){$('#srcSwitch').hidden=false;$('#spSwitch').hidden=false;$('#srcSwitch').onclick=switchTab;$('#spSwitch').onclick=switchTab}$('#smPause').onclick=()=>{sm.held=!sm.held;$('#smPause').textContent=sm.held?'Resume':'Pause';if(!sm.held){sm.idleAt=0;catIdle(false)}};$('#smPets').onclick=pjOpen;$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
+  $('#smEmpty').hidden=!!last;smHomeShow(true);$('#smChange').onclick=()=>smHomeShow(true);if(EXT_TAB){$('#srcSwitch').hidden=false;$('#spSwitch').hidden=false;$('#srcSwitch').onclick=switchTab;$('#spSwitch').onclick=switchTab}$('#smPause').onclick=()=>{sm.held=!sm.held;$('#smPause').textContent=sm.held?'Resume':'Pause';if(!sm.held){sm.idleAt=0;catIdle(false)}};$('#smPets').onclick=pjOpen;$('#smJr').onclick=pjOpen;$('#jrGain').onclick=()=>{$('#jrGain').hidden=true;pjOpen()};$('#smGal').onclick=glOpen;$('#smLyOn').setAttribute('aria-checked',lyricsOn());$('#smLyOn').onclick=()=>{const on=!lyricsOn();try{localStorage.setItem('muse.lyrics',on?'on':'off')}catch(e){}$('#smLyOn').setAttribute('aria-checked',on);LY.key='';if(on)lyricsFor(sm.track);else{LY.lines=null;$('#smWords').hidden=true}};spDraw();spReturn().then(()=>{if(sp.tok){spPoll();if(sm.src==='cover')smStart()}});
   // on Android with access already on, Fude follows the music app from the start; with Headphones on it starts painting straight away
   if(NP)npStart(true).then(ok=>{if(ok){spDraw();if(sm.src==='cover'&&!sm.stream)smStart()}});
   (async()=>{try{const p=await navigator.permissions.query({name:'microphone'});if(p.state==='granted'&&sm.src==='mic')smStart()}catch(e){}})()}

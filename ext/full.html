@@ -891,6 +891,83 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
 .pj-f[aria-checked="true"] .sw{background:var(--accent)}.pj-f[aria-checked="true"] .sw::after{transform:translateX(12px)}
 .pj-f[disabled] .sw{display:none}
 .pj-f .lk{font-size:11px;color:var(--muted);flex:none}
+/* the journey: a level and its rank, a streak of days, three goals a day, and milestones */
+.jr-chip{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font:700 12px/1 var(--sans,system-ui);color:#fff;background:conic-gradient(from 200deg,#E8231F,#F08A1C,#F5D90A,#3FA34D,#4C8FE0,#8B4FB8,#E8231F);box-shadow:inset 0 0 0 2px color-mix(in srgb,#000 18%,transparent);text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.jr-chip.big{width:52px;height:52px;font-size:20px}
+.jr-bar{display:block;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.jr-bar>i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#F08A1C,#E8231F,#8B4FB8);transition:width .9s var(--ease)}
+/* the bar charges while a song plays: a striped, glowing segment grows ahead of the XP already earned */
+.sm-jr .jr-bar{position:relative;height:7px;overflow:visible;border-radius:4px}
+.sm-jr .jr-bar>i{border-radius:4px;position:relative}
+.sm-jr .jr-bar>#smJrBar{transition:none}
+.jr-ghost{position:absolute!important;top:0;height:100%!important;width:0;left:0;border-radius:0 4px 4px 0!important;opacity:0;transition:opacity .4s,width .8s linear!important;
+  background:repeating-linear-gradient(-45deg,rgba(237,190,79,.95) 0 5px,rgba(240,138,28,.55) 5px 10px)!important;background-size:14px 14px!important;animation:jrcharge .6s linear infinite;box-shadow:0 0 10px rgba(237,190,79,.7)}
+.sm-jr.charging .jr-ghost{opacity:1}
+@keyframes jrcharge{to{background-position:14px 0}}
+.sm-jr.charging .jr-chip{animation:jrhum 1.6s ease-in-out infinite}
+@keyframes jrhum{50%{box-shadow:inset 0 0 0 2px rgba(0,0,0,.18),0 0 0 3px rgba(237,190,79,.35),0 0 14px rgba(237,190,79,.6)}}
+.jr-plus{font-weight:700;color:#D9A23A}
+.sm-jr.zap .jr-bar{animation:jrzap .35s ease-out}
+@keyframes jrzap{40%{box-shadow:0 0 0 2px rgba(237,190,79,.55),0 0 12px rgba(237,190,79,.8)}}
+.sm-jr.filling #smJrBar::after{content:"";position:absolute;right:-3px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#fff;box-shadow:0 0 8px 3px #F5D90A,0 0 18px 6px rgba(240,138,28,.7)}
+.sm-jr.lvup{animation:jrlv 1.2s var(--ease)}
+@keyframes jrlv{20%{box-shadow:0 0 0 2px #EDBE4F,0 0 40px rgba(237,190,79,.9);transform:scale(1.03)}}
+.sm-jr.lvup .jr-chip{animation:jgpop .8s var(--ease)}
+.jr-drop{position:fixed;left:0;top:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;z-index:97;pointer-events:none;box-shadow:0 0 8px 2px currentColor;background:currentColor}
+.jr-burst{position:fixed;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;z-index:97;pointer-events:none;background:currentColor}
+.jr-wheel{display:flex;align-items:center;gap:14px}
+.jr-wheel svg{width:132px;height:132px;flex:none}
+.jr-wheel>div{flex:1;min-width:0}
+.jr-wheel p{font-size:13px;margin:0 0 6px}
+.jr-tiers{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:var(--muted)}
+.jr-tiers b{color:var(--fg);font-weight:600}
+@media (prefers-reduced-motion:reduce){.jr-ghost,.sm-jr.charging .jr-chip,.sm-jr.zap .jr-bar,.sm-jr.lvup,.sm-jr.lvup .jr-chip{animation:none}}
+.sm-jr{all:unset;box-sizing:border-box;flex:none;display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:12px;cursor:pointer;background:color-mix(in srgb,var(--surface) 70%,transparent);box-shadow:0 0 0 1px var(--hair)}
+.sm-jr:hover{background:color-mix(in srgb,var(--surface) 92%,transparent)}
+.sm-jr:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sm-jr .jr-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.sm-jr .jr-txt b{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm-jr .jr-meta{display:flex;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap}
+.sm-jr .jr-meta span{display:flex;align-items:center;gap:3px}
+.sm-jr.lit{animation:jrlit 1.4s var(--ease)}
+@keyframes jrlit{30%{box-shadow:0 0 0 2px #EDBE4F,0 0 24px rgba(237,190,79,.6)}}
+@media (max-height:560px){.sm-jr{display:none}}
+.jr-head{display:flex;align-items:center;gap:12px;margin:10px 0 4px}
+.jr-head>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.jr-head b{font-size:17px;font-weight:600}
+.jr-head small{font-size:12px;color:var(--muted)}
+.jr-streak{flex:none;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,#F08A1C 16%,transparent);color:var(--fg)}
+.jr-streak:empty{display:none}
+.jr-goals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.jr-goals li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:8px 10px;border-radius:10px;box-shadow:0 0 0 1px var(--hair);font-size:13.5px}
+.jr-goals li::before{content:"";width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.6px var(--muted);grid-row:span 2}
+.jr-goals li.done::before{box-shadow:none;background:#3FA34D url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100%}
+.jr-goals li.done span{color:var(--muted);text-decoration:line-through}
+.jr-goals em{font-style:normal;font-size:11.5px;font-weight:600;color:var(--muted)}
+.jr-goals .jr-bar{grid-column:2/4;height:4px}
+.jr-goals li.done .jr-bar{display:none}
+.jr-badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.jr-badge{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:12px;box-shadow:0 0 0 1px var(--hair);text-align:center}
+.jr-badge i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:var(--b);color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.jr-badge b{font-size:10.5px;font-weight:600;line-height:1.2}
+.jr-badge small{font-size:9.5px;color:var(--muted);line-height:1.2}
+.jr-badge.off i{background:var(--line);color:var(--faint);box-shadow:none}
+.jr-badge.off b{color:var(--muted);font-weight:500}
+#jrBadgeN{font-weight:500;letter-spacing:0;text-transform:none}
+.jr-gain{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:96;width:min(340px,calc(100vw - 24px));padding:14px 16px;border-radius:18px;background:var(--surface);box-shadow:var(--soft),0 14px 44px rgba(0,0,0,.22),0 0 0 1px var(--hair);cursor:pointer;animation:jgin .5s var(--ease)}
+.jr-gain[hidden]{display:none}
+@keyframes jgin{from{opacity:0;transform:translate(-50%,24px)}}
+.jr-gain.up{box-shadow:var(--soft),0 14px 44px rgba(0,0,0,.22),0 0 0 2px #EDBE4F}
+.jg-top{display:flex;align-items:center;gap:12px}
+.jg-top>div{flex:1;display:flex;flex-direction:column;gap:6px}
+.jg-top b{font-size:15px}
+.jr-gain.up .jr-chip{animation:jgpop .8s var(--ease)}
+@keyframes jgpop{40%{transform:scale(1.35)}}
+.jr-gain ul{list-style:none;margin:10px 0 0;padding:0;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.jr-gain li b{color:var(--fg);font-weight:600}
+.jr-gain p{margin:8px 0 0;font-size:12px;color:var(--muted)}
+.jr-gain p:empty{display:none}
+@media (prefers-reduced-motion:reduce){.jr-gain,.sm-jr.lit,.jr-gain.up .jr-chip{animation:none}}
 #petSheet .btn{margin-top:14px}
 
 /* home, second step: colors */
@@ -1272,11 +1349,12 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
     <button type="button" role="menuitem" id="spUnlink" hidden>Unlink Spotify</button>
     <button type="button" role="menuitemcheckbox" id="smLyOn" aria-checked="true"><span>Show song lyrics<small>Words from LRCLIB, when it has the song</small></span><i class="sw" aria-hidden="true"></i></button>
     <button type="button" role="menuitem" id="smGal"><span>Your gallery<small>Each painting with its song</small></span></button>
-    <button type="button" role="menuitem" id="smPets"><span>Pets and effects<small id="smPetsSub">Unlock more as you paint</small></span></button>
+    <button type="button" role="menuitem" id="smPets"><span>Your journey<small id="smPetsSub">Levels, goals, pets and effects</small></span></button>
     <button type="button" role="menuitem" id="smZen">Zen mode</button>
     <a role="menuitem" id="smFull" href="./?full=1">All of Fude</a>
     <button type="button" role="menuitem" id="smAbout">About and privacy</button>
   </div>
+  <button type="button" class="sm-jr" id="smJr" aria-label="Your journey"><span class="jr-chip" id="smJrLv">1</span><span class="jr-txt"><b id="smJrRank">Apprentice</b><i class="jr-bar" id="smJrTrack"><i id="smJrBar"></i><i class="jr-ghost" id="smJrGhost"></i></i></span><span class="jr-meta"><span id="smJrStreak" hidden></span><span id="smJrGoals"></span><span class="jr-plus" id="smJrPlus" hidden></span></span></button>
   <div class="sm-sp" id="smSp" hidden><img id="spArt" alt="" width="44" height="44" hidden><div class="sp-name"><b id="spTitle">Spotify</b><span id="spBy"></span><i class="sp-bar"><i id="spProg"></i></i></div>
     <button type="button" class="sp-switch" id="spSwitch" aria-label="Switch tab" title="Switch tab" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5h9l-2.5-2.5M13 11H4l2.5 2.5"/></svg></button><span class="sp-lvl" id="spLvl" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="sp-ctl"><button type="button" id="spPrev" aria-label="Previous track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3v10M13 3 6 8l7 5z"/></svg></button><button type="button" id="spPlay" aria-label="Play"><svg class="pl" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z"/></svg><svg class="pa" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10"/></svg></button><button type="button" id="spNext" aria-label="Next track"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M12 3v10M3 3l7 5-7 5z"/></svg></button></div></div>
   <div class="sm-canvas" id="smCanvas"><div class="sm-empty" id="smEmpty">Put on some music, in Spotify or anywhere.<br>Fude paints a new picture for every song.</div>
@@ -1288,6 +1366,7 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <div class="sm-strip" id="smStrip" aria-label="Paintings made here, newest first"></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="jr-gain" id="jrGain" role="status" aria-live="polite" hidden><div class="jg-top"><span class="jr-chip" id="jgLv">1</span><div><b id="jgHead">+50 XP</b><i class="jr-bar"><i id="jgBar"></i></i></div></div><ul id="jgList"></ul><p id="jgNext"></p></div>
 <div class="isheet" id="installSheet" role="dialog" aria-modal="false" aria-labelledby="isHead" hidden>
   <h3 id="isHead">Put Fude on your home screen</h3>
   <ol><li>Tap the Share button <span aria-hidden="true">⎙</span> in Safari’s toolbar.</li><li>Choose <b>Add to Home Screen</b>.</li><li>Open Fude from its icon. It runs full screen, works offline, and keeps your colors and paintings.</li></ol>
@@ -1299,11 +1378,15 @@ body.pet-golden :is(#painter,#mascot) svg{animation:goldGlow 2.6s ease-in-out in
   <button class="btn small" id="glClose" type="button">Done</button>
 </div>
 <div class="isheet petsheet" id="petSheet" role="dialog" aria-modal="false" aria-labelledby="petHead" hidden>
-  <h3 id="petHead">Pets and effects</h3>
+  <h3 id="petHead">Your journey</h3>
+  <div class="jr-head"><span class="jr-chip big" id="jrLv">1</span><div><b id="jrRank">Apprentice</b><small id="jrXp"></small><i class="jr-bar"><i id="jrBar"></i></i></div><span class="jr-streak" id="jrStreak"></span></div>
   <p class="pj-stats" id="pjStats"></p>
+  <h4>Today’s goals</h4><ul class="jr-goals" id="jrGoals"></ul>
   <div class="pj-next" id="pjNext"><span id="pjNextT"></span><i><i id="pjNextBar"></i></i></div>
   <h4>Pets</h4><div class="pj-pets" id="pjPets"></div>
   <h4>Effects</h4><div class="pj-fx" id="pjFx"></div>
+  <h4>Your colors</h4><div class="jr-wheel"><svg id="jrWheel" viewBox="-100 -100 200 200" role="img" aria-label="How much of each note you have heard"></svg><div><p id="jrWheelT"></p><ul class="jr-tiers" id="jrTiers"></ul></div></div>
+  <h4>Milestones <span id="jrBadgeN"></span></h4><div class="jr-badges" id="jrBadges"></div>
   <button class="btn small" id="pjClose" type="button">Done</button>
 </div>
 <div class="isheet" id="aboutSheet" role="dialog" aria-modal="false" aria-labelledby="abHead" hidden>
